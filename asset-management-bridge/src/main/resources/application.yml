@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: asset-management-bridge
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/TID_Asset_Management_DB
+    username: postgres
+    password: Pheaktra123
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    
+springdoc:
+  swagger-ui:
+    path: /api  # Changes the access path to http://localhost:8080/api
+    operations-sorter: alpha  # Sorts endpoints alphabetically for better scannability
+    tags-sorter: alpha # Sorts the tags (Asset, User, etc.) alphabetically
+  api-docs:
+    path: /api-docs # Path for the raw JSON documentation used by other tools
+
+server:
+  port: 8080
