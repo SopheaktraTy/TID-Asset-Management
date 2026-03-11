@@ -1,0 +1,23 @@
+// Delete Gradle cache
+rmdir /s /q "C:\Users\sopheaktra.t\.gradle\caches"
+
+// Delete build directory
+rmdir /s /q build
+
+// Run Spring Boot application
+gradlew.bat bootRun
+
+// Build Spring Boot application
+gradlew.bat build
+
+// Clean build directory
+gradlew.bat clean
+
+// Run Spring Boot application with clean
+gradlew.bat clean bootRun
+
+// Update Gradle wrapper
+./gradlew wrapper --gradle-version 8.6
+
+// Refresh dependencies
+./gradlew --refresh-dependencies
