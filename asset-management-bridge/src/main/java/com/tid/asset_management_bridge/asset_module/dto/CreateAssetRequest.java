@@ -65,6 +65,8 @@ public class CreateAssetRequest {
 
     private String issueDescription;
 
+    private String image;
+
     private LocalDateTime lastSecurityCheck;
 
     public String getAssetTag() {
@@ -209,6 +211,14 @@ public class CreateAssetRequest {
 
     public void setIssueDescription(String issueDescription) {
         this.issueDescription = issueDescription;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public LocalDateTime getLastSecurityCheck() {

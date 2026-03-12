@@ -5,7 +5,10 @@ import com.tid.asset_management_bridge.asset_module.dto.AssetResponse;
 import com.tid.asset_management_bridge.asset_module.service.AssetService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/assets")
@@ -22,4 +25,22 @@ public class AssetController {
     public AssetResponse createAsset(@Valid @RequestBody CreateAssetRequest request) {
         return assetService.createAsset(request);
     }
+
+    @GetMapping
+    public List<AssetResponse> getAllAssets() {
+        return assetService.getAllAssets();
+    }
+
+    @GetMapping("/{id}")
+    public AssetResponse getAssetById(@PathVariable @NonNull Long id) {
+        return assetService.getAssetById(id);
+    }
+
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAsset(@PathVariable @NonNull Long id) {
+        assetService.deleteAsset(id);
+    }
+
 }

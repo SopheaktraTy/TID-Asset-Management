@@ -26,6 +26,7 @@ public class AssetResponse {
     private Boolean domainJoined;
     private String condition;
     private String issueDescription;
+    private String image;
     private LocalDateTime lastSecurityCheck;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -180,6 +181,14 @@ public class AssetResponse {
 
     public void setIssueDescription(String issueDescription) {
         this.issueDescription = issueDescription;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public LocalDateTime getLastSecurityCheck() {

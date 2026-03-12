@@ -30,9 +30,12 @@ public class AssetMapper {
         asset.setDomainJoined(request.getDomainJoined());
         asset.setCondition(request.getCondition());
         asset.setIssueDescription(request.getIssueDescription());
+        asset.setImage(request.getImage());
         asset.setLastSecurityCheck(request.getLastSecurityCheck());
         return asset;
     }
+
+
 
     public AssetResponse toResponse(Asset asset) {
         AssetResponse response = new AssetResponse();
@@ -55,9 +58,10 @@ public class AssetMapper {
         response.setDomainJoined(asset.getDomainJoined());
         response.setCondition(asset.getCondition());
         response.setIssueDescription(asset.getIssueDescription());
+        response.setImage(asset.getImage());
         response.setLastSecurityCheck(asset.getLastSecurityCheck());
         response.setCreatedAt(asset.getCreatedAt());
         response.setUpdatedAt(asset.getUpdatedAt());
         return response;
     }
-}
+}

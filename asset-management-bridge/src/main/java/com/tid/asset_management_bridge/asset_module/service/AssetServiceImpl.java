@@ -6,8 +6,13 @@ import com.tid.asset_management_bridge.asset_module.entity.Asset;
 import com.tid.asset_management_bridge.asset_module.mapper.AssetMapper;
 import com.tid.asset_management_bridge.asset_module.repository.AssetRepository;
 import com.tid.asset_management_bridge.common.exception.ConflictException;
+import com.tid.asset_management_bridge.common.exception.ResourceNotFoundException;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AssetServiceImpl implements AssetService {
@@ -44,4 +49,30 @@ public class AssetServiceImpl implements AssetService {
 
         return assetMapper.toResponse(savedAsset);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AssetResponse> getAllAssets() {
+        return assetRepository.findAll().stream()
+                .map(assetMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AssetResponse getAssetById(@NonNull Long id) {
+        Asset asset = assetRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Asset not found with id: " + id));
+        return assetMapper.toResponse(asset);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAsset(@NonNull Long id) {
+        if (!assetRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Asset not found with id: " + id);
+        }
+        assetRepository.deleteById(id);
+    }
+
 }

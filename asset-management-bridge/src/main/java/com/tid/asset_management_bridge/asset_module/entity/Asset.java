@@ -70,6 +70,9 @@ public class Asset {
     @Column(name = "issue_description", columnDefinition = "TEXT")
     private String issueDescription;
 
+    @Column(name = "image", columnDefinition = "TEXT")
+    private String image;
+
     @Column(name = "last_security_check")
     private LocalDateTime lastSecurityCheck;
 
@@ -244,6 +247,14 @@ public class Asset {
 
     public void setIssueDescription(String issueDescription) {
         this.issueDescription = issueDescription;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public LocalDateTime getLastSecurityCheck() {
