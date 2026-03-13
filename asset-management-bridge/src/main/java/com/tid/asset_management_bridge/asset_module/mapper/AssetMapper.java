@@ -35,6 +35,29 @@ public class AssetMapper {
         return asset;
     }
 
+    public void partialUpdate(com.tid.asset_management_bridge.asset_module.dto.UpdateAssetRequest request, Asset asset) {
+        if (request.getAssetTag() != null) asset.setAssetTag(request.getAssetTag());
+        if (request.getSerialNumber() != null) asset.setSerialNumber(request.getSerialNumber());
+        if (request.getDeviceName() != null) asset.setDeviceName(request.getDeviceName());
+        if (request.getDeviceType() != null) asset.setDeviceType(request.getDeviceType());
+        if (request.getManufacturer() != null) asset.setManufacturer(request.getManufacturer());
+        if (request.getModel() != null) asset.setModel(request.getModel());
+        if (request.getStatus() != null) asset.setStatus(request.getStatus());
+        if (request.getCpu() != null) asset.setCpu(request.getCpu());
+        if (request.getRamGb() != null) asset.setRamGb(request.getRamGb());
+        if (request.getDiskType() != null) asset.setDiskType(request.getDiskType());
+        if (request.getDiskModel() != null) asset.setDiskModel(request.getDiskModel());
+        if (request.getStorageSizeGb() != null) asset.setStorageSizeGb(request.getStorageSizeGb());
+        if (request.getScreenSizeInch() != null) asset.setScreenSizeInch(request.getScreenSizeInch());
+        if (request.getOperatingSystem() != null) asset.setOperatingSystem(request.getOperatingSystem());
+        if (request.getOsVersion() != null) asset.setOsVersion(request.getOsVersion());
+        if (request.getDomainJoined() != null) asset.setDomainJoined(request.getDomainJoined());
+        if (request.getCondition() != null) asset.setCondition(request.getCondition());
+        if (request.getIssueDescription() != null) asset.setIssueDescription(request.getIssueDescription());
+        if (request.getImage() != null) asset.setImage(request.getImage());
+        if (request.getLastSecurityCheck() != null) asset.setLastSecurityCheck(request.getLastSecurityCheck());
+    }
+
 
 
     public AssetResponse toResponse(Asset asset) {

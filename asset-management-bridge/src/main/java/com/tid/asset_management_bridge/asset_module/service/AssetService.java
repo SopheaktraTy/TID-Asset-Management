@@ -13,5 +13,7 @@ public interface AssetService {
 
     AssetResponse getAssetById(@NonNull Long id);
 
+    AssetResponse updateAsset(@NonNull Long id, com.tid.asset_management_bridge.asset_module.dto.UpdateAssetRequest request);
+
     void deleteAsset(@NonNull Long id);
 }

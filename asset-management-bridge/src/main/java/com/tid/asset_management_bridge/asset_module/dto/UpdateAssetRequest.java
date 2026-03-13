@@ -62,6 +62,8 @@ public class UpdateAssetRequest {
 
     private LocalDateTime lastSecurityCheck;
 
+    private String image;
+
     public String getAssetTag() {
         return assetTag;
     }
@@ -212,5 +214,13 @@ public class UpdateAssetRequest {
 
     public void setLastSecurityCheck(LocalDateTime lastSecurityCheck) {
         this.lastSecurityCheck = lastSecurityCheck;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 }

@@ -68,6 +68,37 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     @Transactional
+    public AssetResponse updateAsset(@NonNull Long id, com.tid.asset_management_bridge.asset_module.dto.UpdateAssetRequest request) {
+        Asset asset = assetRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Asset not found with id: " + id));
+
+        if (request.getAssetTag() != null && !request.getAssetTag().isBlank()) {
+            String normalizedAssetTag = request.getAssetTag().trim();
+            if (!asset.getAssetTag().equalsIgnoreCase(normalizedAssetTag) &&
+                assetRepository.existsByAssetTagIgnoreCase(normalizedAssetTag)) {
+                throw new ConflictException("Asset tag already exists: " + normalizedAssetTag);
+            }
+            request.setAssetTag(normalizedAssetTag);
+        }
+
+        if (request.getSerialNumber() != null && !request.getSerialNumber().isBlank()) {
+            String normalizedSerial = request.getSerialNumber().trim();
+            if (asset.getSerialNumber() != null && !asset.getSerialNumber().equalsIgnoreCase(normalizedSerial) &&
+                assetRepository.existsBySerialNumberIgnoreCase(normalizedSerial)) {
+                throw new ConflictException("Serial number already exists: " + normalizedSerial);
+            }
+            request.setSerialNumber(normalizedSerial);
+        }
+
+        assetMapper.partialUpdate(request, asset);
+        @SuppressWarnings("null")
+        Asset updatedAsset = assetRepository.save(asset);
+
+        return assetMapper.toResponse(updatedAsset);
+    }
+
+    @Override
+    @Transactional
     public void deleteAsset(@NonNull Long id) {
         if (!assetRepository.existsById(id)) {
             throw new ResourceNotFoundException("Asset not found with id: " + id);

@@ -36,6 +36,11 @@ public class AssetController {
         return assetService.getAssetById(id);
     }
 
+    @PatchMapping("/{id}")
+    public AssetResponse updateAsset(@PathVariable @NonNull Long id, @Valid @RequestBody com.tid.asset_management_bridge.asset_module.dto.UpdateAssetRequest request) {
+        return assetService.updateAsset(id, request);
+    }
+
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
