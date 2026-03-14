@@ -1,0 +1,1 @@
+ALTER TABLE assets ADD COLUMN latest_used VARCHAR(255);
