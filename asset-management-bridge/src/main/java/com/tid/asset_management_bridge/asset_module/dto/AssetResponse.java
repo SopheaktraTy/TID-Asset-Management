@@ -1,7 +1,7 @@
 package com.tid.asset_management_bridge.asset_module.dto;
 
-import com.tid.asset_management_bridge.asset_module.entity.AssetStatus;
-import com.tid.asset_management_bridge.asset_module.entity.DeviceType;
+import com.tid.asset_management_bridge.asset_module.entity.AssetStatusEnum;
+import com.tid.asset_management_bridge.asset_module.entity.DeviceTypeEnum;
 
 import java.time.LocalDateTime;
 
@@ -11,10 +11,10 @@ public class AssetResponse {
     private String assetTag;
     private String serialNumber;
     private String deviceName;
-    private DeviceType deviceType;
+    private DeviceTypeEnum deviceType;
     private String manufacturer;
     private String model;
-    private AssetStatus status;
+    private AssetStatusEnum status;
     private String cpu;
     private Integer ramGb;
     private String diskType;
@@ -28,6 +28,7 @@ public class AssetResponse {
     private String issueDescription;
     private String image;
     private LocalDateTime lastSecurityCheck;
+    private String latestUsed;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -63,11 +64,11 @@ public class AssetResponse {
         this.deviceName = deviceName;
     }
 
-    public DeviceType getDeviceType() {
+    public DeviceTypeEnum getDeviceType() {
         return deviceType;
     }
 
-    public void setDeviceType(DeviceType deviceType) {
+    public void setDeviceType(DeviceTypeEnum deviceType) {
         this.deviceType = deviceType;
     }
 
@@ -87,11 +88,11 @@ public class AssetResponse {
         this.model = model;
     }
 
-    public AssetStatus getStatus() {
+    public AssetStatusEnum getStatus() {
         return status;
     }
 
-    public void setStatus(AssetStatus status) {
+    public void setStatus(AssetStatusEnum status) {
         this.status = status;
     }
 
@@ -197,6 +198,14 @@ public class AssetResponse {
 
     public void setLastSecurityCheck(LocalDateTime lastSecurityCheck) {
         this.lastSecurityCheck = lastSecurityCheck;
+    }
+
+    public String getLatestUsed() {
+        return latestUsed;
+    }
+
+    public void setLatestUsed(String latestUsed) {
+        this.latestUsed = latestUsed;
     }
 
     public LocalDateTime getCreatedAt() {

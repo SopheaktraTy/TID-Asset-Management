@@ -83,6 +83,7 @@ public class AssetMapper {
         response.setIssueDescription(asset.getIssueDescription());
         response.setImage(asset.getImage());
         response.setLastSecurityCheck(asset.getLastSecurityCheck());
+        response.setLatestUsed(asset.getLatestUsed());
         response.setCreatedAt(asset.getCreatedAt());
         response.setUpdatedAt(asset.getUpdatedAt());
         return response;

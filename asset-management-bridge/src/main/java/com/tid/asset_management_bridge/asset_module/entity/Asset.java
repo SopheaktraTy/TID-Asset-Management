@@ -25,7 +25,7 @@ public class Asset {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "device_type", nullable = false, length = 50)
-    private DeviceType deviceType;
+    private DeviceTypeEnum deviceType;
 
     @Column(name = "manufacturer", length = 100)
     private String manufacturer;
@@ -35,7 +35,7 @@ public class Asset {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 50)
-    private AssetStatus status;
+    private AssetStatusEnum status;
 
     @Column(name = "cpu", length = 150)
     private String cpu;
@@ -76,6 +76,9 @@ public class Asset {
     @Column(name = "last_security_check")
     private LocalDateTime lastSecurityCheck;
 
+    @Column(name = "latest_used", length = 255)
+    private String latestUsed;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -89,7 +92,7 @@ public class Asset {
         this.updatedAt = now;
 
         if (this.status == null) {
-            this.status = AssetStatus.AVAILABLE;
+            this.status = AssetStatusEnum.AVAILABLE;
         }
         if (this.domainJoined == null) {
             this.domainJoined = Boolean.FALSE;
@@ -129,11 +132,11 @@ public class Asset {
         this.deviceName = deviceName;
     }
 
-    public DeviceType getDeviceType() {
+    public DeviceTypeEnum getDeviceType() {
         return deviceType;
     }
 
-    public void setDeviceType(DeviceType deviceType) {
+    public void setDeviceType(DeviceTypeEnum deviceType) {
         this.deviceType = deviceType;
     }
 
@@ -153,11 +156,11 @@ public class Asset {
         this.model = model;
     }
 
-    public AssetStatus getStatus() {
+    public AssetStatusEnum getStatus() {
         return status;
     }
 
-    public void setStatus(AssetStatus status) {
+    public void setStatus(AssetStatusEnum status) {
         this.status = status;
     }
 
@@ -263,6 +266,14 @@ public class Asset {
 
     public void setLastSecurityCheck(LocalDateTime lastSecurityCheck) {
         this.lastSecurityCheck = lastSecurityCheck;
+    }
+
+    public String getLatestUsed() {
+        return latestUsed;
+    }
+
+    public void setLatestUsed(String latestUsed) {
+        this.latestUsed = latestUsed;
     }
 
     public LocalDateTime getCreatedAt() {

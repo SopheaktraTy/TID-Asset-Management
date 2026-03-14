@@ -1,7 +1,7 @@
 package com.tid.asset_management_bridge.asset_module.dto;
 
-import com.tid.asset_management_bridge.asset_module.entity.AssetStatus;
-import com.tid.asset_management_bridge.asset_module.entity.DeviceType;
+import com.tid.asset_management_bridge.asset_module.entity.AssetStatusEnum;
+import com.tid.asset_management_bridge.asset_module.entity.DeviceTypeEnum;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -24,7 +24,7 @@ public class CreateAssetRequest {
     private String deviceName;
 
     @NotNull
-    private DeviceType deviceType;
+    private DeviceTypeEnum deviceType;
 
     @Size(max = 100)
     private String manufacturer;
@@ -32,7 +32,7 @@ public class CreateAssetRequest {
     @Size(max = 100)
     private String model;
 
-    private AssetStatus status;
+    private AssetStatusEnum status;
 
     @Size(max = 150)
     private String cpu;
@@ -93,11 +93,11 @@ public class CreateAssetRequest {
         this.deviceName = deviceName;
     }
 
-    public DeviceType getDeviceType() {
+    public DeviceTypeEnum getDeviceType() {
         return deviceType;
     }
 
-    public void setDeviceType(DeviceType deviceType) {
+    public void setDeviceType(DeviceTypeEnum deviceType) {
         this.deviceType = deviceType;
     }
 
@@ -117,11 +117,11 @@ public class CreateAssetRequest {
         this.model = model;
     }
 
-    public AssetStatus getStatus() {
+    public AssetStatusEnum getStatus() {
         return status;
     }
 
-    public void setStatus(AssetStatus status) {
+    public void setStatus(AssetStatusEnum status) {
         this.status = status;
     }
 
