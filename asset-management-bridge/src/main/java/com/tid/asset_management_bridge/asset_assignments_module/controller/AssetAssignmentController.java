@@ -3,6 +3,7 @@ package com.tid.asset_management_bridge.asset_assignments_module.controller;
 import com.tid.asset_management_bridge.asset_assignments_module.dto.AssignAssetRequest;
 import com.tid.asset_management_bridge.asset_assignments_module.dto.AssignmentResponse;
 import com.tid.asset_management_bridge.asset_assignments_module.dto.ReturnAssetRequest;
+import com.tid.asset_management_bridge.asset_assignments_module.dto.UpdateAssetAssignmentRequest;
 import com.tid.asset_management_bridge.asset_assignments_module.service.AssetAssignmentService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -35,5 +36,16 @@ public class AssetAssignmentController {
     @GetMapping("/assets/{id}/assignments")
     public List<AssignmentResponse> getAssetAssignments(@PathVariable @NonNull Long id) {
         return assignmentService.getAssetAssignments(id);
+    }
+
+    @PutMapping("/assignments/{id}")
+    public AssignmentResponse updateAssetAssignment(@PathVariable @NonNull Long id, @RequestBody UpdateAssetAssignmentRequest request) {
+        return assignmentService.updateAssetAssignment(id, request);
+    }
+
+    @DeleteMapping("/assignments/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAssetAssignment(@PathVariable @NonNull Long id) {
+        assignmentService.deleteAssetAssignment(id);
     }
 }

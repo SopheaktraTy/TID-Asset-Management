@@ -10,4 +10,10 @@ import java.util.List;
 public interface AssetAssignmentRepository extends JpaRepository<AssetAssignment, Long> {
     List<AssetAssignment> findByAssetIdOrderByAssignedDateDesc(Long assetId);
     void deleteByAssetId(Long assetId);
+
+    // Check if an asset already has an active (un-returned) assignment
+    boolean existsByAssetIdAndReturnedDateIsNull(Long assetId);
+
+    // Same check, but excluding a specific assignment record (used during updates)
+    boolean existsByAssetIdAndReturnedDateIsNullAndIdNot(Long assetId, Long excludeId);
 }

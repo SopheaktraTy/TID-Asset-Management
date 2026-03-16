@@ -32,6 +32,7 @@ public class AssetAssignmentMapper {
         response.setReturnedDate(assignment.getReturnedDate());
         response.setReturnCondition(assignment.getReturnCondition());
         response.setNotes(assignment.getNotes());
+        response.setPreviousUsed(assignment.getPreviousUsed());
         return response;
     }
 }
