@@ -6,7 +6,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "assets", uniqueConstraints = {
         @UniqueConstraint(name = "uk_assets_asset_tag", columnNames = "asset_tag"),
-        @UniqueConstraint(name = "uk_assets_serial_number", columnNames = "serial_number")
+        @UniqueConstraint(name = "uk_assets_serial_number", columnNames = "serial_number"),
+        @UniqueConstraint(name = "uk_assets_device_name", columnNames = "device_name")
 })
 public class Asset {
 
@@ -78,6 +79,9 @@ public class Asset {
 
     @Column(name = "latest_used", length = 255)
     private String latestUsed;
+
+    @Column(name = "previous_used", length = 500)
+    private String previousUsed;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -274,6 +278,14 @@ public class Asset {
 
     public void setLatestUsed(String latestUsed) {
         this.latestUsed = latestUsed;
+    }
+
+    public String getPreviousUsed() {
+        return previousUsed;
+    }
+
+    public void setPreviousUsed(String previousUsed) {
+        this.previousUsed = previousUsed;
     }
 
     public LocalDateTime getCreatedAt() {

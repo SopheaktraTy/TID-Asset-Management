@@ -8,4 +8,6 @@ public interface AssetRepository extends JpaRepository<Asset, Long> {
     boolean existsByAssetTagIgnoreCase(String assetTag);
 
     boolean existsBySerialNumberIgnoreCase(String serialNumber);
+
+    boolean existsByDeviceNameIgnoreCase(String deviceName);
 }

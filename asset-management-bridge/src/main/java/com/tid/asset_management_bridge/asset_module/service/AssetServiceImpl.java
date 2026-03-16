@@ -42,6 +42,14 @@ public class AssetServiceImpl implements AssetService {
             request.setSerialNumber(normalizedSerial);
         }
 
+        if (request.getDeviceName() != null && !request.getDeviceName().isBlank()) {
+            String normalizedDeviceName = request.getDeviceName().trim();
+            if (assetRepository.existsByDeviceNameIgnoreCase(normalizedDeviceName)) {
+                throw new ConflictException("Device name already exists: " + normalizedDeviceName);
+            }
+            request.setDeviceName(normalizedDeviceName);
+        }
+
         request.setAssetTag(normalizedAssetTag);
 
         Asset asset = assetMapper.toEntity(request);
@@ -88,6 +96,15 @@ public class AssetServiceImpl implements AssetService {
                 throw new ConflictException("Serial number already exists: " + normalizedSerial);
             }
             request.setSerialNumber(normalizedSerial);
+        }
+
+        if (request.getDeviceName() != null && !request.getDeviceName().isBlank()) {
+            String normalizedDeviceName = request.getDeviceName().trim();
+            if (asset.getDeviceName() != null && !asset.getDeviceName().equalsIgnoreCase(normalizedDeviceName) &&
+                assetRepository.existsByDeviceNameIgnoreCase(normalizedDeviceName)) {
+                throw new ConflictException("Device name already exists: " + normalizedDeviceName);
+            }
+            request.setDeviceName(normalizedDeviceName);
         }
 
         assetMapper.partialUpdate(request, asset);
