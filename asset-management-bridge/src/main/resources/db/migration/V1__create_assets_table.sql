@@ -18,7 +18,10 @@ CREATE TABLE assets (
     domain_joined BOOLEAN DEFAULT FALSE,
     condition VARCHAR(100),
     issue_description TEXT,
+    image TEXT,
     last_security_check TIMESTAMP,
+    latest_used VARCHAR(255),
+    previous_used VARCHAR(500),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -27,4 +30,4 @@ ALTER TABLE assets
     ADD CONSTRAINT uk_assets_asset_tag UNIQUE (asset_tag);
 
 ALTER TABLE assets
-    ADD CONSTRAINT uk_assets_serial_number UNIQUE (serial_number);
+    ADD CONSTRAINT uk_assets_serial_number UNIQUE (serial_number);
