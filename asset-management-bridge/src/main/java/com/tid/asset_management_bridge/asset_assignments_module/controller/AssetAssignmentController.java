@@ -22,10 +22,11 @@ public class AssetAssignmentController {
         this.assignmentService = assignmentService;
     }
 
-    @PostMapping("/assignments")
+    @PostMapping("/assets/{id}/assignments")
     @ResponseStatus(HttpStatus.CREATED)
-    public AssignmentResponse assignAsset(@Valid @RequestBody AssignAssetRequest request) {
-        return assignmentService.assignAsset(request);
+    public AssignmentResponse assignAsset(@PathVariable @NonNull Long id,
+                                          @Valid @RequestBody AssignAssetRequest request) {
+        return assignmentService.assignAsset(id, request);
     }
 
     @PostMapping("/assignments/{id}/return")

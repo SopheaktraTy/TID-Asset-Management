@@ -19,7 +19,6 @@ public class AssignmentResponse {
     private LocalDate returnedDate;
     private String returnCondition;
     private String notes;
-    private String previousUsed;
 
     public Long getId() {
         return id;
@@ -117,11 +116,4 @@ public class AssignmentResponse {
         this.notes = notes;
     }
 
-    public String getPreviousUsed() {
-        return previousUsed;
-    }
-
-    public void setPreviousUsed(String previousUsed) {
-        this.previousUsed = previousUsed;
-    }
 }

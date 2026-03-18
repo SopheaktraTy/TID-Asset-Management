@@ -37,18 +37,14 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
 
     @Override
     @Transactional
-    public AssignmentResponse assignAsset(AssignAssetRequest request) {
-        Long assetId = request.getAssetId();
-        if (assetId == null) {
-            throw new ResourceNotFoundException("Asset ID must not be null");
-        }
+    public AssignmentResponse assignAsset(@NonNull Long assetId, AssignAssetRequest request) {
         Asset asset = assetRepository.findById(assetId)
                 .orElseThrow(() -> new ResourceNotFoundException("Asset not found with id: " + assetId));
 
-        // Prevent duplicate active assignments for the same asset
-        if (assignmentRepository.existsByAssetIdAndReturnedDateIsNull(asset.getId())) {
+        // Block new assignment if the latest assignment has not been returned yet
+        if (assignmentRepository.existsByAssetIdAndReturnedDateIsNull(assetId)) {
             throw new ConflictException(
-                    "Asset is already actively assigned. " +
+                    "Asset is already actively assigned and has not been returned. " +
                     "asset_tag='" + asset.getAssetTag() + "', " +
                     "serial_number='" + asset.getSerialNumber() + "', " +
                     "device_name='" + asset.getDeviceName() + "'");
@@ -66,7 +62,6 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
 
         AssetAssignment assignment = assignmentMapper.toEntity(request);
         assignment.setAsset(asset);
-        assignment.setPreviousUsed(currentLatestUsed);
 
         AssetAssignment saved = assignmentRepository.save(assignment);
         return assignmentMapper.toResponse(saved);
@@ -94,6 +89,14 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
         if (request.getReturnCondition() != null && !request.getReturnCondition().isBlank()) {
             asset.setCondition(request.getReturnCondition());
         }
+
+        // Shift latest_used → previous_used and clear latest_used on return,
+        // so the asset accurately reflects it has no current holder.
+        String currentLatestUsed = asset.getLatestUsed();
+        if (currentLatestUsed != null && !currentLatestUsed.isBlank()) {
+            asset.setPreviousUsed(currentLatestUsed);
+        }
+        asset.setLatestUsed(null);
 
         assetRepository.save(asset);
         AssetAssignment updated = assignmentRepository.save(assignment);
@@ -168,14 +171,52 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
         AssetAssignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Assignment not found with id: " + assignmentId));
 
-        // If this is the active assignment (no return date), reset asset status
+        Asset asset = assignment.getAsset();
+        if (asset == null) {
+            throw new ResourceNotFoundException("Asset linked to assignment not found for id: " + assignmentId);
+        }
+
         if (assignment.getReturnedDate() == null) {
-            Asset asset = assignment.getAsset();
+            // Active assignment: clear latestUsed (asset has no current holder) and mark AVAILABLE.
+            // previousUsed is intentionally left as-is — it already holds the correct last
+            // returned user, set by returnAsset when the prior assignment was returned.
             asset.setStatus(AssetStatusEnum.AVAILABLE);
-            // Restore previous_used back to latest_used on asset
-            asset.setLatestUsed(asset.getPreviousUsed());
-            asset.setPreviousUsed(null);
+            asset.setLatestUsed(null);
             assetRepository.save(asset);
+        } else {
+            // Already-returned assignment: check if asset fields still point to this assignee
+            // and restore them from the assignment's own previousUsed / history chain.
+            String assignedTo = assignment.getAssignedTo();
+            boolean assetChanged = false;
+
+            if (assignedTo != null && assignedTo.equals(asset.getLatestUsed())) {
+                // asset.latestUsed still points to this deleted person → roll it back
+                // Restore latestUsed from asset.previousUsed (the last returned user)
+                asset.setLatestUsed(asset.getPreviousUsed());
+
+                // Also walk back previousUsed: find the prior returned assignment to get its assignedTo
+                String restoredPreviousUsed = assignmentRepository
+                        .findFirstByAssetIdAndReturnedDateIsNotNullAndIdNotOrderByReturnedDateDesc(
+                                asset.getId(), assignmentId)
+                        .map(AssetAssignment::getAssignedTo)
+                        .orElse(null);
+                asset.setPreviousUsed(restoredPreviousUsed);
+                assetChanged = true;
+
+            } else if (assignedTo != null && assignedTo.equals(asset.getPreviousUsed())) {
+                // asset.previousUsed still points to this deleted person → find the one before it
+                String restoredPreviousUsed = assignmentRepository
+                        .findFirstByAssetIdAndReturnedDateIsNotNullAndIdNotOrderByReturnedDateDesc(
+                                asset.getId(), assignmentId)
+                        .map(AssetAssignment::getAssignedTo)
+                        .orElse(null);
+                asset.setPreviousUsed(restoredPreviousUsed);
+                assetChanged = true;
+            }
+
+            if (assetChanged) {
+                assetRepository.save(asset);
+            }
         }
 
         assignmentRepository.deleteById(assignmentId);

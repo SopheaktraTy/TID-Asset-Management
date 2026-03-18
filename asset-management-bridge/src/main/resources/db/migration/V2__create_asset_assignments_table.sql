@@ -9,7 +9,6 @@ CREATE TABLE asset_assignments (
     returned_date DATE,
     return_condition VARCHAR(100),
     notes TEXT,
-    previous_used VARCHAR(500),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

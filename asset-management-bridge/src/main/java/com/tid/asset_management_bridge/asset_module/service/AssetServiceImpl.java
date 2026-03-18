@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,7 +54,7 @@ public class AssetServiceImpl implements AssetService {
         request.setAssetTag(normalizedAssetTag);
 
         Asset asset = assetMapper.toEntity(request);
-        Asset savedAsset = assetRepository.save(asset);
+        Asset savedAsset = Objects.requireNonNull(assetRepository.save(asset));
 
         return assetMapper.toResponse(savedAsset);
     }
@@ -76,6 +77,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     @Transactional
+    @SuppressWarnings("null")
     public AssetResponse updateAsset(@NonNull Long id, com.tid.asset_management_bridge.asset_module.dto.UpdateAssetRequest request) {
         Asset asset = assetRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Asset not found with id: " + id));
@@ -108,8 +110,7 @@ public class AssetServiceImpl implements AssetService {
         }
 
         assetMapper.partialUpdate(request, asset);
-        @SuppressWarnings("null")
-        Asset updatedAsset = assetRepository.save(asset);
+        Asset updatedAsset = Objects.requireNonNull(assetRepository.save(asset));
 
         return assetMapper.toResponse(updatedAsset);
     }
