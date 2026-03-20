@@ -41,6 +41,14 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
         Asset asset = assetRepository.findById(assetId)
                 .orElseThrow(() -> new ResourceNotFoundException("Asset not found with id: " + assetId));
 
+        if (asset.getStatus() != AssetStatusEnum.AVAILABLE) {
+            throw new ConflictException(
+                    "Cannot assign asset. It must be in AVAILABLE status, but is currently: " + asset.getStatus().name() + ". " +
+                    "asset_tag='" + asset.getAssetTag() + "', " +
+                    "serial_number='" + asset.getSerialNumber() + "', " +
+                    "device_name='" + asset.getDeviceName() + "'");
+        }
+
         // Block new assignment if the latest assignment has not been returned yet
         if (assignmentRepository.existsByAssetIdAndReturnedDateIsNull(assetId)) {
             throw new ConflictException(
@@ -79,9 +87,6 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
 
         assignment.setReturnedDate(LocalDate.now());
         assignment.setReturnCondition(request.getReturnCondition());
-        if (request.getNotes() != null && !request.getNotes().isEmpty()) {
-            assignment.setNotes(request.getNotes());
-        }
 
         Asset asset = assignment.getAsset();
         asset.setStatus(AssetStatusEnum.AVAILABLE);
@@ -157,9 +162,7 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
         if (request.getAssignedDate() != null) {
             assignment.setAssignedDate(request.getAssignedDate());
         }
-        if (request.getNotes() != null) {
-            assignment.setNotes(request.getNotes());
-        }
+
 
         AssetAssignment updated = assignmentRepository.save(assignment);
         return assignmentMapper.toResponse(updated);
