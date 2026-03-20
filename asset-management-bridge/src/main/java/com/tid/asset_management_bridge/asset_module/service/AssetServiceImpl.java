@@ -28,6 +28,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     @Transactional
+    @SuppressWarnings("null")
     public AssetResponse createAsset(CreateAssetRequest request) {
         String normalizedAssetTag = request.getAssetTag().trim();
 
