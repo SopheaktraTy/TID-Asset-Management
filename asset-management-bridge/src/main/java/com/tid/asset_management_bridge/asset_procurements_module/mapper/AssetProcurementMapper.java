@@ -1,53 +1,21 @@
 package com.tid.asset_management_bridge.asset_procurements_module.mapper;
 
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import com.tid.asset_management_bridge.asset_procurements_module.dto.ProcurementRequest;
 import com.tid.asset_management_bridge.asset_procurements_module.dto.ProcurementResponse;
 import com.tid.asset_management_bridge.asset_procurements_module.entity.AssetProcurement;
 
-@Component
-public class AssetProcurementMapper {
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+public interface AssetProcurementMapper {
 
-    public AssetProcurement toEntity(ProcurementRequest request) {
-        if (request == null) {
-            return null;
-        }
-        AssetProcurement entity = new AssetProcurement();
-        entity.setPurchaseDate(request.getPurchaseDate());
-        entity.setPurchaseVendor(request.getPurchaseVendor());
-        entity.setPurchaseCost(request.getPurchaseCost());
-        entity.setWarrantyExpiryDate(request.getWarrantyExpiryDate());
-        return entity;
-    }
+    AssetProcurement toEntity(ProcurementRequest request);
 
-    public ProcurementResponse toResponse(AssetProcurement entity) {
-        if (entity == null) {
-            return null;
-        }
-        ProcurementResponse response = new ProcurementResponse();
-        response.setId(entity.getId());
-        if (entity.getAsset() != null) {
-            response.setAssetId(entity.getAsset().getId());
-        }
-        response.setPurchaseDate(entity.getPurchaseDate());
-        response.setPurchaseVendor(entity.getPurchaseVendor());
-        response.setPurchaseCost(entity.getPurchaseCost());
-        response.setWarrantyExpiryDate(entity.getWarrantyExpiryDate());
-        return response;
-    }
+    @Mapping(source = "asset.id", target = "assetId")
+    ProcurementResponse toResponse(AssetProcurement entity);
 
-    public void updateEntityFromRequest(ProcurementRequest request, AssetProcurement entity) {
-        if (request == null || entity == null) {
-            return;
-        }
-        if (request.getPurchaseDate() != null)
-            entity.setPurchaseDate(request.getPurchaseDate());
-        if (request.getPurchaseVendor() != null)
-            entity.setPurchaseVendor(request.getPurchaseVendor());
-        if (request.getPurchaseCost() != null)
-            entity.setPurchaseCost(request.getPurchaseCost());
-        if (request.getWarrantyExpiryDate() != null)
-            entity.setWarrantyExpiryDate(request.getWarrantyExpiryDate());
-    }
+    void updateEntityFromRequest(ProcurementRequest request, @MappingTarget AssetProcurement entity);
 }
