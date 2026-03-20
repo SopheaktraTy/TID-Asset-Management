@@ -18,7 +18,6 @@ public class AssignmentResponse {
     private LocalDate assignedDate;
     private LocalDate returnedDate;
     private String returnCondition;
-    private String notes;
 
     public Long getId() {
         return id;
@@ -108,12 +107,5 @@ public class AssignmentResponse {
         this.returnCondition = returnCondition;
     }
 
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
 
 }

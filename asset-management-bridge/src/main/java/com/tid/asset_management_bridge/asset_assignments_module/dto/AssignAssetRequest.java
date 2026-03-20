@@ -15,7 +15,6 @@ public class AssignAssetRequest {
 
     private String assignedBy;
 
-    private String notes;
 
     public String getAssignedTo() {
         return assignedTo;
@@ -49,11 +48,4 @@ public class AssignAssetRequest {
         this.assignedBy = assignedBy;
     }
 
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
 }

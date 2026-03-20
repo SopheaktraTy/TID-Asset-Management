@@ -40,9 +40,6 @@ public class AssetAssignment {
     @Column(name = "return_condition", length = 100)
     private String returnCondition;
 
-    @Column(name = "notes", columnDefinition = "TEXT")
-    private String notes;
-
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -137,14 +134,6 @@ public class AssetAssignment {
 
     public void setReturnCondition(String returnCondition) {
         this.returnCondition = returnCondition;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
     }
 
 

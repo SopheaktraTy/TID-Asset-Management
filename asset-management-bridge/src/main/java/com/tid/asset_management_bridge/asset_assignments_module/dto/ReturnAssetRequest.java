@@ -4,7 +4,6 @@ public class ReturnAssetRequest {
 
     private String returnCondition;
 
-    private String notes;
 
     public String getReturnCondition() {
         return returnCondition;
@@ -14,11 +13,4 @@ public class ReturnAssetRequest {
         this.returnCondition = returnCondition;
     }
 
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
 }

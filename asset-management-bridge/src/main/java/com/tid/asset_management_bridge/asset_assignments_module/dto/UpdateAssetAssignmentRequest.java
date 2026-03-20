@@ -11,7 +11,6 @@ public class UpdateAssetAssignmentRequest {
     private DepartmentEnum department;
     private JobTitleEnum jobTitle;
     private String assignedBy;
-    private String notes;
     private LocalDate assignedDate;
     private LocalDate returnedDate;
     private String returnCondition;
@@ -48,13 +47,6 @@ public class UpdateAssetAssignmentRequest {
         this.assignedBy = assignedBy;
     }
 
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
 
     public LocalDate getAssignedDate() {
         return assignedDate;
