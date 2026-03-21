@@ -37,4 +37,6 @@ out/
 .vscode/
 
 ### Temporary Files  Docs###
-~$D_Asset_Management_Project_Perspective.docx
+# Ignore all Word temporary/owner files
+~$*.docx
+~$*
