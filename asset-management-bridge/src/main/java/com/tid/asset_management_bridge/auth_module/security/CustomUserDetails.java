@@ -6,7 +6,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
+import com.tid.asset_management_bridge.auth_module.entity.CustomPermission;
 
 public class CustomUserDetails implements UserDetails {
 
@@ -20,10 +22,23 @@ public class CustomUserDetails implements UserDetails {
         return user;
     }
 
-    // This converts the RoleEnum to a GrantedAuthority so Spring Security's @PreAuthorize("hasRole(...)") works.
+    // Converts the RoleEnum and granular CustomPermissions to GrantedAuthorities
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        
+        // Role
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+
+        // Permissions
+        if (user.getPermissions() != null) {
+            for (CustomPermission p : user.getPermissions()) {
+                String authorityName = p.getPermission().name() + "_" + p.getModule().name();
+                authorities.add(new SimpleGrantedAuthority(authorityName));
+            }
+        }
+
+        return authorities;
     }
 
     @Override

@@ -2,6 +2,8 @@ package com.tid.asset_management_bridge.auth_module.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -23,6 +25,9 @@ public class User {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    @Column(name = "department")
+    private String department;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private RoleEnum role;
@@ -35,6 +40,9 @@ public class User {
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CustomPermission> permissions = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
@@ -87,6 +95,14 @@ public class User {
         this.passwordHash = passwordHash;
     }
 
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
     public RoleEnum getRole() {
         return role;
     }
@@ -117,5 +133,13 @@ public class User {
 
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
+    }
+
+    public List<CustomPermission> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(List<CustomPermission> permissions) {
+        this.permissions = permissions;
     }
 }

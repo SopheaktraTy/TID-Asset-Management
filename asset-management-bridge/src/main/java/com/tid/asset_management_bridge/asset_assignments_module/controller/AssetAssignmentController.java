@@ -9,11 +9,16 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import com.tid.asset_management_bridge.common.dto.ApiResponse;
 
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @RestController
 @RequestMapping("/api")
+@SecurityRequirement(name = "bearerAuth")
 public class AssetAssignmentController {
 
     private final AssetAssignmentService assignmentService;
@@ -23,30 +28,40 @@ public class AssetAssignmentController {
     }
 
     @PostMapping("/assets/{id}/assignments")
-    @ResponseStatus(HttpStatus.CREATED)
-    public AssignmentResponse assignAsset(@PathVariable @NonNull Long id,
-                                          @Valid @RequestBody AssignAssetRequest request) {
-        return assignmentService.assignAsset(id, request);
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('CREATE_ASSIGNMENT')")
+    public ResponseEntity<ApiResponse<AssignmentResponse>> assignAsset(@PathVariable @NonNull Long id,
+            @Valid @RequestBody AssignAssetRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                new ApiResponse<>(201, "Asset assigned successfully", assignmentService.assignAsset(id, request)));
     }
 
     @PostMapping("/assignments/{id}/return")
-    public AssignmentResponse returnAsset(@PathVariable @NonNull Long id, @RequestBody ReturnAssetRequest request) {
-        return assignmentService.returnAsset(id, request);
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('UPDATE_ASSIGNMENT')")
+    public ResponseEntity<ApiResponse<AssignmentResponse>> returnAsset(@PathVariable @NonNull Long id,
+            @RequestBody ReturnAssetRequest request) {
+        return ResponseEntity
+                .ok(new ApiResponse<>(200, "Asset returned successfully", assignmentService.returnAsset(id, request)));
     }
 
     @GetMapping("/assets/{id}/assignments")
-    public List<AssignmentResponse> getAssetAssignments(@PathVariable @NonNull Long id) {
-        return assignmentService.getAssetAssignments(id);
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('READ_ASSIGNMENT')")
+    public ResponseEntity<ApiResponse<List<AssignmentResponse>>> getAssetAssignments(@PathVariable @NonNull Long id) {
+        return ResponseEntity.ok(new ApiResponse<>(200, "Asset assignments retrieved successfully",
+                assignmentService.getAssetAssignments(id)));
     }
 
     @PutMapping("/assignments/{id}")
-    public AssignmentResponse updateAssetAssignment(@PathVariable @NonNull Long id, @RequestBody UpdateAssetAssignmentRequest request) {
-        return assignmentService.updateAssetAssignment(id, request);
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('UPDATE_ASSIGNMENT')")
+    public ResponseEntity<ApiResponse<AssignmentResponse>> updateAssetAssignment(@PathVariable @NonNull Long id,
+            @RequestBody UpdateAssetAssignmentRequest request) {
+        return ResponseEntity.ok(new ApiResponse<>(200, "Asset assignment updated successfully",
+                assignmentService.updateAssetAssignment(id, request)));
     }
 
     @DeleteMapping("/assignments/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteAssetAssignment(@PathVariable @NonNull Long id) {
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('DELETE_ASSIGNMENT')")
+    public ResponseEntity<ApiResponse<Void>> deleteAssetAssignment(@PathVariable @NonNull Long id) {
         assignmentService.deleteAssetAssignment(id);
+        return ResponseEntity.ok(new ApiResponse<>(200, "Asset assignment deleted successfully"));
     }
 }

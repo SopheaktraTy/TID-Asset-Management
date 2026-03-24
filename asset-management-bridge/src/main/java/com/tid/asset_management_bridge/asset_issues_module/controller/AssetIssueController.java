@@ -8,11 +8,16 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import com.tid.asset_management_bridge.common.dto.ApiResponse;
 
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @RestController
 @RequestMapping("/api")
+@SecurityRequirement(name = "bearerAuth")
 public class AssetIssueController {
 
     private final AssetIssueService issueService;
@@ -23,29 +28,35 @@ public class AssetIssueController {
 
     // POST /api/assets/{id}/issues — Report a new issue for an asset
     @PostMapping("/assets/{id}/issues")
-    @ResponseStatus(HttpStatus.CREATED)
-    public IssueResponse reportIssue(@PathVariable @NonNull Long id,
-                                     @Valid @RequestBody ReportIssueRequest request) {
-        return issueService.reportIssue(id, request);
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('CREATE_ISSUE')")
+    public ResponseEntity<ApiResponse<IssueResponse>> reportIssue(@PathVariable @NonNull Long id,
+            @Valid @RequestBody ReportIssueRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse<>(201, "Issue reported successfully", issueService.reportIssue(id, request)));
     }
 
     // GET /api/assets/{id}/issues — View all issues for an asset
     @GetMapping("/assets/{id}/issues")
-    public List<IssueResponse> getIssuesByAsset(@PathVariable @NonNull Long id) {
-        return issueService.getIssuesByAsset(id);
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('READ_ISSUE')")
+    public ResponseEntity<ApiResponse<List<IssueResponse>>> getIssuesByAsset(@PathVariable @NonNull Long id) {
+        return ResponseEntity
+                .ok(new ApiResponse<>(200, "Issues retrieved successfully", issueService.getIssuesByAsset(id)));
     }
 
     // PUT /api/issues/{id} — Update an issue
     @PutMapping("/issues/{id}")
-    public IssueResponse updateIssue(@PathVariable @NonNull Long id,
-                                     @RequestBody UpdateIssueRequest request) {
-        return issueService.updateIssue(id, request);
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('UPDATE_ISSUE')")
+    public ResponseEntity<ApiResponse<IssueResponse>> updateIssue(@PathVariable @NonNull Long id,
+            @RequestBody UpdateIssueRequest request) {
+        return ResponseEntity
+                .ok(new ApiResponse<>(200, "Issue updated successfully", issueService.updateIssue(id, request)));
     }
 
     // DELETE /api/issues/{id} — Delete an issue
     @DeleteMapping("/issues/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteIssue(@PathVariable @NonNull Long id) {
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('DELETE_ISSUE')")
+    public ResponseEntity<ApiResponse<Void>> deleteIssue(@PathVariable @NonNull Long id) {
         issueService.deleteIssue(id);
+        return ResponseEntity.ok(new ApiResponse<>(200, "Issue deleted successfully"));
     }
 }

@@ -1,4 +1,4 @@
-package com.tid.asset_management_bridge.auth_module.dto;
+package com.tid.asset_management_bridge.user_management_module.dto;
 
 import com.tid.asset_management_bridge.auth_module.entity.RoleEnum;
 import jakarta.validation.constraints.Email;
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-public class RegisterRequest {
+public class CreateUserRequest {
 
     @NotBlank(message = "Username is required")
     private String username;

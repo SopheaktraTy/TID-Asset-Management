@@ -6,7 +6,11 @@ import com.tid.asset_management_bridge.user_management_module.dto.AssignPermissi
 import org.springframework.lang.NonNull;
 import java.util.List;
 
+import com.tid.asset_management_bridge.user_management_module.dto.CreateUserRequest;
+
 public interface UserService {
+    ProfileResponse createUser(@NonNull CreateUserRequest request);
+
     List<ProfileResponse> getAllUsers();
 
     ProfileResponse getUserById(@NonNull Long id);

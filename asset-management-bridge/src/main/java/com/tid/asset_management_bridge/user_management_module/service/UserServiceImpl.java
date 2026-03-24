@@ -9,9 +9,12 @@ import com.tid.asset_management_bridge.auth_module.mapper.UserMapper;
 import com.tid.asset_management_bridge.auth_module.repository.CustomPermissionRepository;
 import com.tid.asset_management_bridge.auth_module.repository.UserRepository;
 import com.tid.asset_management_bridge.common.exception.ResourceNotFoundException;
+import com.tid.asset_management_bridge.common.exception.ConflictException;
 import com.tid.asset_management_bridge.user_management_module.dto.AssignPermissionRequest;
+import com.tid.asset_management_bridge.user_management_module.dto.CreateUserRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.lang.NonNull;
 
 import java.util.List;
@@ -24,13 +27,36 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final CustomPermissionRepository customPermissionRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     public UserServiceImpl(UserRepository userRepository,
             CustomPermissionRepository customPermissionRepository,
-            UserMapper userMapper) {
+            UserMapper userMapper,
+            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.customPermissionRepository = customPermissionRepository;
         this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Override
+    @Transactional
+    public ProfileResponse createUser(@NonNull CreateUserRequest request) {
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new ConflictException("Username is already taken");
+        }
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new ConflictException("Email is already registered");
+        }
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setRole(request.getRole());
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        user.setIsActive(true);
+
+        return userMapper.toProfileResponse(userRepository.save(user));
     }
 
     @Override

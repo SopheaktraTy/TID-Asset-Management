@@ -12,7 +12,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import com.tid.asset_management_bridge.auth_module.security.JwtUtil;
 import com.tid.asset_management_bridge.auth_module.security.CustomUserDetailsService;
 
@@ -24,20 +23,17 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
-    private final PasswordEncoder passwordEncoder;
 
     public AuthServiceImpl(UserRepository userRepository, 
                            UserMapper userMapper,
                            AuthenticationManager authenticationManager,
                            JwtUtil jwtUtil,
-                           CustomUserDetailsService userDetailsService,
-                           PasswordEncoder passwordEncoder) {
+                           CustomUserDetailsService userDetailsService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -61,35 +57,23 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional
-    public ProfileResponse register(@NonNull RegisterRequest request) {
-        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            throw new ConflictException("Username is already taken");
-        }
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new ConflictException("Email is already registered");
-        }
-
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        user.setRole(request.getRole());
-        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        user.setIsActive(true);
-        
-        return userMapper.toProfileResponse(userRepository.save(user));
-    }
-
-    @Override
     public void logout(String token) {
-        // Implementation requires token invalidation logic (Next steps)
-        throw new UnsupportedOperationException("Logout implementation pending.");
+        // To strictly invalidate, you need a JWT blacklist.
+        // For stateless JWT, returning success is sufficient for now.
     }
 
     @Override
     public LoginResponse refreshToken(String refreshToken) {
-        // Implementation requires JwtUtil to validate and issue new token (Next steps)
-        throw new UnsupportedOperationException("Refresh Token implementation pending.");
+        // Simple token regeneration if valid
+        String username = jwtUtil.extractUsername(refreshToken);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        if (jwtUtil.validateToken(refreshToken, userDetails)) {
+            String newToken = jwtUtil.generateToken(userDetails);
+            User user = userRepository.findByUsernameOrEmail(username, username)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+            return new LoginResponse(newToken, userMapper.toProfileResponse(user));
+        }
+        throw new com.tid.asset_management_bridge.common.exception.ResourceNotFoundException("Invalid token");
     }
 
     @Override
@@ -101,10 +85,18 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void changePassword(@NonNull Long userId, ChangePasswordRequest request) {
-        userRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
-        // Need to verify currentPassword via PasswordEncoder, then set newPassword. (Next steps)
-        throw new UnsupportedOperationException("Password changing implementation pending.");
+
+        // Use standard Spring PasswordEncoder logic
+        org.springframework.security.crypto.password.PasswordEncoder encoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
+
+        if (!encoder.matches(request.getCurrentPassword(), user.getPasswordHash())) {
+            throw new ConflictException("Current password does not match");
+        }
+
+        user.setPasswordHash(encoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 
     @Override

@@ -3,15 +3,17 @@ package com.tid.asset_management_bridge.auth_module.controller;
 import com.tid.asset_management_bridge.auth_module.dto.*;
 import com.tid.asset_management_bridge.auth_module.service.AuthService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import com.tid.asset_management_bridge.common.dto.ApiResponse;
 import org.springframework.lang.NonNull;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 
 @RestController
 @RequestMapping("/api/auth")
+@SecurityRequirement(name = "bearerAuth")
 public class AuthController {
 
     private final AuthService authService;
@@ -21,53 +23,67 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
-        return authService.login(request);
-    }
-
-    @PostMapping("/register")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ProfileResponse register(@Valid @RequestBody @NonNull RegisterRequest request) {
-        return authService.register(request);
+    @SecurityRequirements() // Overrides the class-level Bearer token requirement
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(new ApiResponse<>(200, "Login successful", authService.login(request)));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String token) {
-        // Strip out "Bearer "
-        String actualToken = token.startsWith("Bearer ") ? token.substring(7) : token;
-        authService.logout(actualToken);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<ApiResponse<Void>> logout(@RequestHeader(value = "Authorization", required = false) String token) {
+        if (token != null && token.startsWith("Bearer ")) {
+            String actualToken = token.substring(7);
+            authService.logout(actualToken);
+        }
+        return ResponseEntity.ok(new ApiResponse<>(200, "Logout successful"));
     }
 
     @PostMapping("/refresh-token")
-    public LoginResponse refreshToken(@RequestBody String refreshToken) {
-        return authService.refreshToken(refreshToken);
+    public ResponseEntity<ApiResponse<LoginResponse>> refreshToken(@RequestBody String refreshToken) {
+        return ResponseEntity
+                .ok(new ApiResponse<>(200, "Token refreshed successfully", authService.refreshToken(refreshToken)));
     }
 
     @PostMapping("/forgot-password")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public void forgotPassword(@RequestBody LoginRequest request) {
-        // Normally takes an email/username in a smaller request object. Re-using LoginRequest struct for identifier.
+    @SecurityRequirements() // Overrides the class-level Bearer token requirement
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(@RequestBody LoginRequest request) {
+        // Normally takes an email/username in a smaller request object. Re-using
+        // LoginRequest struct for identifier.
         authService.forgotPassword(request.getIdentifier());
+        return ResponseEntity.accepted().body(new ApiResponse<>(202, "Password reset request accepted"));
     }
 
-    // Normally you'd extract userId from the SecurityContext
-    // For now, accepting it as a query param until Security is fully built.
     @PutMapping("/change-password")
-    public ResponseEntity<Void> changePassword(@RequestParam @NonNull Long userId,
-                                               @Valid @RequestBody ChangePasswordRequest request) {
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request) {
+        Long userId = getAuthenticatedUserId();
         authService.changePassword(userId, request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new ApiResponse<>(200, "Password changed successfully"));
     }
 
     @PutMapping("/update-profile")
-    public ProfileResponse updateProfile(@RequestParam @NonNull Long userId,
-                                         @RequestBody UpdateProfileRequest request) {
-        return authService.updateProfile(userId, request);
+    public ResponseEntity<ApiResponse<ProfileResponse>> updateProfile(
+            @RequestBody UpdateProfileRequest request) {
+        Long userId = getAuthenticatedUserId();
+        return ResponseEntity
+                .ok(new ApiResponse<>(200, "Profile updated successfully", authService.updateProfile(userId, request)));
     }
 
     @GetMapping("/view-profile")
-    public ProfileResponse viewProfile(@RequestParam @NonNull Long userId) {
-        return authService.viewProfile(userId);
+    public ResponseEntity<ApiResponse<ProfileResponse>> viewProfile() {
+        Long userId = getAuthenticatedUserId();
+        return ResponseEntity
+                .ok(new ApiResponse<>(200, "Profile retrieved successfully", authService.viewProfile(userId)));
+    }
+
+    @NonNull
+    private Long getAuthenticatedUserId() {
+        var authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof com.tid.asset_management_bridge.auth_module.security.CustomUserDetails) {
+            Long id = ((com.tid.asset_management_bridge.auth_module.security.CustomUserDetails) authentication.getPrincipal()).getUser().getId();
+            if (id != null) {
+                return id;
+            }
+        }
+        throw new com.tid.asset_management_bridge.common.exception.ResourceNotFoundException("User not found or unauthenticated");
     }
 }
