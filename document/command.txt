@@ -4,6 +4,9 @@ rmdir /s /q "C:\Users\sopheaktra.t\.gradle\caches"
 // Delete build directory
 rmdir /s /q build
 
+
+
+
 // Run Spring Boot application
 gradlew.bat bootRun
 
@@ -21,3 +24,18 @@ gradlew.bat clean bootRun
 
 // Refresh dependencies
 ./gradlew --refresh-dependencies
+
+
+
+
+// Clean flyway
+gradlew flywayClean 
+
+// Migrate flyway
+gradlew flywayMigrate
+
+// Validate flyway
+gradlew flywayValidate
+
+// Repair flyway
+gradlew flywayRepair
