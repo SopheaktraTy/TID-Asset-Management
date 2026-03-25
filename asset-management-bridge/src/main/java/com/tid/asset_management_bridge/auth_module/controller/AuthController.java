@@ -28,21 +28,6 @@ public class AuthController {
         return ResponseEntity.ok(new ApiResponse<>(200, "Login successful", authService.login(request)));
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(@RequestHeader(value = "Authorization", required = false) String token) {
-        if (token != null && token.startsWith("Bearer ")) {
-            String actualToken = token.substring(7);
-            authService.logout(actualToken);
-        }
-        return ResponseEntity.ok(new ApiResponse<>(200, "Logout successful"));
-    }
-
-    @PostMapping("/refresh-token")
-    public ResponseEntity<ApiResponse<LoginResponse>> refreshToken(@RequestBody String refreshToken) {
-        return ResponseEntity
-                .ok(new ApiResponse<>(200, "Token refreshed successfully", authService.refreshToken(refreshToken)));
-    }
-
     @PostMapping("/forgot-password")
     @SecurityRequirements() // Overrides the class-level Bearer token requirement
     public ResponseEntity<ApiResponse<Void>> forgotPassword(@RequestBody LoginRequest request) {
@@ -61,7 +46,7 @@ public class AuthController {
     }
 
     @PutMapping("/update-profile")
-    public ResponseEntity<ApiResponse<ProfileResponse>> updateProfile(
+    public ResponseEntity<ApiResponse<LoginResponse>> updateProfile(
             @RequestBody UpdateProfileRequest request) {
         Long userId = getAuthenticatedUserId();
         return ResponseEntity
@@ -77,13 +62,17 @@ public class AuthController {
 
     @NonNull
     private Long getAuthenticatedUserId() {
-        var authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof com.tid.asset_management_bridge.auth_module.security.CustomUserDetails) {
-            Long id = ((com.tid.asset_management_bridge.auth_module.security.CustomUserDetails) authentication.getPrincipal()).getUser().getId();
+        var authentication = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication();
+        if (authentication != null && authentication
+                .getPrincipal() instanceof com.tid.asset_management_bridge.auth_module.security.CustomUserDetails) {
+            Long id = ((com.tid.asset_management_bridge.auth_module.security.CustomUserDetails) authentication
+                    .getPrincipal()).getUser().getId();
             if (id != null) {
                 return id;
             }
         }
-        throw new com.tid.asset_management_bridge.common.exception.ResourceNotFoundException("User not found or unauthenticated");
+        throw new com.tid.asset_management_bridge.common.exception.ResourceNotFoundException(
+                "User not found or unauthenticated");
     }
 }
