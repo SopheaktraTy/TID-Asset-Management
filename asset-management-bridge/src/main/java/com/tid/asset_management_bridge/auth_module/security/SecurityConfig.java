@@ -36,6 +36,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/login", "/api/auth/forgot-password").permitAll()
+                // Public Report Endpoints
+                .requestMatchers("/api/reports/**").permitAll()
                 // Swagger Documentation access
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/api-docs", "/api").permitAll()
                 .anyRequest().authenticated()
