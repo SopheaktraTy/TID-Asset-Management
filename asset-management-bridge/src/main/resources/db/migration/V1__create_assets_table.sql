@@ -1,4 +1,4 @@
-CREATE TABLE assets (
+CREATE TABLE IF NOT EXISTS assets (
     id BIGSERIAL PRIMARY KEY,
     asset_tag VARCHAR(100) NOT NULL,
     serial_number VARCHAR(100),

@@ -1,4 +1,4 @@
-CREATE TABLE asset_assignments (
+CREATE TABLE IF NOT EXISTS asset_assignments (
     id BIGSERIAL PRIMARY KEY,
     asset_id BIGINT NOT NULL REFERENCES assets(id),
     assigned_to VARCHAR(255) NOT NULL,

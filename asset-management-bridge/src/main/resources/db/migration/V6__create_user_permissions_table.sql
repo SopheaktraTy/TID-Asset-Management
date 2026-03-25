@@ -1,4 +1,4 @@
-CREATE TABLE user_permissions (
+CREATE TABLE IF NOT EXISTS user_permissions (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     module VARCHAR(50) NOT NULL,

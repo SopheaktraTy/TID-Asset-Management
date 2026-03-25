@@ -1,4 +1,4 @@
-CREATE TABLE asset_procurements (
+CREATE TABLE IF NOT EXISTS asset_procurements (
     id BIGSERIAL PRIMARY KEY,
     asset_id BIGINT NOT NULL UNIQUE REFERENCES assets(id),
     purchase_date DATE,

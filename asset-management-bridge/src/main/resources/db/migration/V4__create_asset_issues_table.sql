@@ -1,4 +1,4 @@
-CREATE TABLE asset_issues (
+CREATE TABLE IF NOT EXISTS asset_issues (
     id BIGSERIAL PRIMARY KEY,
     asset_id BIGINT NOT NULL REFERENCES assets(id),
     issue_title VARCHAR(50) NOT NULL,
