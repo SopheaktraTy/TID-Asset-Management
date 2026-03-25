@@ -25,8 +25,9 @@ public class User {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "department")
-    private String department;
+    private DepartmentEnum department;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
@@ -95,11 +96,11 @@ public class User {
         this.passwordHash = passwordHash;
     }
 
-    public String getDepartment() {
+    public DepartmentEnum getDepartment() {
         return department;
     }
 
-    public void setDepartment(String department) {
+    public void setDepartment(DepartmentEnum department) {
         this.department = department;
     }
 
