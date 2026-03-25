@@ -53,4 +53,14 @@ public class CreateUserRequest {
     public void setRole(RoleEnum role) {
         this.role = role;
     }
+
+    private java.util.Map<com.tid.asset_management_bridge.auth_module.entity.ModuleEnum, java.util.List<com.tid.asset_management_bridge.auth_module.entity.PermissionEnum>> permissions;
+
+    public java.util.Map<com.tid.asset_management_bridge.auth_module.entity.ModuleEnum, java.util.List<com.tid.asset_management_bridge.auth_module.entity.PermissionEnum>> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(java.util.Map<com.tid.asset_management_bridge.auth_module.entity.ModuleEnum, java.util.List<com.tid.asset_management_bridge.auth_module.entity.PermissionEnum>> permissions) {
+        this.permissions = permissions;
+    }
 }

@@ -2,7 +2,6 @@ package com.tid.asset_management_bridge.user_management_module.service;
 
 import com.tid.asset_management_bridge.auth_module.dto.ProfileResponse;
 import com.tid.asset_management_bridge.auth_module.entity.CustomPermission;
-import com.tid.asset_management_bridge.auth_module.entity.PermissionEnum;
 import com.tid.asset_management_bridge.auth_module.entity.RoleEnum;
 import com.tid.asset_management_bridge.auth_module.entity.User;
 import com.tid.asset_management_bridge.auth_module.mapper.UserMapper;
@@ -56,7 +55,26 @@ public class UserServiceImpl implements UserService {
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setIsActive(true);
 
-        return userMapper.toProfileResponse(userRepository.save(user));
+        User savedUser = userRepository.save(user);
+
+        if (request.getPermissions() != null && !request.getPermissions().isEmpty()) {
+            if (RoleEnum.SUPER_ADMIN.equals(request.getRole())) {
+                throw new ConflictException("Users with the SUPER_ADMIN role already have all permissions. To set specific permissions, please create the user with a different role.");
+            }
+            
+            for (java.util.Map.Entry<com.tid.asset_management_bridge.auth_module.entity.ModuleEnum, java.util.List<com.tid.asset_management_bridge.auth_module.entity.PermissionEnum>> entry : request.getPermissions().entrySet()) {
+                for (com.tid.asset_management_bridge.auth_module.entity.PermissionEnum perm : entry.getValue()) {
+                    CustomPermission customPermission = new CustomPermission();
+                    customPermission.setUser(savedUser);
+                    customPermission.setModule(entry.getKey());
+                    customPermission.setPermission(perm);
+                    customPermission = customPermissionRepository.save(customPermission);
+                    savedUser.getPermissions().add(customPermission);
+                }
+            }
+        }
+
+        return userMapper.toProfileResponse(savedUser);
     }
 
     @Override
@@ -107,17 +125,22 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
-        // First, optionally clear existing permissions for the specific module to
-        // prevent duplicates
-        customPermissionRepository.deleteByUserIdAndModule(userId, request.getModule());
+        if (RoleEnum.SUPER_ADMIN.equals(user.getRole())) {
+            throw new ConflictException("Users with the SUPER_ADMIN role already have all permissions. To change permissions, please change the user's role first.");
+        }
 
-        // Then insert the provided permissions
-        for (PermissionEnum perm : request.getPermissions()) {
-            CustomPermission customPermission = new CustomPermission();
-            customPermission.setUser(user);
-            customPermission.setModule(request.getModule());
-            customPermission.setPermission(perm);
-            customPermissionRepository.save(customPermission);
+        if (request.getPermissions() != null) {
+            for (java.util.Map.Entry<com.tid.asset_management_bridge.auth_module.entity.ModuleEnum, java.util.List<com.tid.asset_management_bridge.auth_module.entity.PermissionEnum>> entry : request.getPermissions().entrySet()) {
+                customPermissionRepository.deleteByUserIdAndModule(userId, entry.getKey());
+                
+                for (com.tid.asset_management_bridge.auth_module.entity.PermissionEnum perm : entry.getValue()) {
+                    CustomPermission customPermission = new CustomPermission();
+                    customPermission.setUser(user);
+                    customPermission.setModule(entry.getKey());
+                    customPermission.setPermission(perm);
+                    customPermissionRepository.save(customPermission);
+                }
+            }
         }
     }
 }
