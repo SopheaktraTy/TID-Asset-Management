@@ -15,9 +15,12 @@ public class AssignmentResponse {
     private DepartmentEnum department;
     private JobTitleEnum jobTitle;
     private String assignedBy;
+    private Long assignedByUserId;
     private LocalDate assignedDate;
     private LocalDate returnedDate;
     private String returnCondition;
+    private String confirmReturnBy;
+    private Long confirmReturnByUserId;
 
     public Long getId() {
         return id;
@@ -107,5 +110,28 @@ public class AssignmentResponse {
         this.returnCondition = returnCondition;
     }
 
+    public String getConfirmReturnBy() {
+        return confirmReturnBy;
+    }
+
+    public void setConfirmReturnBy(String confirmReturnBy) {
+        this.confirmReturnBy = confirmReturnBy;
+    }
+
+    public Long getAssignedByUserId() {
+        return assignedByUserId;
+    }
+
+    public void setAssignedByUserId(Long assignedByUserId) {
+        this.assignedByUserId = assignedByUserId;
+    }
+
+    public Long getConfirmReturnByUserId() {
+        return confirmReturnByUserId;
+    }
+
+    public void setConfirmReturnByUserId(Long confirmReturnByUserId) {
+        this.confirmReturnByUserId = confirmReturnByUserId;
+    }
 
 }

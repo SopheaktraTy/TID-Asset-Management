@@ -31,6 +31,10 @@ public class AssetAssignment {
     @Column(name = "assigned_by")
     private String assignedBy;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_by_user_id")
+    private com.tid.asset_management_bridge.auth_module.entity.User assignedByUser;
+
     @Column(name = "assigned_date", nullable = false, updatable = false)
     private LocalDate assignedDate;
 
@@ -39,6 +43,13 @@ public class AssetAssignment {
 
     @Column(name = "return_condition", length = 100)
     private String returnCondition;
+
+    @Column(name = "confirm_return_by", length = 100)
+    private String confirmReturnBy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "confirm_return_by_user_id")
+    private com.tid.asset_management_bridge.auth_module.entity.User confirmReturnByUser;
 
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -112,6 +123,14 @@ public class AssetAssignment {
         this.assignedBy = assignedBy;
     }
 
+    public com.tid.asset_management_bridge.auth_module.entity.User getAssignedByUser() {
+        return assignedByUser;
+    }
+
+    public void setAssignedByUser(com.tid.asset_management_bridge.auth_module.entity.User assignedByUser) {
+        this.assignedByUser = assignedByUser;
+    }
+
     public LocalDate getAssignedDate() {
         return assignedDate;
     }
@@ -134,6 +153,22 @@ public class AssetAssignment {
 
     public void setReturnCondition(String returnCondition) {
         this.returnCondition = returnCondition;
+    }
+
+    public String getConfirmReturnBy() {
+        return confirmReturnBy;
+    }
+
+    public void setConfirmReturnBy(String confirmReturnBy) {
+        this.confirmReturnBy = confirmReturnBy;
+    }
+
+    public com.tid.asset_management_bridge.auth_module.entity.User getConfirmReturnByUser() {
+        return confirmReturnByUser;
+    }
+
+    public void setConfirmReturnByUser(com.tid.asset_management_bridge.auth_module.entity.User confirmReturnByUser) {
+        this.confirmReturnByUser = confirmReturnByUser;
     }
 
 

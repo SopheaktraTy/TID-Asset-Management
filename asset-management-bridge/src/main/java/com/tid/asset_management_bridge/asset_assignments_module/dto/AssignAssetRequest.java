@@ -13,9 +13,6 @@ public class AssignAssetRequest {
 
     private JobTitleEnum jobTitle;
 
-    private String assignedBy;
-
-
     public String getAssignedTo() {
         return assignedTo;
     }
@@ -39,13 +36,4 @@ public class AssignAssetRequest {
     public void setJobTitle(JobTitleEnum jobTitle) {
         this.jobTitle = jobTitle;
     }
-
-    public String getAssignedBy() {
-        return assignedBy;
-    }
-
-    public void setAssignedBy(String assignedBy) {
-        this.assignedBy = assignedBy;
-    }
-
 }

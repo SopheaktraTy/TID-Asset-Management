@@ -26,13 +26,16 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
     private final AssetAssignmentRepository assignmentRepository;
     private final AssetRepository assetRepository;
     private final AssetAssignmentMapper assignmentMapper;
+    private final com.tid.asset_management_bridge.auth_module.repository.UserRepository userRepository;
 
     public AssetAssignmentServiceImpl(AssetAssignmentRepository assignmentRepository,
             AssetRepository assetRepository,
-            AssetAssignmentMapper assignmentMapper) {
+            AssetAssignmentMapper assignmentMapper,
+            com.tid.asset_management_bridge.auth_module.repository.UserRepository userRepository) {
         this.assignmentRepository = assignmentRepository;
         this.assetRepository = assetRepository;
         this.assignmentMapper = assignmentMapper;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -70,6 +73,13 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
 
         AssetAssignment assignment = assignmentMapper.toEntity(request);
         assignment.setAsset(asset);
+        assignment.setAssignedBy(org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName());
+        
+        Long userId = getAuthenticatedUserId();
+        if (userId != null) {
+            com.tid.asset_management_bridge.auth_module.entity.User user = userRepository.getReferenceById(userId);
+            assignment.setAssignedByUser(user);
+        }
 
         AssetAssignment saved = assignmentRepository.save(assignment);
         return assignmentMapper.toResponse(saved);
@@ -87,6 +97,13 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
 
         assignment.setReturnedDate(LocalDate.now());
         assignment.setReturnCondition(request.getReturnCondition());
+        assignment.setConfirmReturnBy(org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName());
+        
+        Long userId = getAuthenticatedUserId();
+        if (userId != null) {
+            com.tid.asset_management_bridge.auth_module.entity.User user = userRepository.getReferenceById(userId);
+            assignment.setConfirmReturnByUser(user);
+        }
 
         Asset asset = assignment.getAsset();
         asset.setStatus(AssetStatusEnum.AVAILABLE);
@@ -223,5 +240,16 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
         }
 
         assignmentRepository.deleteById(assignmentId);
+    }
+
+    private Long getAuthenticatedUserId() {
+        var authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof com.tid.asset_management_bridge.auth_module.security.CustomUserDetails) {
+            Long currentUserId = ((com.tid.asset_management_bridge.auth_module.security.CustomUserDetails) authentication.getPrincipal()).getUser().getId();
+            if (currentUserId != null) {
+                return currentUserId;
+            }
+        }
+        return null; // Or handle as an exception
     }
 }
