@@ -49,6 +49,11 @@ public class UserManagementController {
     @PatchMapping("/{id}/role")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> updateUserRole(@PathVariable @NonNull Long id, @RequestParam @NonNull RoleEnum role) {
+        Long currentUserId = getAuthenticatedUserId();
+        if (currentUserId.equals(id)) {
+            throw new com.tid.asset_management_bridge.common.exception.ConflictException("You cannot change your own role.");
+        }
+        
         userService.updateUserRole(id, role);
         return ResponseEntity.ok(new ApiResponse<>(200, "User role updated successfully"));
     }
@@ -57,6 +62,11 @@ public class UserManagementController {
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> updateUserStatus(@PathVariable @NonNull Long id,
             @RequestParam @NonNull Boolean isActive) {
+        Long currentUserId = getAuthenticatedUserId();
+        if (currentUserId.equals(id)) {
+            throw new com.tid.asset_management_bridge.common.exception.ConflictException("You cannot manually change your own active status.");
+        }
+        
         userService.updateUserStatus(id, isActive);
         return ResponseEntity.ok(new ApiResponse<>(200, "User status updated successfully"));
     }
@@ -64,15 +74,37 @@ public class UserManagementController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable @NonNull Long id) {
+        Long currentUserId = getAuthenticatedUserId();
+        if (currentUserId.equals(id)) {
+            throw new com.tid.asset_management_bridge.common.exception.ConflictException("You cannot delete your own account.");
+        }
+        
         userService.deleteUser(id);
         return ResponseEntity.ok(new ApiResponse<>(200, "User deleted successfully"));
     }
 
-    @PostMapping("/{id}/permissions")
+    @PatchMapping("/{id}/permissions")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> assignPermissions(@PathVariable @NonNull Long id,
             @RequestBody @NonNull AssignPermissionRequest request) {
+        Long currentUserId = getAuthenticatedUserId();
+        if (currentUserId.equals(id)) {
+            throw new com.tid.asset_management_bridge.common.exception.ConflictException("You cannot assign or modify your own permissions.");
+        }
+        
         userService.assignPermissions(id, request);
         return ResponseEntity.ok(new ApiResponse<>(200, "Permissions assigned successfully"));
+    }
+
+    @NonNull
+    private Long getAuthenticatedUserId() {
+        var authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof com.tid.asset_management_bridge.auth_module.security.CustomUserDetails) {
+            Long currentUserId = ((com.tid.asset_management_bridge.auth_module.security.CustomUserDetails) authentication.getPrincipal()).getUser().getId();
+            if (currentUserId != null) {
+                return currentUserId;
+            }
+        }
+        throw new com.tid.asset_management_bridge.common.exception.ResourceNotFoundException("User not found or unauthenticated");
     }
 }
