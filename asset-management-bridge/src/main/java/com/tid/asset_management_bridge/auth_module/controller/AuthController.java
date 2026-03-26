@@ -29,12 +29,18 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    @SecurityRequirements() // Overrides the class-level Bearer token requirement
-    public ResponseEntity<ApiResponse<Void>> forgotPassword(@RequestBody LoginRequest request) {
-        // Normally takes an email/username in a smaller request object. Re-using
-        // LoginRequest struct for identifier.
-        authService.forgotPassword(request.getIdentifier());
-        return ResponseEntity.accepted().body(new ApiResponse<>(202, "Password reset request accepted"));
+    @SecurityRequirements() // Public endpoint — no Bearer token required
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request);
+        // Always return the same response for security (never reveal if email exists)
+        return ResponseEntity.ok(new ApiResponse<>(200, "If that email is in our system, a reset link has been sent."));
+    }
+
+    @PostMapping("/reset-password")
+    @SecurityRequirements() // Public endpoint — no Bearer token required
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(new ApiResponse<>(200, "Password has been reset successfully."));
     }
 
     @PutMapping("/change-password")

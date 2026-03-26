@@ -2,7 +2,9 @@ package com.tid.asset_management_bridge;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest
 @TestPropertySource(properties = {
@@ -12,12 +14,21 @@ import org.springframework.test.context.TestPropertySource;
 		"spring.datasource.password=",
 		"spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
 		"spring.jpa.hibernate.ddl-auto=create-drop",
-		"spring.flyway.enabled=false"
+		"spring.flyway.enabled=false",
+		"spring.mail.host=localhost",
+		"spring.mail.username=test@test.com",
+		"management.health.mail.enabled=false"
 })
 class AssetManagementBridgeApplicationTests {
+
+	@MockitoBean
+	JavaMailSender javaMailSender;
 
 	@Test
 	void contextLoads() {
 	}
 
 }
+
+
+
