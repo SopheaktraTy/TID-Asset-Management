@@ -1,0 +1,396 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sign-In Page Styles
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Page Layout ──────────────────────────────────────────────────────────── */
+.signin-page {
+  display: flex;
+  min-height: 100vh;
+  font-family: var(--font-primary);
+  color: var(--text-main);
+  background-color: var(--bg);
+}
+
+/* ── Left Hero Panel ──────────────────────────────────────────────────────── */
+.signin-hero {
+  position: relative;
+  display: none;                      /* hidden on mobile              */
+  flex: 1;
+  overflow: hidden;
+  background: linear-gradient(
+    145deg,
+    var(--color-charcoal) 0%,
+    #1f242d 50%,
+    var(--color-charcoal) 100%
+  );
+}
+
+@media (min-width: 1024px) {
+  .signin-hero {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.signin-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 480px;
+  padding: 3rem;
+}
+
+.signin-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-growth-green);
+  background: rgba(209, 236, 81, 0.1);
+  border: 1px solid rgba(209, 236, 81, 0.2);
+  margin-bottom: 2rem;
+}
+
+.signin-hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #ffffff;
+  margin-bottom: 1.25rem;
+}
+
+.signin-hero-accent {
+  background: linear-gradient(
+    135deg,
+    var(--color-growth-green),
+    var(--color-aqua)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.signin-hero-desc {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #9ca3af;
+  margin-bottom: 2.5rem;
+}
+
+/* Feature cards */
+.signin-hero-features {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.signin-hero-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px 18px;
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.signin-hero-feature:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.signin-hero-feature-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(209, 236, 81, 0.12);
+  color: var(--color-growth-green);
+  flex-shrink: 0;
+}
+
+.signin-hero-feature-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #ffffff;
+  margin-bottom: 2px;
+}
+
+.signin-hero-feature-desc {
+  font-size: 0.82rem;
+  color: #9ca3af;
+  line-height: 1.5;
+}
+
+/* Blobs */
+.signin-hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.signin-hero-blob--1 {
+  width: 360px;
+  height: 360px;
+  top: -80px;
+  right: -60px;
+  background: var(--color-aqua);
+}
+
+.signin-hero-blob--2 {
+  width: 300px;
+  height: 300px;
+  bottom: -60px;
+  left: -40px;
+  background: var(--color-growth-green);
+}
+
+/* ── Right Form Panel ─────────────────────────────────────────────────────── */
+.signin-form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 2rem 1.25rem;
+  background-color: var(--bg);
+}
+
+@media (min-width: 1024px) {
+  .signin-form-panel {
+    max-width: 560px;
+    padding: 3rem;
+  }
+}
+
+/* ── Card ─────────────────────────────────────────────────────────────────── */
+.signin-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface);
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  padding: 2rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 6px 16px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* ── Logo ─────────────────────────────────────────────────────────────────── */
+.signin-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.signin-logo-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+.signin-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.signin-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-main);
+}
+
+.signin-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+/* ── Demo Callout ─────────────────────────────────────────────────────────── */
+.signin-demo-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.82rem;
+  color: var(--text-main);
+  margin-bottom: 1.25rem;
+  line-height: 1.55;
+}
+
+.signin-demo-icon {
+  width: 18px;
+  height: 18px;
+  color: #3b82f6;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── Message alert (positioned inside the form) ───────────────────────────── */
+.signin-message {
+  margin-bottom: 1rem;
+}
+
+/* ── Social Button ────────────────────────────────────────────────────────── */
+.signin-social-btn {
+  height: 44px;
+  margin-bottom: 1.25rem;
+}
+
+/* ── Divider ──────────────────────────────────────────────────────────────── */
+.signin-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1.25rem;
+}
+
+.signin-divider-line {
+  flex: 1;
+  height: 1px;
+  background-color: var(--border-color);
+}
+
+.signin-divider-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── Form ─────────────────────────────────────────────────────────────────── */
+.signin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.signin-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.signin-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text-main);
+}
+
+.signin-field-error {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #ef4444;
+}
+
+/* Password toggle */
+.signin-password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s ease;
+}
+
+.signin-password-toggle:hover {
+  color: var(--text-main);
+}
+
+/* Remember / Forgot row */
+.signin-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 2px;
+}
+
+.signin-remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: var(--text-main);
+}
+
+.signin-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: #3b82f6;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.signin-forgot-link {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #3b82f6;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.signin-forgot-link:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+/* Submit button override */
+.signin-submit-btn {
+  height: 46px;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+.signin-footer {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 1.5rem;
+  padding-bottom: 4px;
+}
+
+.signin-footer-link {
+  font-weight: 600;
+  color: #3b82f6;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.signin-footer-link:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+/* ── Animations ───────────────────────────────────────────────────────────── */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 0.75s linear infinite;
+}

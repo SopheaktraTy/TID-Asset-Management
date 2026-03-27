@@ -1,3 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+@layer base {
+  :root {
+    --font-primary: 'Inter', system-ui, sans-serif;
+
+    /* 🎨 Core Brand Colors */
+    --color-growth-green: #D1EC51;
+    --color-charcoal: #2B303A;
+    --color-aqua: #00BAB3;
+    --color-aqua-50: #80DCD9; /* 50% tint */
+    --color-aqua-15: #E0F2EF; /* 15% tint */
+
+    /* Surface and Semantic Mappings mapped to CSS Variables */
+    --color-surface: var(--surface);
+    --color-surface-hover: var(--surface-hover);
+    --color-border-color: var(--border-color);
+    --color-text-main: var(--text-main);
+    --color-text-muted: var(--text-muted);
+
+    /* ✨ Typography Scale */
+    --text-xs: 0.75rem; 
+    --text-sm: 0.875rem; 
+    --text-base: 1rem;   
+    --text-lg: 1.125rem; 
+    --text-xl: 1.25rem;  
+    --text-2xl: 1.5rem;  
+    --text-3xl: 1.875rem;
+    --text-4xl: 2.25rem; 
+
+    /* ⚖️ Font Weights */
+    --font-light: 300;
+    --font-normal: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    --font-extrabold: 800; /* Extra bold copy */
+
+    /* ☀️ Light Mode Theme Tokens */
+    --bg: #f9fafb; /* App background (gray-50 equivalent) */
+    --surface: #ffffff; /* Card background */
+    --surface-hover: #f3f4f6;
+    --border-color: #e5e7eb;
+    --text-main: var(--color-charcoal); 
+    --text-muted: #6b7280;
+  }
+
+  /* 🌙 Dark Mode Support */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1f2329; /* Slightly darker than charcoal for base */
+      --surface: var(--color-charcoal); /* 2B303A Card surface */
+      --surface-hover: #373d4a;
+      --border-color: #3f4654;
+      --text-main: #ffffff;
+      --text-muted: #9ca3af;
+    }
+  }
+
+  .dark {
+    --bg: #1f2329;
+    --surface: var(--color-charcoal);
+    --surface-hover: #373d4a;
+    --border-color: #3f4654;
+    --text-main: #ffffff;
+    --text-muted: #9ca3af;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text-main);
+    font-family: var(--font-primary);
+    font-size: var(--text-base);
+    font-weight: var(--font-normal);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
