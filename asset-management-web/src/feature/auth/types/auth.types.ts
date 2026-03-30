@@ -9,12 +9,26 @@ export const signInSchema = z.object({
 
 export type SignInFormValues = z.infer<typeof signInSchema>;
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Invalid email format"),
+});
+
+export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
+
+export const resetPasswordSchema = z.object({
+  newPassword: z.string().min(8, "Password must be at least 8 characters long"),
+  confirmPassword: z.string().min(1, "Please confirm your password"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
+
+export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
+
 // ─── Backend DTOs (mirrors asset-management-bridge) ─────────────────────────
 
-/** Mirrors: com.tid.asset_management_bridge.auth_module.entity.RoleEnum */
 export type RoleEnum = "SUPER_ADMIN" | "ADMIN";
 
-/** Mirrors: com.tid.asset_management_bridge.auth_module.entity.ModuleEnum */
 export type ModuleEnum =
   | "ASSET"
   | "USER"
@@ -23,10 +37,8 @@ export type ModuleEnum =
   | "ISSUE"
   | "PROCUREMENT";
 
-/** Mirrors: com.tid.asset_management_bridge.auth_module.entity.PermissionEnum */
 export type PermissionEnum = "CREATE" | "READ" | "UPDATE" | "DELETE";
 
-/** Mirrors: com.tid.asset_management_bridge.auth_module.dto.ProfileResponse */
 export interface ProfileResponse {
   id: number;
   username: string;
@@ -36,13 +48,11 @@ export interface ProfileResponse {
   permissions: Record<ModuleEnum, PermissionEnum[]>;
 }
 
-/** Mirrors: com.tid.asset_management_bridge.auth_module.dto.LoginResponse */
 export interface LoginResponse {
   token: string;
   user: ProfileResponse;
 }
 
-/** Mirrors: com.tid.asset_management_bridge.common.dto.ApiResponse<T> */
 export interface ApiResponse<T> {
   timestamp: string;
   status: number;
@@ -50,7 +60,6 @@ export interface ApiResponse<T> {
   data: T;
 }
 
-/** Error shape returned by the backend GlobalExceptionHandler */
 export interface ApiErrorResponse {
   timestamp: string;
   status: number;

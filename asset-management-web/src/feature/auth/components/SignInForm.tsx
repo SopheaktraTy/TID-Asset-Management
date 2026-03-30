@@ -134,7 +134,7 @@ export const SignInForm = () => {
           </label>
           <Link
             to="/forgot-password"
-            className="text-[0.82rem] font-semibold no-underline transition-colors duration-150 hover:underline"
+            className="text-[0.82rem] font-semibold no-underline transition-colors duration-200 hover:underline hover:brightness-110"
             style={{ color: "var(--color-growth-green)" }}
           >
             Forgot Password?

@@ -10,7 +10,8 @@
 
     /* 🎨 Core Brand Colors */
     --color-dark-growth-green: #D1EC51;
-    --color-light-growth-green: #B8D332; /* A slightly darker matching green for light mode */
+    --color-light-growth-green: #B8D332;
+    /* A slightly darker matching green for light mode */
     --color-growth-green: var(--color-light-growth-green);
     --color-charcoal: #2B303A;
     --color-aqua: #00BAB3;
@@ -42,6 +43,9 @@
     --border-color: #e5e7eb;
     --text-main: var(--color-charcoal);
     --text-muted: #6b7280;
+    --btn-primary-text: var(--color-charcoal);
+    /* dark text on bright green- Button tokens */
+    --btn-primary-shadow: rgba(184, 211, 50, 0.25);
   }
 
   /* 🌙 Dark Mode – via .dark class on <html> */
@@ -53,6 +57,9 @@
     --border-color: #3f4654;
     --text-main: #ffffff;
     --text-muted: #9ca3af;
+    --btn-primary-text: #1a1e24;
+    /* slightly deeper charcoal for contrast on lime - Button tokens*/
+    --btn-primary-shadow: rgba(209, 236, 81, 0.20);
   }
 
   body {

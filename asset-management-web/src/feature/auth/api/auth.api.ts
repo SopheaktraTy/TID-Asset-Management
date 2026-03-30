@@ -3,6 +3,7 @@ import type {
   SignInFormValues,
   LoginResponse,
   ApiResponse,
+
 } from "../types/auth.types";
 
 /**
@@ -19,7 +20,25 @@ export const loginApi = async (
     {
       identifier: data.identifier,
       password: data.password,
+      rememberMe: data.rememberMe,
     }
   );
   return response.data.data;
+};
+
+export const forgotPasswordApi = async (email: string): Promise<string> => {
+  const response = await api.post<ApiResponse<string>>(
+    "/api/auth/forgot-password",
+    { email }
+  );
+  // It might return data.message or data.data depending on the backend, I'll return data.message.
+  return response.data.message;
+};
+
+export const resetPasswordApi = async (data: { token: string; newPassword: string }): Promise<string> => {
+  const response = await api.post<ApiResponse<string>>(
+    "/api/auth/reset-password",
+    data
+  );
+  return response.data.message;
 };
