@@ -24,7 +24,7 @@ public class EmailService {
         message.setSubject("TID Asset Management - Password Reset");
 
         // Replace with your actual frontend URL once deployed
-        String resetUrl = "http://localhost:3000/reset-password?token=" + token;
+        String resetUrl = "http://localhost:5173/reset-password?token=" + token;
 
         String text = "Hello,\n\n"
                 + "You requested a password reset for your account. "

@@ -62,7 +62,8 @@ public class AuthServiceImpl implements AuthService {
         }
 
         CustomUserDetails userDetails = new CustomUserDetails(user);
-        String token = jwtUtil.generateToken(userDetails);
+        boolean rememberMe = request.getRememberMe() != null && request.getRememberMe();
+        String token = jwtUtil.generateToken(userDetails, rememberMe);
         ProfileResponse profile = userMapper.toProfileResponse(user);
         return new LoginResponse(token, profile);
     }
