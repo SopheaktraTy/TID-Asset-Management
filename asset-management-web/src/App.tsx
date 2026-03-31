@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 
@@ -9,6 +10,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         {/* Redirect root to login for now of you don't have a dashboard */}

@@ -156,6 +156,20 @@ export const SignInForm = () => {
             "Sign In"
           )}
         </Button>
+        
+        {/* Links */}
+        <div className="text-center mt-2">
+          <p className="text-[0.82rem] text-[color:var(--text-muted)]">
+            Don't have an account?{" "}
+            <Link
+              to="/signup"
+              className="font-semibold no-underline transition-colors duration-200 hover:underline hover:brightness-110"
+              style={{ color: "var(--color-growth-green)" }}
+            >
+              Sign Up
+            </Link>
+          </p>
+        </div>
       </form>
 
     </div>

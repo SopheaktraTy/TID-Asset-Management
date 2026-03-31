@@ -50,6 +50,8 @@ export const ResetPasswordForm = () => {
   })();
 
   const isSuccess = resetPasswordMutation.isSuccess;
+  
+  const isExpiredOrMissing = !token || (errorMessage && errorMessage.toLowerCase().includes("expired"));
 
   return (
     <div className="w-full max-w-[440px] bg-[color:var(--surface)] rounded-2xl border border-[color:var(--border-color)] px-5 py-7 sm:p-8 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_6px_16px_rgba(0,0,0,0.04)] transition-[border-color,box-shadow] duration-200">
@@ -85,7 +87,7 @@ export const ResetPasswordForm = () => {
       )}
 
       {/* ── Form ── */}
-      {!isSuccess && token ? (
+      {!isSuccess && token && !isExpiredOrMissing ? (
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           
           {/* New Password */}
@@ -169,11 +171,18 @@ export const ResetPasswordForm = () => {
         </form>
       ) : null}
 
-      {/* Show back to sign in button if success or missing token */}
-      {(isSuccess || !token) && (
-        <div className="flex flex-col gap-4 mt-2">
+      {/* Action buttons when the form is hidden (success, missing token, or expired) */}
+      {(isSuccess || isExpiredOrMissing) && (
+        <div className="flex flex-col gap-3 mt-2">
+            {!isSuccess && (
+                <Link to="/forgot-password" className="w-full">
+                    <Button type="button" className="w-full h-[46px] font-semibold">
+                        Request New Link
+                    </Button>
+                </Link>
+            )}
             <Link to="/login" className="w-full">
-                <Button variant="outline" className="h-[46px] font-semibold">
+                <Button variant={isSuccess ? "primary" : "outline"} className="w-full h-[46px] font-semibold">
                     Return to Sign In
                 </Button>
             </Link>

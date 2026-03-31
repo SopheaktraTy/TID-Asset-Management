@@ -1,6 +1,7 @@
 import { api } from "../../../lib/axios";
 import type {
   SignInFormValues,
+  SignUpFormValues,
   LoginResponse,
   ApiResponse,
 
@@ -24,6 +25,11 @@ export const loginApi = async (
     }
   );
   return response.data.data;
+};
+
+export const signUpApi = async (data: SignUpFormValues): Promise<string> => {
+  const response = await api.post<ApiResponse<string>>("/api/auth/signup", data);
+  return response.data.message;
 };
 
 export const forgotPasswordApi = async (email: string): Promise<string> => {
