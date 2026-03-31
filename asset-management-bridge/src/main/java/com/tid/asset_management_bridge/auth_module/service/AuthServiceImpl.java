@@ -137,11 +137,11 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
         PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(request.getToken())
-                .orElseThrow(() -> new ResourceNotFoundException("Invalid or expired password reset token"));
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid or expired password reset token. Please request a new password reset email."));
 
         if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
             passwordResetTokenRepository.delete(resetToken);
-            throw new ResourceNotFoundException("Password reset token has expired");
+            throw new ResourceNotFoundException("Your password reset link has expired. Please request a new password reset email.");
         }
 
         User user = resetToken.getUser();
