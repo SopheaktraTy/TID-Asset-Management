@@ -40,9 +40,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login", "/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
-                // Public Report Endpoints
-                .requestMatchers("/api/reports/**").permitAll()
+                 .requestMatchers("/api/auth/login", "/api/auth/signup", "/api/auth/refresh", "/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
                 // Swagger Documentation access
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/api-docs", "/api").permitAll()
                 .anyRequest().authenticated()

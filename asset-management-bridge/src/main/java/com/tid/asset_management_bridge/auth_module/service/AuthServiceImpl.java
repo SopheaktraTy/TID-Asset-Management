@@ -31,6 +31,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final EmailService emailService;
+    private final RefreshTokenService refreshTokenService;
 
     public AuthServiceImpl(
             UserRepository userRepository,
@@ -38,34 +39,104 @@ public class AuthServiceImpl implements AuthService {
             JwtUtil jwtUtil,
             UserMapper userMapper,
             PasswordResetTokenRepository passwordResetTokenRepository,
-            EmailService emailService) {
+            EmailService emailService,
+            RefreshTokenService refreshTokenService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.userMapper = userMapper;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.emailService = emailService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @Override
     public LoginResponse login(LoginRequest request) {
         User user = userRepository
                 .findByUsernameOrEmail(request.getIdentifier(), request.getIdentifier())
-                .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            throw new BadCredentialsException("Invalid credentials");
+            throw new BadCredentialsException("Incorrect password");
         }
 
         if (Boolean.FALSE.equals(user.getIsActive())) {
-            throw new BadCredentialsException("Account is inactive");
+            throw new BadCredentialsException("Account is pending approval from super admin");
         }
 
         CustomUserDetails userDetails = new CustomUserDetails(user);
         boolean rememberMe = request.getRememberMe() != null && request.getRememberMe();
         String token = jwtUtil.generateToken(userDetails, rememberMe);
+        
+        com.tid.asset_management_bridge.auth_module.entity.RefreshToken refreshToken = refreshTokenService.createRefreshToken(java.util.Objects.requireNonNull(user.getId()), rememberMe);
+        
         ProfileResponse profile = userMapper.toProfileResponse(user);
-        return new LoginResponse(token, profile);
+        return new LoginResponse(token, profile, refreshToken.getToken(), rememberMe);
+    }
+
+    @Override
+    @Transactional
+    public LoginResponse refreshToken(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response) {
+        String token = null;
+        if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+                if ("refresh_token".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                }
+            }
+        }
+        
+        if (token == null) {
+            throw new BadCredentialsException("Refresh token is missing");
+        }
+
+        com.tid.asset_management_bridge.auth_module.entity.RefreshToken rToken = refreshTokenService.findByToken(token);
+        rToken = refreshTokenService.verifyExpiration(rToken);
+        
+        User user = rToken.getUser();
+        boolean rememberMe = java.time.Duration.between(rToken.getCreatedAt(), rToken.getExpiryDate()).toDays() > 2;
+
+        refreshTokenService.deleteByToken(token);
+        
+        CustomUserDetails userDetails = new CustomUserDetails(user);
+        String newAccessToken = jwtUtil.generateToken(userDetails, rememberMe);
+        
+        com.tid.asset_management_bridge.auth_module.entity.RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(java.util.Objects.requireNonNull(user.getId()), rememberMe);
+        
+        int maxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60;
+        
+        org.springframework.http.ResponseCookie cookie = org.springframework.http.ResponseCookie.from("refresh_token", java.util.Objects.requireNonNull(newRefreshToken.getToken()))
+                .httpOnly(true)
+                .secure(false) 
+                .path("/")
+                .maxAge(maxAge)
+                .build();
+        response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString());
+        
+        ProfileResponse profile = userMapper.toProfileResponse(user);
+        return new LoginResponse(newAccessToken, profile, newRefreshToken.getToken(), rememberMe);
+    }
+
+    @Override
+    @Transactional
+    public void signUp(SignUpRequest request) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new ConflictException("Email is already registered");
+        }
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new ConflictException("Username is already taken");
+        }
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        user.setDepartment(request.getDepartment());
+        user.setRole(com.tid.asset_management_bridge.auth_module.entity.RoleEnum.ADMIN);
+        // User needs to be approved by SUPER_ADMIN, so set isActive to false
+        user.setIsActive(false);
+
+        userRepository.save(user);
     }
 
     @Override

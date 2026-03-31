@@ -23,13 +23,41 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @SecurityRequirements() // Overrides the class-level Bearer token requirement
-    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(new ApiResponse<>(200, "Login successful", authService.login(request)));
+    @SecurityRequirements()
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request,
+            jakarta.servlet.http.HttpServletResponse response) {
+        LoginResponse res = authService.login(request);
+        int maxAge = res.isRememberMe() ? 30 * 24 * 60 * 60 : 24 * 60 * 60;
+
+        org.springframework.http.ResponseCookie cookie = org.springframework.http.ResponseCookie
+                .from("refresh_token", java.util.Objects.requireNonNull(res.getRefreshToken()))
+                .httpOnly(true)
+                .secure(false) // set to true if using HTTPS
+                .path("/")
+                .maxAge(maxAge)
+                .build();
+        response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return ResponseEntity.ok(new ApiResponse<>(200, "Login successful", res));
+    }
+
+    @PostMapping("/refresh")
+    @SecurityRequirements()
+    public ResponseEntity<ApiResponse<LoginResponse>> refresh(jakarta.servlet.http.HttpServletRequest request,
+            jakarta.servlet.http.HttpServletResponse response) {
+        return ResponseEntity
+                .ok(new ApiResponse<>(200, "Token refreshed", authService.refreshToken(request, response)));
+    }
+
+    @PostMapping("/signup")
+    @SecurityRequirements()
+    public ResponseEntity<ApiResponse<Void>> signUp(@Valid @RequestBody SignUpRequest request) {
+        authService.signUp(request);
+        return ResponseEntity.ok(new ApiResponse<>(201, "Sign up successful. Pending admin approval."));
     }
 
     @PostMapping("/forgot-password")
-    @SecurityRequirements() // Public endpoint — no Bearer token required
+    @SecurityRequirements()
     public ResponseEntity<ApiResponse<Void>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         authService.forgotPassword(request);
         // Always return the same response for security (never reveal if email exists)
@@ -37,7 +65,7 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    @SecurityRequirements() // Public endpoint — no Bearer token required
+    @SecurityRequirements()
     public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         authService.resetPassword(request);
         return ResponseEntity.ok(new ApiResponse<>(200, "Password has been reset successfully."));

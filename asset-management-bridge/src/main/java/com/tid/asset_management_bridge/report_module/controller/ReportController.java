@@ -4,12 +4,13 @@ import com.tid.asset_management_bridge.common.dto.ApiResponse;
 import com.tid.asset_management_bridge.report_module.service.ReportService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/reports")
+@SecurityRequirement(name = "bearerAuth")
 public class ReportController {
 
     private final ReportService reportService;
@@ -41,7 +42,8 @@ public class ReportController {
 
     // GET /api/reports/search/device-detail — device detail search (PUBLIC)
     @GetMapping("/search/device-detail")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> searchDeviceDetail(@RequestParam(required = false, defaultValue = "") String searchTerm) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> searchDeviceDetail(
+            @RequestParam(required = false, defaultValue = "") String searchTerm) {
         Map<String, Object> detail = reportService.getDeviceDetail(searchTerm);
         return ResponseEntity.ok(new ApiResponse<>(200, "Device detail retrieved successfully", detail));
     }

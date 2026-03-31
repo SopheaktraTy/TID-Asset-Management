@@ -7,6 +7,10 @@ import org.springframework.lang.NonNull;
 public interface AuthService {
     LoginResponse login(LoginRequest request);
 
+    LoginResponse refreshToken(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response);
+
+    void signUp(SignUpRequest request);
+
     void changePassword(@NonNull Long userId, ChangePasswordRequest request);
 
     LoginResponse updateProfile(@NonNull Long userId, UpdateProfileRequest request);
