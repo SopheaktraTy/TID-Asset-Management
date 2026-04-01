@@ -1,4 +1,4 @@
-import { SignInForm } from "../feature/auth/components/SignInForm";
+import { SignInForm } from "../components/layout/auth/SignInForm";
 import { ThemeToggle } from "../components/ui/ThemeToggle";
 
 export default function SignInPage() {

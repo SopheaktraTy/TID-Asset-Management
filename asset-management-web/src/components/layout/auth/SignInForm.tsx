@@ -4,11 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 
-import { useSignIn } from "../hooks/useSignIn";
-import { signInSchema, type SignInFormValues } from "../types/auth.types";
-import { Button } from "../../../components/ui/Button";
-import { Input } from "../../../components/ui/Input";
-import { Message } from "../../../components/ui/Message";
+import { useSignIn } from "../../../hooks/useSignIn";
+import { signInSchema, type SignInFormValues } from "../../../types/auth.types";
+import { Button } from "../../ui/Button";
+import { Input } from "../../ui/Input";
+import { Message } from "../../ui/Message";
 import { useTheme } from "../../../hooks/useTheme";
 
 // ── Baker Tilly logo assets ──────────────────────────────────────────────────
@@ -156,7 +156,7 @@ export const SignInForm = () => {
             "Sign In"
           )}
         </Button>
-        
+
         {/* Links */}
         <div className="text-center mt-2">
           <p className="text-[0.82rem] text-[color:var(--text-muted)]">

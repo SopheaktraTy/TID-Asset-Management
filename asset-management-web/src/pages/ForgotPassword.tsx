@@ -1,4 +1,4 @@
-import { ForgotPasswordForm } from "../feature/auth/components/ForgotPasswordForm";
+import { ForgotPasswordForm } from "../components/layout/auth/ForgotPasswordForm";
 import { ThemeToggle } from "../components/ui/ThemeToggle";
 
 export default function ForgotPasswordPage() {

@@ -1,4 +1,4 @@
-import { ResetPasswordForm } from "../feature/auth/components/ResetPasswordForm";
+import { ResetPasswordForm } from "../components/layout/auth/ResetPasswordForm";
 import { ThemeToggle } from "../components/ui/ThemeToggle";
 
 export default function ResetPasswordPage() {

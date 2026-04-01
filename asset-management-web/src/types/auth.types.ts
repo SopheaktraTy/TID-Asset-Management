@@ -34,7 +34,7 @@ export const resetPasswordSchema = z.object({
 
 export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
-// ─── Backend DTOs (mirrors asset-management-bridge) ─────────────────────────
+// ─── Backend DTOs ─────────────────────────────────────────────────────────────
 
 export type RoleEnum = "SUPER_ADMIN" | "ADMIN";
 

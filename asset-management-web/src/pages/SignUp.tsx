@@ -1,4 +1,4 @@
-import { SignUpForm } from "../feature/auth/components/SignUpForm";
+import { SignUpForm } from "../components/layout/auth/SignUpForm";
 import { ThemeToggle } from "../components/ui/ThemeToggle";
 
 export default function SignUpPage() {
