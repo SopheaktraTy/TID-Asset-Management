@@ -1,10 +1,15 @@
-package com.tid.asset_management_bridge.auth_module.dto;
+package com.tid.asset_management_bridge.user_management_module.dto;
 
 import com.tid.asset_management_bridge.auth_module.entity.RoleEnum;
 import com.tid.asset_management_bridge.auth_module.entity.DepartmentEnum;
-import java.time.LocalDateTime;
+import com.tid.asset_management_bridge.auth_module.entity.ModuleEnum;
+import com.tid.asset_management_bridge.auth_module.entity.PermissionEnum;
 
-public class ProfileResponse {
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
+public class UserResponse {
     private Long id;
     private String username;
     private String email;
@@ -14,6 +19,7 @@ public class ProfileResponse {
     private Boolean isActive;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Map<ModuleEnum, List<PermissionEnum>> permissions;
 
     public Long getId() {
         return id;
@@ -85,5 +91,13 @@ public class ProfileResponse {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Map<ModuleEnum, List<PermissionEnum>> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(Map<ModuleEnum, List<PermissionEnum>> permissions) {
+        this.permissions = permissions;
     }
 }

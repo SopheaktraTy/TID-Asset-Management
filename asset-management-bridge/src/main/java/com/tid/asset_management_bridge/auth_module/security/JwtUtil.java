@@ -64,7 +64,23 @@ public class JwtUtil {
     }
 
     public String generateToken(UserDetails userDetails, boolean rememberMe) {
-        Map<String, Object> claims = new HashMap<>(); // Add roles to claims if needed
+        Map<String, Object> claims = new HashMap<>(); 
+        
+        java.util.List<String> roles = new java.util.ArrayList<>();
+        java.util.List<String> permissions = new java.util.ArrayList<>();
+
+        for (org.springframework.security.core.GrantedAuthority authority : userDetails.getAuthorities()) {
+            String authorityName = authority.getAuthority();
+            if (authorityName.startsWith("ROLE_")) {
+                roles.add(authorityName.substring(5));
+            } else {
+                permissions.add(authorityName);
+            }
+        }
+        
+        claims.put("role", roles.isEmpty() ? null : roles.get(0));
+        claims.put("permissions", permissions);
+
         return createToken(claims, userDetails.getUsername(), rememberMe ? expirationTimeRememberMe : expirationTime);
     }
 

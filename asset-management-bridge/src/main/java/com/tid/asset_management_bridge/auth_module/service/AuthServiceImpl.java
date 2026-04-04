@@ -76,6 +76,42 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
+    public void logout(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response) {
+        // Delete only this session's refresh token (multi-device: other browsers stay logged in)
+        if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+                if ("refresh_token".equals(cookie.getName()) && cookie.getValue() != null) {
+                    try {
+                        refreshTokenService.deleteByToken(cookie.getValue());
+                    } catch (com.tid.asset_management_bridge.common.exception.ResourceNotFoundException ignored) {
+                        // Token already removed or never existed — that's fine
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Expire both cookies immediately on the client
+        org.springframework.http.ResponseCookie clearAccess = org.springframework.http.ResponseCookie
+                .from("access_token", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .build();
+        org.springframework.http.ResponseCookie clearRefresh = org.springframework.http.ResponseCookie
+                .from("refresh_token", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .build();
+        response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, clearAccess.toString());
+        response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, clearRefresh.toString());
+    }
+
+    @Override
+    @Transactional
     public LoginResponse refreshToken(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response) {
         String token = null;
         if (request.getCookies() != null) {
@@ -87,31 +123,45 @@ public class AuthServiceImpl implements AuthService {
         }
         
         if (token == null) {
-            throw new BadCredentialsException("Refresh token is missing");
+            throw new com.tid.asset_management_bridge.common.exception.ResourceNotFoundException("Refresh token is missing from cookies");
         }
 
         com.tid.asset_management_bridge.auth_module.entity.RefreshToken rToken = refreshTokenService.findByToken(token);
         rToken = refreshTokenService.verifyExpiration(rToken);
         
         User user = rToken.getUser();
-        boolean rememberMe = java.time.Duration.between(rToken.getCreatedAt(), rToken.getExpiryDate()).toDays() > 2;
+        // Detect whether this was a Remember Me session:
+        // refresh tokens without Remember Me expire in 1 day, with Remember Me in 30 days.
+        // Anything with more than 2 days left is a Remember Me token.
+        boolean rememberMe = java.time.Duration.between(java.time.LocalDateTime.now(), rToken.getExpiryDate()).toDays() > 2;
 
-        refreshTokenService.deleteByToken(token);
+        refreshTokenService.delete(rToken);
         
         CustomUserDetails userDetails = new CustomUserDetails(user);
         String newAccessToken = jwtUtil.generateToken(userDetails, rememberMe);
         
         com.tid.asset_management_bridge.auth_module.entity.RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(java.util.Objects.requireNonNull(user.getId()), rememberMe);
         
-        int maxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60;
+        // Access token: always short-lived (15 min), regardless of Remember Me
+        int accessTokenMaxAge = 900;
+        // Refresh token: 1 day without Remember Me, 30 days with Remember Me
+        int refreshTokenMaxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60;
         
         org.springframework.http.ResponseCookie cookie = org.springframework.http.ResponseCookie.from("refresh_token", java.util.Objects.requireNonNull(newRefreshToken.getToken()))
                 .httpOnly(true)
                 .secure(false) 
                 .path("/")
-                .maxAge(maxAge)
+                .maxAge(refreshTokenMaxAge)
                 .build();
         response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString());
+
+        org.springframework.http.ResponseCookie accessCookie = org.springframework.http.ResponseCookie.from("access_token", java.util.Objects.requireNonNull(newAccessToken))
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(accessTokenMaxAge)
+                .build();
+        response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, accessCookie.toString());
         
         ProfileResponse profile = userMapper.toProfileResponse(user);
         return new LoginResponse(newAccessToken, profile, newRefreshToken.getToken(), rememberMe);

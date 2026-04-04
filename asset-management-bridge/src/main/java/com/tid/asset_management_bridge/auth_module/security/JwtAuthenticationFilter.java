@@ -32,21 +32,47 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.objectMapper.registerModule(new JavaTimeModule());
     }
 
+    /**
+     * Skip JWT validation for public auth endpoints.
+     * This is critical for /api/auth/refresh — if the access_token cookie is expired,
+     * the filter must NOT short-circuit the request before it reaches the controller.
+     */
+    @Override
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.equals("/api/auth/refresh")
+            || path.equals("/api/auth/logout")
+            || path.equals("/api/auth/login")
+            || path.equals("/api/auth/signup")
+            || path.equals("/api/auth/forgot-password")
+            || path.equals("/api/auth/reset-password");
+    }
+
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
 
+        String jwt = null;
         final String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            jwt = authHeader.substring(7);
+        } else if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+                if ("access_token".equals(cookie.getName())) {
+                    jwt = cookie.getValue();
+                    break;
+                }
+            }
+        }
 
         // No token present — let the request pass through;
         // SecurityConfig's authenticationEntryPoint will return 401 if the route is protected.
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (jwt == null) {
             filterChain.doFilter(request, response);
             return;
         }
-
-        final String jwt = authHeader.substring(7);
 
         try {
             final String identifier = jwtUtil.extractUsername(jwt);

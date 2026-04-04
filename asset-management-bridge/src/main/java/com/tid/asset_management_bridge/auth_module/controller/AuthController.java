@@ -27,16 +27,29 @@ public class AuthController {
     public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request,
             jakarta.servlet.http.HttpServletResponse response) {
         LoginResponse res = authService.login(request);
-        int maxAge = res.isRememberMe() ? 30 * 24 * 60 * 60 : 24 * 60 * 60;
+
+        // Access token: always short-lived (15 min), regardless of Remember Me
+        int accessTokenMaxAge = 900;
+        // Refresh token: 1 day without Remember Me, 30 days with Remember Me
+        int refreshTokenMaxAge = res.isRememberMe() ? 30 * 24 * 60 * 60 : 24 * 60 * 60;
 
         org.springframework.http.ResponseCookie cookie = org.springframework.http.ResponseCookie
                 .from("refresh_token", java.util.Objects.requireNonNull(res.getRefreshToken()))
                 .httpOnly(true)
                 .secure(false) // set to true if using HTTPS
                 .path("/")
-                .maxAge(maxAge)
+                .maxAge(refreshTokenMaxAge)
                 .build();
         response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString());
+
+        org.springframework.http.ResponseCookie accessCookie = org.springframework.http.ResponseCookie
+                .from("access_token", java.util.Objects.requireNonNull(res.getToken()))
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(accessTokenMaxAge)
+                .build();
+        response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, accessCookie.toString());
 
         return ResponseEntity.ok(new ApiResponse<>(200, "Login successful", res));
     }
@@ -47,6 +60,14 @@ public class AuthController {
             jakarta.servlet.http.HttpServletResponse response) {
         return ResponseEntity
                 .ok(new ApiResponse<>(200, "Token refreshed", authService.refreshToken(request, response)));
+    }
+
+    @PostMapping("/logout")
+    @SecurityRequirements()
+    public ResponseEntity<ApiResponse<Void>> logout(jakarta.servlet.http.HttpServletRequest request,
+            jakarta.servlet.http.HttpServletResponse response) {
+        authService.logout(request, response);
+        return ResponseEntity.ok(new ApiResponse<>(200, "Logged out successfully"));
     }
 
     @PostMapping("/signup")

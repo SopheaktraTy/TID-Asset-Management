@@ -9,6 +9,8 @@ public interface AuthService {
 
     LoginResponse refreshToken(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response);
 
+    void logout(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response);
+
     void signUp(SignUpRequest request);
 
     void changePassword(@NonNull Long userId, ChangePasswordRequest request);

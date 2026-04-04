@@ -1,6 +1,6 @@
 package com.tid.asset_management_bridge.user_management_module.service;
 
-import com.tid.asset_management_bridge.auth_module.dto.ProfileResponse;
+import com.tid.asset_management_bridge.user_management_module.dto.UserResponse;
 import com.tid.asset_management_bridge.auth_module.entity.CustomPermission;
 import com.tid.asset_management_bridge.auth_module.entity.RoleEnum;
 import com.tid.asset_management_bridge.auth_module.entity.User;
@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public ProfileResponse createUser(@NonNull CreateUserRequest request) {
+    public UserResponse createUser(@NonNull CreateUserRequest request) {
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new ConflictException("Username is already taken");
         }
@@ -74,23 +74,23 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        return userMapper.toProfileResponse(savedUser);
+        return userMapper.toUserResponse(savedUser);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProfileResponse> getAllUsers() {
+    public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(userMapper::toProfileResponse)
+                .map(userMapper::toUserResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ProfileResponse getUserById(@NonNull Long id) {
+    public UserResponse getUserById(@NonNull Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        return userMapper.toProfileResponse(user);
+        return userMapper.toUserResponse(user);
     }
 
     @Override
