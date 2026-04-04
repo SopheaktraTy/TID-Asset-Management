@@ -13,7 +13,7 @@ export const useSignIn = () => {
     mutationFn: loginApi,
     onSuccess: (data) => {
       setAuth(data.token, data.user);
-      navigate("/dashboard");
+      navigate("/users-management");
     },
   });
 };

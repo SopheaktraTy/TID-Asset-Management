@@ -3,25 +3,29 @@ import { useAuthStore } from "../../store/authStore";
 import type { RoleEnum } from "../../types/auth.types";
 
 interface ProtectedRouteProps {
+  /** If provided, only users whose role is in this list may enter. */
   allowedRoles?: RoleEnum[];
 }
 
+/**
+ * 🛡️ ProtectedRoute: Gates access using authStore.
+ * - Redirects to /login if unauthenticated.
+ * - Optionally checks allowedRoles.
+ * Relies on useInitializeAuth completing first.
+ */
 export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
-  const { user, token } = useAuthStore();
+  const { token, user } = useAuthStore();
 
-  // 1. If no token or user, redirect to login
+  // ① Not authenticated
   if (!token || !user) {
     return <Navigate to="/login" replace />;
   }
 
-  // 2. If roles are specified, check if the user has one of the allowed roles
-  if (allowedRoles && allowedRoles.length > 0) {
-    if (!allowedRoles.includes(user.role)) {
-      // You can redirect to an "Unauthorized" page or the dashboard here
-      return <Navigate to="/" replace />;
-    }
+  // ② Authenticated but missing required role
+  if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/login" replace />;
   }
 
-  // 3. Render the child routes if authorized
+  // ③ All checks passed — render child routes
   return <Outlet />;
 }

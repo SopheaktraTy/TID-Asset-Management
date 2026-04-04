@@ -1,88 +1,48 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState } from "react";
 import { Users, ChevronRight as ArrowRight } from "lucide-react";
 import Header from "../components/layout/Header";
 import AddUserModal from "../components/layout/user/AddUserModal";
 import EditUserModal from "../components/layout/user/EditUserModal";
 import UserToolbar from "../components/layout/user/UserToolbar";
-import UserTable from "../components/layout/user/UserTable";
-import UserPagination from "../components/layout/user/UserPagination";
-import { getUsersApi } from "../services/userManagement.service";
-import type { UserDto } from "../types/user.types";
+import UserTable, { USER_TABLE_COLUMN_OPTIONS } from "../components/layout/user/UserTable";
+import Pagination from "../components/ui/Pagination";
+import { useUserManagement } from "../hooks/useUserManagement";
 
 export default function UserManagementPage() {
-  const [allUsers, setAllUsers] = useState<UserDto[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    users,
+    setUsers,
+    loading,
+    search,
+    roleFilter,
+    setRoleFilter,
+    statusFilter,
+    setStatusFilter,
+    page,
+    setPage,
+    pageSize,
+    setPageSize,
+    sortBy,
+    sortDir,
+    totalElements,
+    totalPages,
+    addOpen,
+    setAddOpen,
+    editUser,
+    setEditUser,
+    handleSort,
+    handleSearch,
+  } = useUserManagement();
 
-  // Filters & pagination
-  const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(5);
-  const [sortBy, setSortBy] = useState("createdAt");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [hiddenCols, setHiddenCols] = useState<Set<string>>(new Set());
 
-  // Modals
-  const [addOpen, setAddOpen] = useState(false);
-  const [editUser, setEditUser] = useState<UserDto | null>(null);
-
-  const fetchUsers = useCallback(async () => {
-    setLoading(true);
-    try {
-      // The backend returns a full list; query params are applied client-side
-      const result = await getUsersApi({} as any);
-      setAllUsers(result || []);
-    } catch {
-      setAllUsers([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
-
-  const filteredUsers = useMemo(() => {
-    return allUsers
-      .filter((u) => {
-        const matchSearch = search
-          ? u.username?.toLowerCase().includes(search.toLowerCase()) ||
-          u.email?.toLowerCase().includes(search.toLowerCase())
-          : true;
-        const matchRole = roleFilter ? u.role === roleFilter : true;
-        const matchStatus = statusFilter ? u.status === statusFilter : true;
-        return matchSearch && matchRole && matchStatus;
-      })
-      .sort((a, b) => {
-        let valA = (a as any)[sortBy] || "";
-        let valB = (b as any)[sortBy] || "";
-        if (typeof valA === "string") valA = valA.toLowerCase();
-        if (typeof valB === "string") valB = valB.toLowerCase();
-
-        if (valA < valB) return sortDir === "asc" ? -1 : 1;
-        if (valA > valB) return sortDir === "asc" ? 1 : -1;
-        return 0;
-      });
-  }, [allUsers, search, roleFilter, statusFilter, sortBy, sortDir]);
-
-  const totalElements = filteredUsers.length;
-  const totalPages = Math.ceil(totalElements / pageSize) || 1;
-  const paginatedUsers = filteredUsers.slice(page * pageSize, (page + 1) * pageSize);
-
-  const handleSort = (field: string) => {
-    if (sortBy === field) {
-      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    } else {
-      setSortBy(field);
-      setSortDir("asc");
-    }
-    setPage(0);
-  };
-
-  const handleSearch = (val: string) => {
-    setSearch(val);
-    setPage(0);
+  const handleToggleColumn = (key: string) => {
+    setHiddenCols((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
   };
 
   return (
@@ -92,18 +52,17 @@ export default function UserManagementPage() {
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* ── Page Title ── */}
         <div className="mb-6">
+          <h1 className="text-2xl font-bold text-[var(--text-main)]">Users</h1>
           <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] mb-1">
             <Users size={13} />
             <span>Users</span>
             <ArrowRight size={12} />
             <span className="text-[var(--text-main)] font-medium">User Management</span>
           </div>
-          <h1 className="text-2xl font-bold text-[var(--text-main)]">Users</h1>
-          <p className="text-sm text-[var(--text-muted)] mt-0.5">User Management</p>
         </div>
 
         {/* ── Card ── */}
-        <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border-color)] shadow-sm overflow-hidden">
+        <div className="bg-[var(--surface)] rounded-xl border border-[var(--border-color)] shadow-sm overflow-hidden">
           <UserToolbar
             search={search}
             onSearchChange={handleSearch}
@@ -112,25 +71,29 @@ export default function UserManagementPage() {
             statusFilter={statusFilter}
             onStatusChange={(val) => { setStatusFilter(val); setPage(0); }}
             onAddClick={() => setAddOpen(true)}
+            hiddenCols={hiddenCols}
+            onToggleColumn={handleToggleColumn}
+            columnOptions={USER_TABLE_COLUMN_OPTIONS}
           />
 
           <UserTable
-            users={paginatedUsers}
+            users={users}
             loading={loading}
             pageSize={pageSize}
             sortBy={sortBy}
             sortDir={sortDir}
+            hiddenCols={hiddenCols}
             onSort={handleSort}
             onRowClick={(user) => setEditUser(user)}
           />
 
-          <UserPagination
+          <Pagination
             page={page}
             pageSize={pageSize}
             totalElements={totalElements}
             totalPages={totalPages}
             onPageChange={setPage}
-            onPageSizeChange={(size) => { setPageSize(size); setPage(0); }}
+            onPageSizeChange={(size: number) => { setPageSize(size); setPage(0); }}
           />
         </div>
       </main>
@@ -141,7 +104,7 @@ export default function UserManagementPage() {
         onClose={() => setAddOpen(false)}
         onSuccess={(newUser) => {
           setAddOpen(false);
-          setAllUsers((prev) => [newUser, ...prev]);
+          setUsers((prev) => [newUser, ...prev]);
         }}
       />
 
@@ -150,11 +113,11 @@ export default function UserManagementPage() {
         user={editUser}
         onClose={() => setEditUser(null)}
         onUpdated={(updated) => {
-          setAllUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
+          setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
           setEditUser(null);
         }}
         onDeleted={(id) => {
-          setAllUsers((prev) => prev.filter((u) => u.id !== id));
+          setUsers((prev) => prev.filter((u) => u.id !== id));
           setEditUser(null);
         }}
       />

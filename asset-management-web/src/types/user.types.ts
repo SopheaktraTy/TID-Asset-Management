@@ -13,7 +13,10 @@ export interface UserDto {
   image: string | null;
   role: string;
   status: UserStatus;
-  createdAt: string;
+  is_active?: boolean;
+  department?: string;
+  updated_at?: string;
+  created_at: string;
   lastSignIn: string | null;
 }
 

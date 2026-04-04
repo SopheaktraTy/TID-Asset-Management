@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useInitializeAuth } from "./hooks/useInitializeAuth";
 
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
@@ -7,27 +8,47 @@ import ResetPassword from "./pages/ResetPassword";
 import UserManagement from "./pages/UserManagement";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/layout/ProtectedRoute";
+import LoadingScreen from "./components/ui/LoadingScreen";
+
+/**
+ * AppRoutes wraps the application. 
+ * Resolves authentication silently on load (useInitializeAuth) before rendering routes.
+ */
+function AppRoutes() {
+  const isInitializing = useInitializeAuth();
+
+  // Block the UI from rendering (and ProtectedRoute from redirecting) while we
+  // silently check if the browser has a valid session cookie.
+  if (isInitializing) {
+    return <LoadingScreen />;
+  }
+
+  return (
+    <Routes>
+      {/* Public routes */}
+      <Route path="/login" element={<SignIn />} />
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+
+      {/* Protected routes — role-gated */}
+      <Route element={<ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN"]} />}>
+        <Route path="/users-management" element={<UserManagement />} />
+      </Route>
+
+      {/* Default route */}
+      <Route path="/" element={<SignIn />} />
+
+      {/* 404 catch-all */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
 
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-
-        {/* Protected Routes */}
-        <Route element={<ProtectedRoute allowedRoles={["SUPER_ADMIN"]} />}>
-          <Route path="/users-management" element={<UserManagement />} />
-        </Route>
-
-        {/* Redirect root to login for now if you don't have a dashboard */}
-        <Route path="/" element={<SignIn />} />
-
-        {/* Catch-all 404 Route */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <AppRoutes />
     </BrowserRouter>
   );
 }

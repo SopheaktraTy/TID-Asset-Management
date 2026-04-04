@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
@@ -8,13 +8,26 @@ import { useSignUp } from "../../../hooks/useSignUp";
 import { signUpSchema, type SignUpFormValues } from "../../../types/auth.types";
 import { Button } from "../../ui/Button";
 import { Input } from "../../ui/Input";
-import { Select } from "../../ui/Select";
+import { DropdownReverseList } from "../../ui/DropdownReverseList";
 import { Message } from "../../ui/Message";
 import { useTheme } from "../../../hooks/useTheme";
 
 // ── Baker Tilly logo assets ──────────────────────────────────────────────────
 import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_Charcoal.png";
 import logoWhite from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_White.png";
+
+// ── Department options ────────────────────────────────────────────────────────
+const DEPARTMENT_OPTIONS = [
+    { value: "",                              label: "Select a department..." },
+    { value: "OFFICE_ADMIN",                  label: "Office Admin" },
+    { value: "TAX_ACCOUNTING_ADVISORY",       label: "Tax & Accounting Advisory" },
+    { value: "LEGAL_CORPORATE_ADVISORY",      label: "Legal & Corporate Advisory" },
+    { value: "AUDIT_ASSURANCE",               label: "Audit & Assurance" },
+    { value: "PRACTICE_DEVELOPMENT_MANAGEMENT", label: "Practice Development & Management" },
+    { value: "CLIENT_OPERATION_MANAGEMENT",   label: "Client & Operation Management" },
+    { value: "FINANCE_HUMAN_RESOURCE",        label: "Finance & Human Resource" },
+    { value: "TECHNOLOGY_INNOVATION_DEVELOPMENT", label: "Technology Innovation and Development" },
+];
 
 export const SignUpForm = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -24,6 +37,7 @@ export const SignUpForm = () => {
     const {
         register,
         handleSubmit,
+        control,
         formState: { errors },
     } = useForm<SignUpFormValues>({
         resolver: zodResolver(signUpSchema),
@@ -172,17 +186,20 @@ export const SignUpForm = () => {
                     <label className="text-[0.82rem] font-semibold mb-1.5 text-[color:var(--text-main)]" htmlFor="department">
                         Department
                     </label>
-                    <Select id="department" {...register("department")}>
-                        <option value="">Select a department...</option>
-                        <option value="OFFICE_ADMIN">Office Admin</option>
-                        <option value="TAX_ACCOUNTING_ADVISORY">Tax & Accounting Advisory</option>
-                        <option value="LEGAL_CORPORATE_ADVISORY">Legal & Corporate Advisory</option>
-                        <option value="AUDIT_ASSURANCE">Audit & Assurance</option>
-                        <option value="PRACTICE_DEVELOPMENT_MANAGEMENT">Practice Development & Management</option>
-                        <option value="CLIENT_OPERATION_MANAGEMENT">Client & Operation Management</option>
-                        <option value="FINANCE_HUMAN_RESOURCE">Finance & Human Resource</option>
-                        <option value="TECHNOLOGY_INNOVATION_DEVELOPMENT">Technology Innovation and Development</option>
-                    </Select>
+                    <Controller
+                        name="department"
+                        control={control}
+                        defaultValue=""
+                        render={({ field }) => (
+                            <DropdownReverseList
+                                options={DEPARTMENT_OPTIONS}
+                                value={field.value}
+                                onChange={field.onChange}
+                                placeholder="Select a department..."
+                                className="w-full"
+                            />
+                        )}
+                    />
                     {errors.department && (
                         <p className="mt-1 text-[0.75rem] text-red-500">{errors.department.message}</p>
                     )}

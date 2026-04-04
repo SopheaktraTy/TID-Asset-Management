@@ -1,56 +1,59 @@
 import axios from "axios";
-import { useAuthStore } from "../store/authStore";
+import { getOrStartRefresh } from "./refreshLock";
 
 export const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
-    withCredentials: true,
+  baseURL: import.meta.env.VITE_API_URL ?? "http://localhost:8080",
+  withCredentials: true,
 });
 
-api.interceptors.request.use((config) => {
-    const token = useAuthStore.getState().token;
-    if (token && !config.url?.includes("/api/auth/")) {
-        config.headers.Authorization = `Bearer ${token}`;
+let failedQueue: Array<{
+  resolve: (value?: unknown) => void;
+  reject: (reason?: unknown) => void;
+}> = [];
+
+function processQueue(error: unknown) {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve();
     }
-    return config;
-});
+  });
+  failedQueue = [];
+}
 
 api.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-        const originalRequest = error.config;
-        
-        if (error.response?.status === 401 && !originalRequest._retry) {
-            
-            // Do not retry for actual login credential failures
-            if (originalRequest.url?.includes("/api/auth/login") || originalRequest.url?.includes("/api/auth/refresh")) {
-                return Promise.reject(error);
-            }
+  (response) => response,
 
-            originalRequest._retry = true;
-            
-            try {
-                // Try to get a new access token via refresh token cookie
-                const refreshResponse = await api.post("/api/auth/refresh");
-                
-                // The backend responds with the same LoginResponse (token, user) structure
-                const newToken = refreshResponse.data.data.token;
-                const user = refreshResponse.data.data.user;
-                
-                // Update our global auth store
-                useAuthStore.getState().setAuth(newToken, user);
-                
-                // Retry the original request that failed
-                originalRequest.headers.Authorization = `Bearer ${newToken}`;
-                return api(originalRequest);
-                
-            } catch (refreshError) {
-                // If the refresh token request fails (e.g. cookie missing or expired) log them out
-                useAuthStore.getState().clearAuth();
-                window.location.href = "/login";
-                return Promise.reject(refreshError);
-            }
-        }
-        
-        return Promise.reject(error);
+  async (error) => {
+    const originalRequest = error.config;
+
+    const is401 = error.response?.status === 401;
+    const isRetry = originalRequest._retry === true;
+    const isRefreshEndpoint = originalRequest.url?.includes("/api/auth/refresh");
+    const isAuthCheckEndpoint = originalRequest.url?.includes("/api/auth/view-profile");
+
+    if (is401 && !isRetry && !isRefreshEndpoint && !isAuthCheckEndpoint) {
+      originalRequest._retry = true;
+      // 🔄 Use shared lock: Wait for the single active refresh call to finish,
+      // avoiding duplicate calls that would invalidate rotating refresh tokens.
+      return new Promise((resolve, reject) => {
+        failedQueue.push({
+          resolve: () => resolve(api(originalRequest)),
+          reject,
+        });
+
+        getOrStartRefresh()
+          .then(() => processQueue(null))
+          .catch(async (refreshError) => {
+            processQueue(refreshError);
+            const { useAuthStore } = await import("../store/authStore");
+            useAuthStore.getState().clearAuth();
+            reject(refreshError);
+          });
+      });
     }
+
+    return Promise.reject(error);
+  }
 );

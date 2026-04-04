@@ -1,4 +1,5 @@
-import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { DropdownReverseList } from "../../ui/DropdownReverseList";
 
 interface UserPaginationProps {
   page: number;
@@ -33,28 +34,28 @@ export default function UserPagination({
 
   const start = page * pageSize + 1;
   const end = Math.min((page + 1) * pageSize, totalElements);
+  
+  const pageSizeOptions = [5, 10, 20, 50].map((n) => ({
+    label: String(n),
+    value: String(n),
+  }));
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-3.5 border-t border-[var(--border-color)]">
       {/* Rows per page */}
-      <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+      <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] w-36">
         <span>Rows per page</span>
-        <div className="relative">
-          <select
-            value={pageSize}
-            onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            className="pl-2.5 pr-7 py-1 text-sm bg-[var(--surface)] border border-[var(--border-color)] rounded-lg focus:outline-none text-[var(--text-main)] appearance-none cursor-pointer"
-          >
-            {[5, 10, 20, 50].map((n) => (
-              <option key={n} value={n}>{n}</option>
-            ))}
-          </select>
-          <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)]" />
+        <div className="relative w-full">
+          <DropdownReverseList
+            options={pageSizeOptions}
+            value={String(pageSize)}
+            onChange={(val) => onPageSizeChange(Number(val))}
+          />
         </div>
       </div>
 
       {/* Page info + controls */}
-      <div className="flex items-center gap-3 text-sm">
+      <div className="flex items-center gap-3 text-xs">
         <span className="text-[var(--text-muted)]">
           {totalElements === 0 ? "0" : `${start} – ${end}`} of {totalElements}
         </span>
@@ -75,11 +76,10 @@ export default function UserPagination({
               <button
                 key={p}
                 onClick={() => onPageChange(p as number)}
-                className={`min-w-[32px] h-8 px-2 rounded-lg text-sm font-medium transition-colors ${
-                  page === p
-                    ? "bg-blue-600 text-white shadow-sm"
+                className={`min-w-[32px] h-8 px-2 rounded-lg text-xs font-medium transition-colors ${page === p
+                    ? "bg-[var(--text-main)] text-[var(--surface)] shadow-sm"
                     : "border border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--surface-hover)]"
-                }`}
+                  }`}
               >
                 {(p as number) + 1}
               </button>
