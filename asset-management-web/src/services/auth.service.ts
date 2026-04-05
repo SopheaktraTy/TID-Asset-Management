@@ -4,6 +4,7 @@ import type {
   SignUpFormValues,
   LoginResponse,
   ApiResponse,
+  ProfileResponse,
 } from "../types/auth.types";
 
 export const loginApi = async (data: SignInFormValues): Promise<LoginResponse> => {
@@ -28,4 +29,9 @@ export const forgotPasswordApi = async (email: string): Promise<string> => {
 export const resetPasswordApi = async (data: { token: string; newPassword: string }): Promise<string> => {
   const response = await api.post<ApiResponse<string>>("/api/auth/reset-password", data);
   return response.data.message;
+};
+
+export const viewProfileApi = async (): Promise<ProfileResponse> => {
+  const response = await api.get<ApiResponse<ProfileResponse>>("/api/auth/view-profile");
+  return response.data.data;
 };

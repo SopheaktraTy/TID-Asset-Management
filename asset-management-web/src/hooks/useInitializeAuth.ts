@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { api } from "../lib/axios";
 import { getOrStartRefresh } from "../lib/refreshLock";
 import { useAuthStore } from "../store/authStore";
-import type { ApiResponse, ProfileResponse } from "../types/auth.types";
+import { viewProfileApi } from "../services/auth.service";
 import { AxiosError } from "axios";
 
 export function useInitializeAuth(): boolean {
@@ -20,9 +19,9 @@ export function useInitializeAuth(): boolean {
     async function checkSession() {
       try {
         // Check if the access token cookie is still valid
-        const response = await api.get<ApiResponse<ProfileResponse>>("/api/auth/view-profile");
+        const data = await viewProfileApi();
         if (!cancelled) {
-          setUser(response.data.data);
+          setUser(data);
         }
       } catch (err) {
         const status = (err as AxiosError)?.response?.status;
@@ -32,9 +31,9 @@ export function useInitializeAuth(): boolean {
           // without conflicting with the axios interceptor.
           try {
             await getOrStartRefresh();
-            const retryResponse = await api.get<ApiResponse<ProfileResponse>>("/api/auth/view-profile");
+            const retryData = await viewProfileApi();
             if (!cancelled) {
-              setUser(retryResponse.data.data);
+              setUser(retryData);
             }
           } catch {
             // Refresh token also expired — store stays empty, ProtectedRoute redirects

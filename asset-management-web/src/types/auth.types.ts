@@ -59,7 +59,7 @@ export interface ProfileResponse {
 
 export interface LoginResponse {
   token: string;
-  user: ProfileResponse;
+  userId: number;
 }
 
 export interface ApiResponse<T> {
