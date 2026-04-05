@@ -9,8 +9,6 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
 @Component
@@ -29,7 +27,8 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String extractUsername(String token) {
+    // Returns the subject — which is now the userId
+    public String extractUserId(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -55,8 +54,12 @@ public class JwtUtil {
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        final String subject = extractUserId(token);
+        if (userDetails instanceof CustomUserDetails customUserDetails) {
+            String userId = customUserDetails.getUser().getId().toString();
+            return subject.equals(userId) && !isTokenExpired(token);
+        }
+        return false;
     }
 
     public String generateToken(UserDetails userDetails) {
@@ -64,29 +67,16 @@ public class JwtUtil {
     }
 
     public String generateToken(UserDetails userDetails, boolean rememberMe) {
-        Map<String, Object> claims = new HashMap<>(); 
-        
-        java.util.List<String> roles = new java.util.ArrayList<>();
-        java.util.List<String> permissions = new java.util.ArrayList<>();
-
-        for (org.springframework.security.core.GrantedAuthority authority : userDetails.getAuthorities()) {
-            String authorityName = authority.getAuthority();
-            if (authorityName.startsWith("ROLE_")) {
-                roles.add(authorityName.substring(5));
-            } else {
-                permissions.add(authorityName);
-            }
+        if (!(userDetails instanceof CustomUserDetails customUserDetails)) {
+            throw new IllegalArgumentException("UserDetails must be an instance of CustomUserDetails");
         }
-        
-        claims.put("role", roles.isEmpty() ? null : roles.get(0));
-        claims.put("permissions", permissions);
-
-        return createToken(claims, userDetails.getUsername(), rememberMe ? expirationTimeRememberMe : expirationTime);
+        String userId = customUserDetails.getUser().getId().toString();
+        long expiration = rememberMe ? expirationTimeRememberMe : expirationTime;
+        return createToken(userId, expiration);
     }
 
-    private String createToken(Map<String, Object> claims, String subject, Long expiration) {
+    private String createToken(String subject, Long expiration) {
         return Jwts.builder()
-                .claims(claims)
                 .subject(subject)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))

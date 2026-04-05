@@ -70,8 +70,7 @@ public class AuthServiceImpl implements AuthService {
         
         com.tid.asset_management_bridge.auth_module.entity.RefreshToken refreshToken = refreshTokenService.createRefreshToken(java.util.Objects.requireNonNull(user.getId()), rememberMe);
         
-        ProfileResponse profile = userMapper.toProfileResponse(user);
-        return new LoginResponse(token, profile, refreshToken.getToken(), rememberMe);
+        return new LoginResponse(token, user.getId(), refreshToken.getToken(), rememberMe);
     }
 
     @Override
@@ -163,8 +162,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, accessCookie.toString());
         
-        ProfileResponse profile = userMapper.toProfileResponse(user);
-        return new LoginResponse(newAccessToken, profile, newRefreshToken.getToken(), rememberMe);
+        return new LoginResponse(newAccessToken, user.getId(), newRefreshToken.getToken(), rememberMe);
     }
 
     @Override
@@ -219,8 +217,7 @@ public class AuthServiceImpl implements AuthService {
 
         CustomUserDetails userDetails = new CustomUserDetails(savedUser);
         String token = jwtUtil.generateToken(userDetails);
-        ProfileResponse profile = userMapper.toProfileResponse(savedUser);
-        return new LoginResponse(token, profile);
+        return new LoginResponse(token, savedUser.getId());
     }
 
     @Override
