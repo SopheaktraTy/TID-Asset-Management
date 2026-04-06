@@ -1,12 +1,12 @@
 package com.tid.asset_management_bridge.user_management_module.service;
 
 import com.tid.asset_management_bridge.user_management_module.dto.UserResponse;
-import com.tid.asset_management_bridge.auth_module.entity.RoleEnum;
-import com.tid.asset_management_bridge.user_management_module.dto.AssignPermissionRequest;
 import org.springframework.lang.NonNull;
 import java.util.List;
 
 import com.tid.asset_management_bridge.user_management_module.dto.CreateUserRequest;
+
+import com.tid.asset_management_bridge.user_management_module.dto.UpdateUserRequest;
 
 public interface UserService {
     UserResponse createUser(@NonNull CreateUserRequest request);
@@ -15,11 +15,9 @@ public interface UserService {
 
     UserResponse getUserById(@NonNull Long id);
 
-    void updateUserRole(@NonNull Long id, @NonNull RoleEnum role);
-
-    void updateUserStatus(@NonNull Long id, @NonNull Boolean isActive);
-
     void deleteUser(@NonNull Long id);
 
-    void assignPermissions(@NonNull Long userId, @NonNull AssignPermissionRequest request);
+    UserResponse updateUser(@NonNull Long id, @NonNull UpdateUserRequest request);
+
+    void forceResetPassword(@NonNull Long id, @NonNull String newPassword);
 }

@@ -27,6 +27,7 @@ interface UserToolbarProps {
   onAddClick: () => void;
   hiddenCols: Set<string>;
   onToggleColumn: (key: string) => void;
+  onSetHiddenCols: (keys: Set<string>) => void;
   columnOptions: { key: string; label: string }[];
 }
 
@@ -41,6 +42,7 @@ export default function UserToolbar({
   onAddClick,
   hiddenCols,
   onToggleColumn,
+  onSetHiddenCols,
   columnOptions,
 }: UserToolbarProps) {
   return (
@@ -56,11 +58,11 @@ export default function UserToolbar({
           type="text"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Search users..."
+          placeholder="Search users"
           className="
             w-full pl-9 pr-4 py-2 text-xs
             bg-[var(--bg)] border border-[var(--border-color)] rounded-lg
-            focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-1 focus:ring-[var(--color-growth-green)]
+            focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-0.5 focus:ring-[var(--color-growth-green)]
             text-[var(--text-main)] placeholder:text-[var(--text-muted)]
             transition-colors
           "
@@ -90,6 +92,7 @@ export default function UserToolbar({
           columns={columnOptions}
           hiddenColumns={hiddenCols}
           onToggleColumn={onToggleColumn}
+          onSetHiddenColumns={onSetHiddenCols}
         />
       </div>
 

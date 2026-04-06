@@ -15,6 +15,8 @@ export interface ColumnDef<T> {
   header: React.ReactNode;
   cell: (item: T) => React.ReactNode;
   sortable?: boolean;
+  headerClassName?: string;
+  cellClassName?: string;
 }
 
 interface TableProps<T> {
@@ -81,6 +83,46 @@ export function Table<T>({
 
   useOnClickOutside(menuRef, () => setMenuOpen(null));
 
+  // ── Drag & Drop State ──────────────────────────────────────────────────────
+  const [draggedCol, setDraggedCol] = useState<string | null>(null);
+  const [overCol, setOverCol] = useState<string | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, key: string) => {
+    setDraggedCol(key);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent, key: string) => {
+    e.preventDefault();
+    if (draggedCol && draggedCol !== key) {
+      setOverCol(key);
+    }
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDragLeave = () => {
+    setOverCol(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetKey: string) => {
+    e.preventDefault();
+    setOverCol(null);
+    if (!draggedCol || draggedCol === targetKey) return;
+
+    setColOrder((prev) => {
+      const next = [...prev];
+      const draggedIdx = next.indexOf(draggedCol);
+      const targetIdx = next.indexOf(targetKey);
+      if (draggedIdx === -1 || targetIdx === -1) return prev;
+
+      // Remove dragged and insert at target
+      next.splice(draggedIdx, 1);
+      next.splice(targetIdx, 0, draggedCol);
+      return next;
+    });
+    setDraggedCol(null);
+  };
+
   // Derive ordered visible columns
   const visibleColumns = colOrder
     .map((key) => columns.find((c) => c.key === key))
@@ -119,13 +161,10 @@ export function Table<T>({
   );
 
   return (
-    <div
-      className="w-full overflow-x-auto transition-all duration-200"
-      style={{ paddingBottom: menuOpen ? "220px" : "8px" }}
-    >
+    <div className="w-full transition-all duration-200 pb-2 overflow-x-auto custom-scrollbar">
       <table className="w-full min-w-max text-xs">
         <thead className="relative z-20">
-          <tr className="border-b border-[var(--border-color)]">
+          <tr className="border-b border-[var(--border-color)] dark:border-[var(--border-color)]/80">
             {visibleColumns.map((col, colIdx) => {
               const isFirst = colIdx === 0;
               const isLast = colIdx === visibleColumns.length - 1;
@@ -133,7 +172,12 @@ export function Table<T>({
               return (
                 <th
                   key={col.key}
-                  className="px-5 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide select-none group relative whitespace-nowrap"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, col.key)}
+                  onDragOver={(e) => handleDragOver(e, col.key)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, col.key)}
+                  className={`px-5 py-3 text-left text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide select-none group relative whitespace-nowrap border-r border-[var(--border-color)] last:border-r-0 cursor-move hover:bg-[var(--surface-hover)] transition-all ${overCol === col.key ? "ring-1 ring-[var(--color-growth-green)] ring-inset bg-[var(--color-growth-green)]/10" : ""} ${col.headerClassName || ""}`}
                 >
                   <div className="flex items-center justify-between w-full h-full">
                     <span
@@ -168,7 +212,7 @@ export function Table<T>({
                                   e.stopPropagation();
                                   toggleSort(col.key, "asc");
                                 }}
-                                className="w-full flex items-center gap-3 px-3 py-2 text-xs text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors duration-100"
+                                className="flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors duration-100"
                               >
                                 <ArrowUp size={13} className="text-[var(--text-muted)] shrink-0" />
                                 Sort Ascending
@@ -178,12 +222,12 @@ export function Table<T>({
                                   e.stopPropagation();
                                   toggleSort(col.key, "desc");
                                 }}
-                                className="w-full flex items-center gap-3 px-3 py-2 text-xs text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors duration-100"
+                                className="flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors duration-100"
                               >
                                 <ArrowDown size={13} className="text-[var(--text-muted)] shrink-0" />
                                 Sort Descending
                               </button>
-                              <div className="h-px bg-[var(--border-color)] my-1" />
+                              <div className="h-px bg-[var(--border-color)] dark:bg-[var(--border-color)]/50 my-1" />
                             </>
                           )}
 
@@ -193,7 +237,7 @@ export function Table<T>({
                               if (!isFirst) moveColumn(col.key, "left");
                             }}
                             disabled={isFirst}
-                            className={`w-full flex items-center gap-3 px-3 py-2 text-xs transition-colors duration-100 ${isFirst
+                            className={`flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs transition-colors duration-100 ${isFirst
                               ? "text-[var(--text-muted)] opacity-40 cursor-not-allowed"
                               : "text-[var(--text-main)] hover:bg-[var(--surface-hover)] cursor-pointer"
                               }`}
@@ -207,7 +251,7 @@ export function Table<T>({
                               if (!isLast) moveColumn(col.key, "right");
                             }}
                             disabled={isLast}
-                            className={`w-full flex items-center gap-3 px-3 py-2 text-xs transition-colors duration-100 ${isLast
+                            className={`flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs transition-colors duration-100 ${isLast
                               ? "text-[var(--text-muted)] opacity-40 cursor-not-allowed"
                               : "text-[var(--text-main)] hover:bg-[var(--surface-hover)] cursor-pointer"
                               }`}
@@ -227,7 +271,7 @@ export function Table<T>({
         </thead>
 
         <tbody
-          className={`divide-y divide-[var(--border-color)] transition-opacity duration-200 ${loading && data && data.length > 0
+          className={`divide-y divide-gray-200 dark:divide-[var(--border-color)] transition-opacity duration-200 ${loading && data && data.length > 0
             ? "opacity-50 pointer-events-none"
             : ""
             }`}
@@ -235,8 +279,8 @@ export function Table<T>({
           {loading && (!data || data.length === 0) ? (
             [...Array(pageSize)].map((_, i) => (
               <tr key={`skeleton-${i}`}>
-                {visibleColumns.map((_, j) => (
-                  <td key={`skeleton-col-${j}`} className="px-5 py-3">
+                {visibleColumns.map((col, j) => (
+                  <td key={`skeleton-col-${j}`} className={`px-5 py-3 ${col.cellClassName || ""}`}>
                     <div
                       className="h-3.5 rounded-md bg-[var(--border-color)] animate-pulse"
                       style={{ width: j === 0 ? "70%" : "50%" }}
@@ -268,7 +312,7 @@ export function Table<T>({
                 {visibleColumns.map((col) => (
                   <td
                     key={`cell-${rowIndex}-${col.key}`}
-                    className="px-5 py-3 text-xs whitespace-nowrap"
+                    className={`px-5 py-3 text-xs whitespace-nowrap ${col.cellClassName || ""}`}
                   >
                     {col.cell(item)}
                   </td>

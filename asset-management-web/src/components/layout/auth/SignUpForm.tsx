@@ -7,7 +7,7 @@ import { Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
 import { useSignUp } from "../../../hooks/useSignUp";
 import { signUpSchema, type SignUpFormValues } from "../../../types/auth.types";
 import { Button } from "../../ui/Button";
-import { Input } from "../../ui/Input";
+import { Input } from "../../ui/AuthPlaceholder";
 import { DropdownReverseList } from "../../ui/DropdownReverseList";
 import { Message } from "../../ui/Message";
 import { useTheme } from "../../../hooks/useTheme";
@@ -18,14 +18,14 @@ import logoWhite from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_White.pn
 
 // ── Department options ────────────────────────────────────────────────────────
 const DEPARTMENT_OPTIONS = [
-    { value: "",                              label: "Select a department..." },
-    { value: "OFFICE_ADMIN",                  label: "Office Admin" },
-    { value: "TAX_ACCOUNTING_ADVISORY",       label: "Tax & Accounting Advisory" },
-    { value: "LEGAL_CORPORATE_ADVISORY",      label: "Legal & Corporate Advisory" },
-    { value: "AUDIT_ASSURANCE",               label: "Audit & Assurance" },
+    { value: "", label: "Select a department..." },
+    { value: "OFFICE_ADMIN", label: "Office Admin" },
+    { value: "TAX_ACCOUNTING_ADVISORY", label: "Tax & Accounting Advisory" },
+    { value: "LEGAL_CORPORATE_ADVISORY", label: "Legal & Corporate Advisory" },
+    { value: "AUDIT_ASSURANCE", label: "Audit & Assurance" },
     { value: "PRACTICE_DEVELOPMENT_MANAGEMENT", label: "Practice Development & Management" },
-    { value: "CLIENT_OPERATION_MANAGEMENT",   label: "Client & Operation Management" },
-    { value: "FINANCE_HUMAN_RESOURCE",        label: "Finance & Human Resource" },
+    { value: "CLIENT_OPERATION_MANAGEMENT", label: "Client & Operation Management" },
+    { value: "FINANCE_HUMAN_RESOURCE", label: "Finance & Human Resource" },
     { value: "TECHNOLOGY_INNOVATION_DEVELOPMENT", label: "Technology Innovation and Development" },
 ];
 

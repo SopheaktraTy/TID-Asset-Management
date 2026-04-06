@@ -1,4 +1,6 @@
 import { z } from "zod";
+import type { ModuleEnum, PermissionEnum } from "./auth.types";
+
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
@@ -18,6 +20,7 @@ export interface UserDto {
   updated_at?: string;
   created_at: string;
   lastSignIn: string | null;
+  permissions?: Record<ModuleEnum, PermissionEnum[]>;
 }
 
 export interface PagedResponse<T> {
@@ -57,6 +60,8 @@ export const editUserSchema = z.object({
   email: z.string().email("Invalid email"),
   role: z.string().min(1, "Role is required"),
   status: z.enum(["ACTIVE", "INACTIVE"]),
+  permissions: z.record(z.string(), z.array(z.string())).optional(),
+  password: z.string().min(6, "Password must be at least 6 characters").optional().or(z.literal("")),
 });
 
 export type EditUserFormValues = z.infer<typeof editUserSchema>;

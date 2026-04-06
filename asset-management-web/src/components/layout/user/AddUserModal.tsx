@@ -1,9 +1,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, X } from "lucide-react";
+import { Loader2, X, Eye, EyeOff } from "lucide-react";
 
 import { Button } from "../../ui/Button";
-import { Input } from "../../ui/Input";
+import { Input } from "../../ui/AuthPlaceholder";
 import { Select } from "../../ui/Select";
 import { Message } from "../../ui/Message";
 
@@ -21,6 +21,7 @@ interface AddUserModalProps {
 export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModalProps) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -85,7 +86,20 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
 
             <div>
               <label className="block text-sm font-medium text-[var(--text-main)] mb-1">Password</label>
-              <Input type="password" placeholder="••••••••" {...register("password")} />
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  {...register("password")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
               {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>}
             </div>
 

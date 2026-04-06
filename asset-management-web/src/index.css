@@ -51,13 +51,13 @@
   /* 🌙 Dark Mode – via .dark class on <html> */
   .dark {
     --color-growth-green: var(--color-dark-growth-green);
-    --bg: #1f2329;
-    --surface: var(--color-charcoal);
-    --surface-hover: #373d4a;
-    --border-color: #3f4654;
+    --bg: #111111;
+    --surface: #181c21;
+    --surface-hover: #1f2329;
+    --border-color: #2b2b2b;
     --text-main: #ffffff;
     --text-muted: #9ca3af;
-    --btn-primary-text: #1a1e24;
+    --btn-primary-text: #000000;
     /* slightly deeper charcoal for contrast on lime - Button tokens*/
     --btn-primary-shadow: rgba(209, 236, 81, 0.20);
   }
@@ -72,4 +72,17 @@
     -moz-osx-font-smoothing: grayscale;
     transition: background-color 0.3s ease, color 0.3s ease;
   }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   ✨ Utilities: Scrollbars & UI Polish
+   ────────────────────────────────────────────────────────────────────────── */
+
+.custom-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.custom-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
 }

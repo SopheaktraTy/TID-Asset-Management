@@ -7,7 +7,7 @@ import { z } from "zod";
 import { useAuthStore } from "../../../store/authStore";
 import { getProfileApi, updateProfileApi } from "../../../services/user.service";
 import { Button } from "../../ui/Button";
-import { Input } from "../../ui/Input";
+import { Input } from "../../ui/AuthPlaceholder";
 import { Message } from "../../ui/Message";
 
 const profileSchema = z.object({

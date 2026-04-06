@@ -4,10 +4,10 @@ import { Table, type ColumnDef } from "../../ui/Table";
 
 export const USER_TABLE_COLUMN_OPTIONS = [
   { key: "username", label: "User" },
-  { key: "department", label: "Department" },
-  { key: "role", label: "Role" },
   { key: "is_active", label: "Status" },
-  { key: "created_at", label: "Created At" },
+  { key: "role", label: "Role" },
+  { key: "department", label: "Department" },
+  { key: "created_at", label: "Joined" },
   { key: "updated_at", label: "Updated At" },
 ];
 
@@ -76,17 +76,17 @@ export default function UserTable({
       header: "User",
       sortable: true,
       cell: (user) => (
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-3 min-w-0 py-1">
           <div className="flex items-center shrink-0 relative z-10">
             {user?.image ? (
               <img
                 src={user.image}
                 alt={user.username || "User"}
-                className="w-8 h-8 rounded-full object-cover ring-2 ring-[var(--surface)] shadow-sm"
+                className="w-8 h-8 rounded-full object-cover ring-1 ring-[#2b2b2b] shadow-sm"
               />
             ) : (
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${avatarColor(
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold border border-[#2b2b2b] ${avatarColor(
                   user?.username || ""
                 )}`}
               >
@@ -94,11 +94,35 @@ export default function UserTable({
               </div>
             )}
           </div>
-          <div className="min-w-0 flex flex-col">
-            <p className="font-medium text-[var(--text-main)] truncate">{user?.username || "Unknown"}</p>
-            <p className="text-xs text-[var(--text-muted)] truncate">{user?.email}</p>
+          <div className="min-w-0 flex flex-col leading-tight">
+            <p className="text-sm font-bold text-[var(--text-main)] truncate">{user?.username || "Unknown"}</p>
+            <p className="text-xs text-[var(--text-muted)] truncate mt-0.5">{user?.email}</p>
           </div>
         </div>
+      ),
+    },
+    {
+      key: "is_active",
+      header: "Status",
+      sortable: true,
+      cell: (user) => {
+        const isActiveOrActive = user?.is_active ?? (user?.status === "ACTIVE");
+        return (
+          <span className={`inline-flex items-center gap-2 text-xs font-normal ${isActiveOrActive ? "text-[#10b981]" : "text-[#f59e0b]"}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${isActiveOrActive ? "bg-[#10b981]" : "bg-[#f59e0b]"}`} />
+            {isActiveOrActive ? "Active" : "Inactive"}
+          </span>
+        );
+      },
+    },
+    {
+      key: "role",
+      header: "Role",
+      sortable: true,
+      cell: (user) => (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-[#1f1f1f] text-gray-300 uppercase tracking-tight border border-[#2b2b2b]">
+          {user?.role?.replace('_', ' ')}
+        </span>
       ),
     },
     {
@@ -110,41 +134,16 @@ export default function UserTable({
       ),
     },
     {
-      key: "role",
-      header: "Role",
-      sortable: true,
-      cell: (user) => (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-[var(--border-color)] text-[var(--text-main)]">
-          {user?.role}
-        </span>
-      ),
-    },
-    {
-      key: "is_active",
-      header: "Status",
-      sortable: true,
-      cell: (user) => {
-        // Fallback to "status" if is_active is undefined depending on API implementation
-        const isActiveOrActive = user?.is_active ?? (user?.status === "ACTIVE");
-        return (
-          <span className={`inline-flex items-center gap-1.5 text-sm font-medium ${isActiveOrActive ? "text-emerald-600 dark:text-emerald-400" : "text-[var(--text-muted)]"}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${isActiveOrActive ? "bg-emerald-500" : "bg-gray-400"}`} />
-            {isActiveOrActive ? "Active" : "Inactive"}
-          </span>
-        );
-      },
-    },
-    {
       key: "created_at",
-      header: "Created At",
+      header: "Joined",
       sortable: true,
-      cell: (user) => <span className="text-[var(--text-muted)]">{formatDate(user?.created_at || (user as any)?.createdAt)}</span>,
+      cell: (user) => <span className="text-[var(--text-main)] font-medium">{formatDate(user?.created_at || (user as any)?.createdAt)}</span>,
     },
     {
       key: "updated_at",
       header: "Updated At",
       sortable: true,
-      cell: (user) => <span className="text-[var(--text-muted)]">{formatDate(user?.updated_at || (user as any)?.updatedAt || user?.created_at || (user as any)?.createdAt || null)}</span>,
+      cell: (user) => <span className="text-[var(--text-muted)]">{formatDate(user?.updated_at || (user as any)?.updatedAt || user?.created_at || (user as any)?.createdAt)}</span>,
     },
   ];
 

@@ -77,8 +77,13 @@ export const createUserApi = async (data: CreateUserFormValues): Promise<UserDto
 };
 
 export const updateUserApi = async (id: number, data: EditUserFormValues): Promise<UserDto> => {
-  const response = await api.put<ApiResponse<UserDto>>(`${BASE}/${id}`, data);
+  // Uses the new unified PATCH endpoint on the backend
+  const response = await api.patch<ApiResponse<UserDto>>(`${BASE}/${id}`, data);
   return response.data.data;
+};
+
+export const forceResetPasswordApi = async (id: number, newPassword: string): Promise<void> => {
+  await api.patch(`${BASE}/${id}/force-reset-password`, { newPassword });
 };
 
 export const deleteUserApi = async (id: number): Promise<void> => {

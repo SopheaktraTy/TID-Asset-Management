@@ -93,23 +93,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponse(user);
     }
 
-    @Override
-    @Transactional
-    public void updateUserRole(@NonNull Long id, @NonNull RoleEnum role) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        user.setRole(role);
-        userRepository.save(user);
-    }
-
-    @Override
-    @Transactional
-    public void updateUserStatus(@NonNull Long id, @NonNull Boolean isActive) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        user.setIsActive(isActive);
-        userRepository.save(user);
-    }
 
     @Override
     @Transactional
@@ -119,9 +102,8 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(user);
     }
 
-    @Override
     @Transactional
-    public void assignPermissions(@NonNull Long userId, @NonNull AssignPermissionRequest request) {
+    private void assignPermissions(@NonNull Long userId, @NonNull AssignPermissionRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
@@ -142,5 +124,55 @@ public class UserServiceImpl implements UserService {
                 }
             }
         }
+    }
+
+    @Override
+    @Transactional
+    public UserResponse updateUser(@NonNull Long id, @NonNull com.tid.asset_management_bridge.user_management_module.dto.UpdateUserRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        if (request.getUsername() != null && !request.getUsername().equals(user.getUsername())) {
+            if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+                throw new ConflictException("Username is already taken");
+            }
+            user.setUsername(request.getUsername());
+        }
+
+        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+            if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+                throw new ConflictException("Email is already registered");
+            }
+            user.setEmail(request.getEmail());
+        }
+
+        if (request.getRole() != null) {
+            user.setRole(request.getRole());
+        }
+
+        if (request.getIsActive() != null) {
+            user.setIsActive(request.getIsActive());
+        }
+
+        User savedUser = userRepository.save(user);
+
+        if (request.getPermissions() != null) {
+            AssignPermissionRequest apRequest = new AssignPermissionRequest();
+            apRequest.setPermissions(request.getPermissions());
+            this.assignPermissions(id, apRequest);
+            // Re-fetch user to get the new permissions inside the response if necessary,
+            // though userMapper probably queries it correctly anyway via hibernate associations.
+        }
+
+        return userMapper.toUserResponse(savedUser);
+    }
+
+    @Override
+    @Transactional
+    public void forceResetPassword(@NonNull Long id, @NonNull String newPassword) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 }

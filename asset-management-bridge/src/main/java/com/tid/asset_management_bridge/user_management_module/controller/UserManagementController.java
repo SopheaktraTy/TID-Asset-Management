@@ -4,10 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.tid.asset_management_bridge.common.dto.ApiResponse;
-import com.tid.asset_management_bridge.user_management_module.dto.AssignPermissionRequest;
-
 import com.tid.asset_management_bridge.user_management_module.dto.UserResponse;
-import com.tid.asset_management_bridge.auth_module.entity.RoleEnum;
 import com.tid.asset_management_bridge.user_management_module.service.UserService;
 import java.util.List;
 
@@ -48,33 +45,9 @@ public class UserManagementController {
         return ResponseEntity.ok(new ApiResponse<>(200, "User retrieved successfully", userService.getUserById(id)));
     }
 
-    @PatchMapping("/{id}/role")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> updateUserRole(@PathVariable @NonNull Long id,
-            @RequestParam @NonNull RoleEnum role) {
-        Long currentUserId = getAuthenticatedUserId();
-        if (currentUserId.equals(id)) {
-            throw new com.tid.asset_management_bridge.common.exception.ConflictException(
-                    "You cannot change your own role.");
-        }
 
-        userService.updateUserRole(id, role);
-        return ResponseEntity.ok(new ApiResponse<>(200, "User role updated successfully"));
-    }
 
-    @PatchMapping("/{id}/status")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> updateUserStatus(@PathVariable @NonNull Long id,
-            @RequestParam @NonNull Boolean isActive) {
-        Long currentUserId = getAuthenticatedUserId();
-        if (currentUserId.equals(id)) {
-            throw new com.tid.asset_management_bridge.common.exception.ConflictException(
-                    "You cannot manually change your own active status.");
-        }
 
-        userService.updateUserStatus(id, isActive);
-        return ResponseEntity.ok(new ApiResponse<>(200, "User status updated successfully"));
-    }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
@@ -89,18 +62,35 @@ public class UserManagementController {
         return ResponseEntity.ok(new ApiResponse<>(200, "User deleted successfully"));
     }
 
-    @PatchMapping("/{id}/permissions")
+
+
+    @PatchMapping("/{id}")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> assignPermissions(@PathVariable @NonNull Long id,
-            @RequestBody @NonNull AssignPermissionRequest request) {
+    public ResponseEntity<ApiResponse<UserResponse>> updateUser(@PathVariable @NonNull Long id,
+            @Valid @RequestBody @NonNull com.tid.asset_management_bridge.user_management_module.dto.UpdateUserRequest request) {
         Long currentUserId = getAuthenticatedUserId();
         if (currentUserId.equals(id)) {
             throw new com.tid.asset_management_bridge.common.exception.ConflictException(
-                    "You cannot assign or modify your own permissions.");
+                    "You cannot update your own profile through this endpoint.");
         }
 
-        userService.assignPermissions(id, request);
-        return ResponseEntity.ok(new ApiResponse<>(200, "Permissions assigned successfully"));
+        UserResponse updatedUser = userService.updateUser(id, request);
+        return ResponseEntity.ok(new ApiResponse<>(200, "User profile updated successfully", updatedUser));
+    }
+
+    @PatchMapping("/{id}/force-reset-password")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> forceResetPassword(@PathVariable @NonNull Long id,
+            @Valid @RequestBody com.tid.asset_management_bridge.user_management_module.dto.ForceResetPasswordRequest request) {
+        Long currentUserId = getAuthenticatedUserId();
+        if (currentUserId.equals(id)) {
+            throw new com.tid.asset_management_bridge.common.exception.ConflictException(
+                    "You cannot force reset your own password. Please use the standard change password flow.");
+        }
+
+        userService.forceResetPassword(id,
+                java.util.Objects.requireNonNull(request.getNewPassword(), "Password must not be null"));
+        return ResponseEntity.ok(new ApiResponse<>(200, "User password force-reset successfully"));
     }
 
     @NonNull

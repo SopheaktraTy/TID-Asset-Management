@@ -7,7 +7,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useResetPassword } from "../../../hooks/useResetPassword";
 import { resetPasswordSchema, type ResetPasswordFormValues } from "../../../types/auth.types";
 import { Button } from "../../ui/Button";
-import { Input } from "../../ui/Input";
+import { Input } from "../../ui/AuthPlaceholder";
 import { Message } from "../../ui/Message";
 import { useTheme } from "../../../hooks/useTheme";
 

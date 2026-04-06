@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Users, ChevronRight as ArrowRight } from "lucide-react";
 import Header from "../components/layout/Header";
 import AddUserModal from "../components/layout/user/AddUserModal";
@@ -9,6 +10,7 @@ import Pagination from "../components/ui/Pagination";
 import { useUserManagement } from "../hooks/useUserManagement";
 
 export default function UserManagementPage() {
+  const navigate = useNavigate();
   const {
     users,
     setUsers,
@@ -45,24 +47,47 @@ export default function UserManagementPage() {
     });
   };
 
+  // ── Auto-hide columns based on screen width on mount ────────────────────────
+  useEffect(() => {
+    const width = window.innerWidth;
+    setHiddenCols((prev) => {
+      const next = new Set(prev);
+      // Mobile (< 768px): Hide Department, Joined, Updated At
+      if (width < 768) {
+        next.add("department");
+        next.add("created_at");
+        next.add("updated_at");
+      }
+      // Tablet (< 1024px): Hide Joined, Updated At
+      else if (width < 1024) {
+        next.add("created_at");
+        next.add("updated_at");
+      }
+      return next;
+    });
+  }, []); // Only on mount to establish a default
+
+
   return (
     <div className="min-h-screen bg-[var(--bg)]">
       <Header />
 
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* ── Page Title ── */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-[var(--text-main)]">Users</h1>
-          <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] mb-1">
-            <Users size={13} />
-            <span>Users</span>
-            <ArrowRight size={12} />
-            <span className="text-[var(--text-main)] font-medium">User Management</span>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col">
+            <h1 className="text-2xl font-bold text-[var(--text-main)]">Users</h1>
+            <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
+              <Users size={13} />
+              <span>Users</span>
+              <ArrowRight size={12} />
+              <span className="text-[var(--text-main)] font-medium">User Management</span>
+            </div>
           </div>
         </div>
 
         {/* ── Card ── */}
-        <div className="bg-[var(--surface)] rounded-xl border border-[var(--border-color)] shadow-sm overflow-hidden">
+        <div className="bg-[var(--bg)] rounded-xl border border-[var(--border-color)] shadow-xl overflow-hidden transition-colors duration-300">
           <UserToolbar
             search={search}
             onSearchChange={handleSearch}
@@ -73,6 +98,7 @@ export default function UserManagementPage() {
             onAddClick={() => setAddOpen(true)}
             hiddenCols={hiddenCols}
             onToggleColumn={handleToggleColumn}
+            onSetHiddenCols={setHiddenCols}
             columnOptions={USER_TABLE_COLUMN_OPTIONS}
           />
 
@@ -84,7 +110,7 @@ export default function UserManagementPage() {
             sortDir={sortDir}
             hiddenCols={hiddenCols}
             onSort={handleSort}
-            onRowClick={(user) => setEditUser(user)}
+            onRowClick={(user) => navigate(`/user-detail/${user.id}`)}
           />
 
           <Pagination
@@ -112,12 +138,8 @@ export default function UserManagementPage() {
         isOpen={!!editUser}
         user={editUser}
         onClose={() => setEditUser(null)}
-        onUpdated={(updated) => {
+        onUpdated={(updated: any) => {
           setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
-          setEditUser(null);
-        }}
-        onDeleted={(id) => {
-          setUsers((prev) => prev.filter((u) => u.id !== id));
           setEditUser(null);
         }}
       />

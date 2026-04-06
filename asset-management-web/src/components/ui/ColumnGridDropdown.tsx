@@ -10,6 +10,7 @@ interface ColumnGridDropdownProps {
   columns: ColumnOption[];
   hiddenColumns: Set<string>;
   onToggleColumn: (key: string) => void;
+  onSetHiddenColumns?: (keys: Set<string>) => void;
 }
 
 function useOnClickOutside(
@@ -34,11 +35,48 @@ export function ColumnGridDropdown({
   columns,
   hiddenColumns,
   onToggleColumn,
+  onSetHiddenColumns,
 }: ColumnGridDropdownProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useOnClickOutside(containerRef, () => setOpen(false));
+
+  // ── Smart responsive auto-hiding ──────────────────────────────────────────
+  useEffect(() => {
+    if (!onSetHiddenColumns) return;
+
+    let lastWidth = window.innerWidth;
+
+    const handleResize = () => {
+      const width = window.innerWidth;
+
+      // Boundaries: Mobile (<768), Tablet (768-1024), Desktop (>1024)
+      if ((lastWidth >= 1024 && width < 1024) || (lastWidth >= 768 && width < 768) ||
+        (lastWidth < 768 && width >= 768) || (lastWidth < 1024 && width >= 1024)) {
+
+        const next = new Set(hiddenColumns);
+        if (width < 768) {
+          next.add("department");
+          next.add("created_at");
+          next.add("updated_at");
+        } else if (width < 1024) {
+          next.add("created_at");
+          next.add("updated_at");
+          next.delete("department");
+        } else {
+          next.delete("department");
+          next.delete("created_at");
+          next.delete("updated_at");
+        }
+        onSetHiddenColumns(next);
+      }
+      lastWidth = width;
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [onSetHiddenColumns, hiddenColumns]);
 
   return (
     <div className="relative inline-block text-left" ref={containerRef}>
@@ -48,12 +86,12 @@ export function ColumnGridDropdown({
         onClick={() => setOpen((prev) => !prev)}
         className={`
           flex items-center gap-1.5 px-3 py-2 text-xs font-medium
-          bg-[var(--surface)] border border-[var(--border-color)] rounded-lg
+          bg-[var(--bg)] border border-[var(--border-color)] rounded-lg
           text-[var(--text-main)]
           hover:border-[var(--text-muted)] hover:bg-[var(--surface-hover)]
-          focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-1 focus:ring-[var(--color-growth-green)]
+          focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-0.5 focus:ring-[var(--color-growth-green)]
           transition-colors duration-200 cursor-pointer
-          ${open ? "border-[var(--color-growth-green)] ring-1 ring-[var(--color-growth-green)]" : ""}
+          ${open ? "border-[var(--color-growth-green)] ring-0.5 ring-[var(--color-growth-green)]" : ""}
         `}
       >
         <Columns size={14} className="text-[var(--text-muted)]" />
@@ -83,16 +121,15 @@ export function ColumnGridDropdown({
                 role="option"
                 aria-selected={isVisible}
                 onClick={() => onToggleColumn(col.key)}
-                className="flex items-center gap-2.5 px-3 py-2 text-xs cursor-pointer select-none
-                  text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors duration-100"
+                className="flex items-center gap-2 px-3 py-2 text-xs cursor-pointer select-none
+                  text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors duration-100 rounded-lg mx-1"
               >
                 {/* Custom checkbox */}
                 <div
-                  className={`flex items-center justify-center w-4 h-4 rounded border shrink-0 transition-colors duration-100 ${
-                    isVisible
-                      ? "bg-[var(--color-growth-green)] border-[var(--color-growth-green)]"
-                      : "border-[var(--border-color)] bg-transparent"
-                  }`}
+                  className={`flex items-center justify-center w-4 h-4 rounded border shrink-0 transition-colors duration-100 ${isVisible
+                    ? "bg-[var(--color-growth-green)] border-[var(--color-growth-green)]"
+                    : "border-[var(--border-color)] bg-transparent"
+                    }`}
                 >
                   {isVisible && (
                     <Check

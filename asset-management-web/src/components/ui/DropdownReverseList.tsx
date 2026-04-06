@@ -46,9 +46,9 @@ const DropdownReverseList = React.forwardRef<HTMLDivElement, DropdownListProps>(
             bg-[var(--surface)] border border-[var(--border-color)] rounded-lg
             text-[var(--text-main)]
             hover:border-[var(--text-muted)] hover:bg-[var(--surface-hover)]
-            focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-1 focus:ring-[var(--color-growth-green)]
+            focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-0.5 focus:ring-[var(--color-growth-green)]
             transition-colors duration-200 cursor-pointer whitespace-nowrap
-            ${open ? "border-[var(--color-growth-green)] ring-1 ring-[var(--color-growth-green)]" : ""}
+            ${open ? "border-[var(--color-growth-green)] ring-0.5 ring-[var(--color-growth-green)]" : ""}
           `}
         >
           <span className="text-[var(--text-main)]">{selectedLabel}</span>

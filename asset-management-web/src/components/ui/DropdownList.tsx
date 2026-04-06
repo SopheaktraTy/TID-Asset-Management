@@ -53,12 +53,12 @@ const DropdownList = React.forwardRef<HTMLDivElement, DropdownListProps>(
             flex items-center gap-2 pl-3 pr-3 py-2
             w-full justify-between
             text-xs font-normal
-            bg-[var(--surface)] border border-[var(--border-color)] rounded-lg
+            bg-[var(--bg)] border border-[var(--border-color)] rounded-lg
             text-[var(--text-main)]
             hover:border-[var(--text-muted)] hover:bg-[var(--surface-hover)]
-            focus:outline-none focus:border-[var(--color-growth-green)] focus:ring- focus:ring-[var(--color-growth-green)]
+            focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-0.5 focus:ring-[var(--color-growth-green)]
             transition-colors duration-200 cursor-pointer whitespace-nowrap
-            ${open ? "border-[var(--color-growth-green)] ring-1 ring-[var(--color-growth-green)]" : ""}
+            ${open ? "border-[var(--color-growth-green)] ring-0.5 ring-[var(--color-growth-green)]" : ""}
           `}
         >
           <span className="text-[var(--text-main)]">{selectedLabel}</span>

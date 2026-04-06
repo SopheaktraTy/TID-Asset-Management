@@ -1,4 +1,5 @@
-import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { DropdownReverseList } from "./DropdownReverseList";
 
 interface PaginationProps {
   page: number;
@@ -39,24 +40,20 @@ export default function Pagination({
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-3.5 border-t border-[var(--border-color)] w-full">
       {/* Rows per page */}
-      <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+      <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)]">
         <span>Rows per page</span>
-        <div className="relative">
-          <select
-            value={pageSize}
-            onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            className="pl-2.5 pr-7 py-1 text-sm bg-[var(--surface)] border border-[var(--border-color)] rounded-lg focus:outline-none text-[var(--text-main)] appearance-none cursor-pointer"
-          >
-            {pageSizeOptions.map((n) => (
-              <option key={n} value={n}>{n}</option>
-            ))}
-          </select>
-          <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)]" />
+        <div className="w-[60px]">
+          <DropdownReverseList
+            options={pageSizeOptions.map((n) => ({ label: String(n), value: String(n) }))}
+            value={String(pageSize)}
+            onChange={(val) => onPageSizeChange(Number(val))}
+            className="[&>button]:!text-[11px] [&>button]:!py-1 [&>button]:!px-2 [&>div]:!min-w-[70px] [&_ul]:!py-1 [&_li]:!py-1 [&_li]:!px-2 [&_li]:!text-[11px] [&_svg]:!w-3 [&_svg]:!h-3"
+          />
         </div>
       </div>
 
       {/* Page info + controls */}
-      <div className="flex items-center gap-3 text-sm">
+      <div className="flex items-center gap-3 text-[11px]">
         <span className="text-[var(--text-muted)]">
           {totalElements === 0 ? "0" : `${start} – ${end}`} of {totalElements}
         </span>
@@ -65,9 +62,9 @@ export default function Pagination({
           <button
             onClick={() => onPageChange(Math.max(0, page - 1))}
             disabled={page === 0}
-            className="p-1.5 rounded-lg border border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--surface-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="p-1 rounded border border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--surface-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
-            <ChevronLeft size={14} />
+            <ChevronLeft size={12} />
           </button>
 
           {pageRange().map((p, i) =>
@@ -77,8 +74,8 @@ export default function Pagination({
               <button
                 key={p}
                 onClick={() => onPageChange(p as number)}
-                className={`min-w-[32px] h-8 px-2 rounded-lg text-sm font-medium transition-colors ${page === p
-                  ? "bg-blue-600 text-white shadow-sm"
+                className={`min-w-[24px] h-6 px-1 rounded text-[11px] font-medium transition-colors ${page === p
+                  ? "bg-[var(--color-growth-green)] text-[var(--btn-primary-text)] shadow-sm"
                   : "border border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--surface-hover)]"
                   }`}
               >
@@ -90,9 +87,9 @@ export default function Pagination({
           <button
             onClick={() => onPageChange(Math.min(totalPages - 1, page + 1))}
             disabled={page >= totalPages - 1}
-            className="p-1.5 rounded-lg border border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--surface-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="p-1 rounded border border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--surface-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
-            <ChevronRight size={14} />
+            <ChevronRight size={12} />
           </button>
         </div>
       </div>
