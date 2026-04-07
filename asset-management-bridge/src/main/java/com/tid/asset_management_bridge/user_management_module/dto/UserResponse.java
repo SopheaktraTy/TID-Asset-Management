@@ -16,7 +16,7 @@ public class UserResponse {
     private String image;
     private RoleEnum role;
     private DepartmentEnum department;
-    private Boolean isActive;
+    private com.tid.asset_management_bridge.auth_module.entity.UserStatusEnum status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Map<ModuleEnum, List<PermissionEnum>> permissions;
@@ -69,12 +69,12 @@ public class UserResponse {
         this.department = department;
     }
 
-    public Boolean getIsActive() {
-        return isActive;
+    public com.tid.asset_management_bridge.auth_module.entity.UserStatusEnum getStatus() {
+        return status;
     }
 
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
+    public void setStatus(com.tid.asset_management_bridge.auth_module.entity.UserStatusEnum status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreatedAt() {

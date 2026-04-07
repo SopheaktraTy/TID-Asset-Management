@@ -4,6 +4,7 @@ import com.tid.asset_management_bridge.user_management_module.dto.UserResponse;
 import com.tid.asset_management_bridge.auth_module.entity.CustomPermission;
 import com.tid.asset_management_bridge.auth_module.entity.RoleEnum;
 import com.tid.asset_management_bridge.auth_module.entity.User;
+import com.tid.asset_management_bridge.auth_module.entity.UserStatusEnum;
 import com.tid.asset_management_bridge.auth_module.mapper.UserMapper;
 import com.tid.asset_management_bridge.auth_module.repository.CustomPermissionRepository;
 import com.tid.asset_management_bridge.auth_module.repository.UserRepository;
@@ -53,23 +54,32 @@ public class UserServiceImpl implements UserService {
         user.setEmail(request.getEmail());
         user.setRole(request.getRole());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        user.setIsActive(true);
+        user.setStatus(UserStatusEnum.ACTIVE);
 
         User savedUser = userRepository.save(user);
 
         if (request.getPermissions() != null && !request.getPermissions().isEmpty()) {
             if (RoleEnum.SUPER_ADMIN.equals(request.getRole())) {
-                throw new ConflictException("Users with the SUPER_ADMIN role already have all permissions. To set specific permissions, please create the user with a different role.");
+                throw new ConflictException(
+                        "Users with the SUPER_ADMIN role already have all permissions. To set specific permissions, please create the user with a different role.");
             }
-            
-            for (java.util.Map.Entry<com.tid.asset_management_bridge.auth_module.entity.ModuleEnum, java.util.List<com.tid.asset_management_bridge.auth_module.entity.PermissionEnum>> entry : request.getPermissions().entrySet()) {
-                for (com.tid.asset_management_bridge.auth_module.entity.PermissionEnum perm : entry.getValue()) {
+
+            for (java.util.Map.Entry<com.tid.asset_management_bridge.auth_module.entity.ModuleEnum, java.util.List<com.tid.asset_management_bridge.auth_module.entity.PermissionEnum>> entry : request
+                    .getPermissions().entrySet()) {
+                
+                // Deduplicate at Java level before adding
+                java.util.Set<com.tid.asset_management_bridge.auth_module.entity.PermissionEnum> uniquePerms = new java.util.LinkedHashSet<>(
+                        entry.getValue());
+
+                for (com.tid.asset_management_bridge.auth_module.entity.PermissionEnum perm : uniquePerms) {
                     CustomPermission customPermission = new CustomPermission();
                     customPermission.setUser(savedUser);
                     customPermission.setModule(entry.getKey());
                     customPermission.setPermission(perm);
                     customPermission = customPermissionRepository.save(customPermission);
-                    savedUser.getPermissions().add(customPermission);
+                    if (savedUser.getPermissions() != null) {
+                        savedUser.getPermissions().add(customPermission);
+                    }
                 }
             }
         }
@@ -93,7 +103,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponse(user);
     }
 
-
     @Override
     @Transactional
     public void deleteUser(@NonNull Long id) {
@@ -108,13 +117,15 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         if (RoleEnum.SUPER_ADMIN.equals(user.getRole())) {
-            throw new ConflictException("Users with the SUPER_ADMIN role already have all permissions. To change permissions, please change the user's role first.");
+            throw new ConflictException(
+                    "Users with the SUPER_ADMIN role already have all permissions. To change permissions, please change the user's role first.");
         }
 
         if (request.getPermissions() != null) {
-            for (java.util.Map.Entry<com.tid.asset_management_bridge.auth_module.entity.ModuleEnum, java.util.List<com.tid.asset_management_bridge.auth_module.entity.PermissionEnum>> entry : request.getPermissions().entrySet()) {
+            for (java.util.Map.Entry<com.tid.asset_management_bridge.auth_module.entity.ModuleEnum, java.util.List<com.tid.asset_management_bridge.auth_module.entity.PermissionEnum>> entry : request
+                    .getPermissions().entrySet()) {
                 customPermissionRepository.deleteByUserIdAndModule(userId, entry.getKey());
-                
+
                 for (com.tid.asset_management_bridge.auth_module.entity.PermissionEnum perm : entry.getValue()) {
                     CustomPermission customPermission = new CustomPermission();
                     customPermission.setUser(user);
@@ -128,7 +139,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponse updateUser(@NonNull Long id, @NonNull com.tid.asset_management_bridge.user_management_module.dto.UpdateUserRequest request) {
+    public UserResponse updateUser(@NonNull Long id,
+            @NonNull com.tid.asset_management_bridge.user_management_module.dto.UpdateUserRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
@@ -150,21 +162,43 @@ public class UserServiceImpl implements UserService {
             user.setRole(request.getRole());
         }
 
-        if (request.getIsActive() != null) {
-            user.setIsActive(request.getIsActive());
+        if (request.getDepartment() != null) {
+            user.setDepartment(request.getDepartment());
         }
 
-        User savedUser = userRepository.save(user);
+        if (request.getStatus() != null) {
+            user.setStatus(request.getStatus());
+        }
+        // Permissions: the frontend always sends this field.
+        // Empty {} = "clear all permissions". Non-empty = replace with exact set.
+        // SUPER_ADMIN users have inherent all-access, so skip silently.
+        if (request.getPermissions() != null && !RoleEnum.SUPER_ADMIN.equals(user.getRole())) {
 
-        if (request.getPermissions() != null) {
-            AssignPermissionRequest apRequest = new AssignPermissionRequest();
-            apRequest.setPermissions(request.getPermissions());
-            this.assignPermissions(id, apRequest);
-            // Re-fetch user to get the new permissions inside the response if necessary,
-            // though userMapper probably queries it correctly anyway via hibernate associations.
+            // 1. Clear the entire collection — orphanRemoval will DELETE all existing rows.
+            user.getPermissions().clear();
+
+            // 2. Build the new unique permission set and add to the collection.
+            for (java.util.Map.Entry<com.tid.asset_management_bridge.auth_module.entity.ModuleEnum, java.util.List<com.tid.asset_management_bridge.auth_module.entity.PermissionEnum>> entry : request
+                    .getPermissions().entrySet()) {
+
+                // Deduplicate at Java level before adding
+                java.util.Set<com.tid.asset_management_bridge.auth_module.entity.PermissionEnum> uniquePerms = new java.util.LinkedHashSet<>(
+                        entry.getValue());
+
+                for (com.tid.asset_management_bridge.auth_module.entity.PermissionEnum perm : uniquePerms) {
+                    CustomPermission cp = new CustomPermission();
+                    cp.setUser(user);
+                    cp.setModule(entry.getKey());
+                    cp.setPermission(perm);
+                    user.getPermissions().add(cp);
+                }
+            }
         }
 
-        return userMapper.toUserResponse(savedUser);
+        // Single save — Hibernate flushes the collection changes (DELETE orphans +
+        // INSERT new)
+        User saved = userRepository.save(user);
+        return userMapper.toUserResponse(saved);
     }
 
     @Override

@@ -39,8 +39,9 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "is_active", nullable = false)
-    private Boolean isActive = true;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private UserStatusEnum status = UserStatusEnum.ACTIVE;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CustomPermission> permissions = new ArrayList<>();
@@ -128,12 +129,17 @@ public class User {
         this.updatedAt = updatedAt;
     }
 
-    public Boolean getIsActive() {
-        return isActive;
+    public UserStatusEnum getStatus() {
+        return status;
     }
 
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
+    public void setStatus(UserStatusEnum status) {
+        this.status = status;
+    }
+
+    /** Convenience helper — true only when ACTIVE. */
+    public Boolean getIsActive() {
+        return UserStatusEnum.ACTIVE.equals(status);
     }
 
     public List<CustomPermission> getPermissions() {

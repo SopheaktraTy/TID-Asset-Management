@@ -4,7 +4,7 @@ import type { ModuleEnum, PermissionEnum } from "./auth.types";
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
-export type UserStatus = "ACTIVE" | "INACTIVE";
+export type UserStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED";
 
 // ─── Backend DTOs ─────────────────────────────────────────────────────────────
 
@@ -15,7 +15,6 @@ export interface UserDto {
   image: string | null;
   role: string;
   status: UserStatus;
-  is_active?: boolean;
   department?: string;
   updated_at?: string;
   created_at: string;
@@ -51,6 +50,7 @@ export const createUserSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
   role: z.string().min(1, "Role is required"),
   department: z.string().optional(),
+  permissions: z.record(z.string(), z.any()).optional(),
 });
 
 export type CreateUserFormValues = z.infer<typeof createUserSchema>;
@@ -59,8 +59,12 @@ export const editUserSchema = z.object({
   username: z.string().min(1, "Username is required"),
   email: z.string().email("Invalid email"),
   role: z.string().min(1, "Role is required"),
-  status: z.enum(["ACTIVE", "INACTIVE"]),
-  permissions: z.record(z.string(), z.array(z.string())).optional(),
+  status: z.enum(["ACTIVE", "INACTIVE", "SUSPENDED"]),
+  image: z.string().optional().or(z.literal("")),
+  department: z.string().optional(),
+  // z.any() per-value: Controller may produce undefined for uninitialised fields;
+  // the service layer filters out non-array values before sending to the backend.
+  permissions: z.record(z.string(), z.any()).optional(),
   password: z.string().min(6, "Password must be at least 6 characters").optional().or(z.literal("")),
 });
 

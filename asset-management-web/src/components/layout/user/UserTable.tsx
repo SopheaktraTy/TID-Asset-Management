@@ -4,7 +4,7 @@ import { Table, type ColumnDef } from "../../ui/Table";
 
 export const USER_TABLE_COLUMN_OPTIONS = [
   { key: "username", label: "User" },
-  { key: "is_active", label: "Status" },
+  { key: "status", label: "Status" },
   { key: "role", label: "Role" },
   { key: "department", label: "Department" },
   { key: "created_at", label: "Joined" },
@@ -102,15 +102,22 @@ export default function UserTable({
       ),
     },
     {
-      key: "is_active",
+      key: "status",
       header: "Status",
       sortable: true,
       cell: (user) => {
-        const isActiveOrActive = user?.is_active ?? (user?.status === "ACTIVE");
+        const status = user?.status || "INACTIVE";
+        const statusConfig = {
+          ACTIVE: { color: "text-[#10b981]", bg: "bg-[#10b981]" },
+          INACTIVE: { color: "text-[#f59e0b]", bg: "bg-[#f59e0b]" },
+          SUSPENDED: { color: "text-[#ef4444]", bg: "bg-[#ef4444]" },
+        };
+        const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.INACTIVE;
+
         return (
-          <span className={`inline-flex items-center gap-2 text-xs font-normal ${isActiveOrActive ? "text-[#10b981]" : "text-[#f59e0b]"}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${isActiveOrActive ? "bg-[#10b981]" : "bg-[#f59e0b]"}`} />
-            {isActiveOrActive ? "Active" : "Inactive"}
+          <span className={`inline-flex items-center gap-2 text-xs font-medium ${config.color}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${config.bg}`} />
+            {toPascalCase(status)}
           </span>
         );
       },

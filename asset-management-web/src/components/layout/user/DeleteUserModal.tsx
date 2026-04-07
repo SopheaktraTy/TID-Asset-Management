@@ -4,6 +4,11 @@ import { Modal } from "../../ui/Modal";
 import { Button } from "../../ui/Button";
 import type { UserDto } from "../../../types/user.types";
 import { deleteUserApi } from "../../../services/userManagement.service";
+import { useTheme } from "../../../hooks/useTheme";
+
+// Baker Tilly logo assets
+import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_Charcoal.png";
+import logoWhite from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_White.png";
 
 interface DeleteUserModalProps {
   isOpen: boolean;
@@ -13,6 +18,7 @@ interface DeleteUserModalProps {
 }
 
 export default function DeleteUserModal({ isOpen, user, onClose, onDeleted }: DeleteUserModalProps) {
+  const { theme } = useTheme();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,13 +40,27 @@ export default function DeleteUserModal({ isOpen, user, onClose, onDeleted }: De
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} maxWidth="max-w-[420px]">
-      <div className="flex flex-col gap-6 text-center">
+      <div className="flex flex-col gap-2 text-center">
+        {/* Header - Logo & Title */}
+        <div className="w-full flex flex-col items-center mb-1">
+          <img
+            src={theme === "dark" ? logoWhite : logoCharcoal}
+            alt="Logo"
+            className="h-8 w-auto object-contain mb-4"
+          />
+          <div className="text-center">
+            <h3 className="text-xl font-black tracking-tight text-[var(--text-main)]">Delete User</h3>
+            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-bold uppercase tracking-wider">Permanent Account Removal</p>
+          </div>
+        </div>
+
+        <div className="h-px bg-[var(--border-color)] w-full opacity-30" />
+
         <div className="flex flex-col items-center gap-4">
           <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-2">
             <TriangleAlert size={32} />
           </div>
           <div className="flex flex-col gap-1">
-            <h2 className="text-xl font-bold text-[var(--text-main)]">Delete User</h2>
             <p className="text-sm text-[var(--text-muted)]">
               This action cannot be undone. Are you sure you want to permanently remove this user?
             </p>

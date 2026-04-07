@@ -54,6 +54,7 @@ export interface ProfileResponse {
   email: string;
   image: string | null;
   role: RoleEnum;
+  department: string | null;
   permissions: Record<ModuleEnum, PermissionEnum[]>;
 }
 

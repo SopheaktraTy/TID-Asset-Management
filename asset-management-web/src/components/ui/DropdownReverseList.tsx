@@ -42,7 +42,7 @@ const DropdownReverseList = React.forwardRef<HTMLDivElement, DropdownListProps>(
           className={`
             flex items-center gap-2 pl-3 pr-3 py-2
             w-full justify-between
-            text-sm font-medium
+            text-xs font-medium
             bg-[var(--surface)] border border-[var(--border-color)] rounded-lg
             text-[var(--text-main)]
             hover:border-[var(--text-muted)] hover:bg-[var(--surface-hover)]
@@ -70,7 +70,7 @@ const DropdownReverseList = React.forwardRef<HTMLDivElement, DropdownListProps>(
             ${open ? "opacity-100 scale-y-100 pointer-events-auto" : "opacity-0 scale-y-95 pointer-events-none"}
           `}
         >
-          <ul className="py-5" role="listbox">
+          <ul className="py-2" role="listbox">
             {options.map((option) => {
               const isSelected = option.value === value;
               return (
@@ -83,7 +83,7 @@ const DropdownReverseList = React.forwardRef<HTMLDivElement, DropdownListProps>(
                     setOpen(false);
                   }}
                   className={`
-                    flex items-center gap-2 px-4 py-2.5 text-sm cursor-pointer
+                    flex items-center gap-2 px-3 py-1.5 text-xs cursor-pointer
                     transition-colors duration-100 rounded-lg mx-1
                     ${isSelected
                       ? "text-[var(--color-growth-green)] font-semibold"

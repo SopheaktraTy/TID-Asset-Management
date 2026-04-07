@@ -30,23 +30,24 @@ export default function UserDetailsPage() {
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [deleting] = useState(false);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        setLoading(true);
-        if (!id) throw new Error("No user ID provided.");
-        const data = await getUserByIdApi(Number(id));
-        // Ensure status property exists for the UI
-        const isActiveValue = data.is_active ?? (data as any).isActive;
-        data.status = data.status || (isActiveValue === false ? "INACTIVE" : "ACTIVE");
-        setUser(data);
-      } catch (err: any) {
+  const fetchUser = async (isBackgroundRefresh = false) => {
+    try {
+      if (!isBackgroundRefresh) setLoading(true);
+      if (!id) throw new Error("No user ID provided.");
+      const data = await getUserByIdApi(Number(id));
+      setUser(data);
+    } catch (err: any) {
+      if (!isBackgroundRefresh) {
         setErrorDetails(err?.response?.data?.message || err.message || "Failed to load user.");
-      } finally {
-        setLoading(false);
+      } else {
+        console.error("Background refresh failed", err);
       }
-    };
+    } finally {
+      if (!isBackgroundRefresh) setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchUser();
   }, [id]);
 
@@ -57,7 +58,7 @@ export default function UserDetailsPage() {
     navigate("/users-management");
   };
 
-  const isUserActive = user?.is_active ?? (user as any)?.isActive ?? (user?.status === 'ACTIVE');
+  const isUserActive = user?.status === "ACTIVE";
 
   if (loading) return <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center text-[var(--text-main)]">Loading...</div>;
 
@@ -152,9 +153,15 @@ export default function UserDetailsPage() {
             <div className="grid grid-cols-[150px_1fr] items-center">
               <span className="text-[var(--text-muted)]">Status:</span>
               <div className="flex items-center gap-2">
-                <div className={`w-1.5 h-1.5 rounded-full ${isUserActive ? 'bg-emerald-500' : 'bg-gray-400 dark:bg-gray-500'}`}></div>
-                <span className={`${isUserActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-muted)]'} font-medium`}>
-                  {isUserActive ? 'Active' : 'Inactive'}
+                <div className={`w-1.5 h-1.5 rounded-full ${user.status === 'ACTIVE' ? 'bg-emerald-500' :
+                  user.status === 'SUSPENDED' ? 'bg-red-500' :
+                    'bg-gray-400 dark:bg-gray-500'
+                  }`}></div>
+                <span className={`${user.status === 'ACTIVE' ? 'text-emerald-600 dark:text-emerald-400' :
+                  user.status === 'SUSPENDED' ? 'text-red-500 dark:text-red-400' :
+                    'text-[var(--text-muted)]'
+                  } font-medium`}>
+                  {user.status === 'ACTIVE' ? 'Active' : user.status === 'SUSPENDED' ? 'Suspended' : 'Inactive'}
                 </span>
               </div>
             </div>
@@ -182,6 +189,50 @@ export default function UserDetailsPage() {
                 Edit user details
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Access Permissions Card */}
+        <div className="bg-[var(--bg)] border border-[var(--border-color)] rounded-xl p-6 mb-8 text-xs">
+          <h3 className="text-sm font-bold text-[var(--text-main)] mb-4 px-1">Access Permissions</h3>
+          <div className="h-px bg-[var(--border-color)] w-full mb-4 opacity-50" />
+
+          <div className="flex flex-col gap-6">
+            {user.role === 'SUPER_ADMIN' ? (
+              <div className="flex items-center gap-3 px-4 py-4 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
+                <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500">
+                  <UserIcon size={16} />
+                </div>
+                <div>
+                  <h4 className="text-[var(--text-main)] font-bold text-sm">Full System Access</h4>
+                  <p className="text-[var(--text-muted)] text-[11px] mt-0.5">This user has a Super Admin role and bypasses individual module permission checks.</p>
+                </div>
+              </div>
+            ) : Object.keys(user.permissions || {}).length === 0 ? (
+              <div className="px-4 py-8 text-center border border-dashed border-[var(--border-color)] rounded-lg">
+                <p className="text-[var(--text-muted)] text-sm">No specific permissions assigned.</p>
+              </div>
+            ) : (
+              <div className={`grid grid-cols-1 gap-4 ${
+                Object.keys(user.permissions || {}).length >= 4 ? 'lg:grid-cols-4 md:grid-cols-2' : 
+                Object.keys(user.permissions || {}).length === 3 ? 'lg:grid-cols-3 md:grid-cols-3' : 
+                'md:grid-cols-2'
+              }`}>
+                {Object.entries(user.permissions || {}).map(([module, perms]) => (
+                  <div key={module} className="flex flex-col bg-[var(--surface)] dark:bg-[var(--bg)] border border-[var(--border-color)]/60 rounded-lg p-4 transition-all hover:border-[var(--border-color)] hover:shadow-sm">
+                    <h4 className="text-[var(--text-main)] font-bold text-xs mb-1 uppercase tracking-wider">{module.replace(/_/g, ' ')}</h4>
+                    <p className="text-[var(--text-muted)] text-[10px] mb-3">Module access allowed</p>
+                    <div className="flex flex-wrap gap-2">
+                      {Array.isArray(perms) && perms.map((p) => (
+                        <span key={p} className="px-2 py-1 bg-[var(--surface-hover)] border border-[var(--border-color)] rounded text-[10px] font-semibold text-[var(--text-main)] transition-colors hover:bg-[var(--surface-hover)]/70 cursor-default">
+                          {p}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -238,10 +289,9 @@ export default function UserDetailsPage() {
         user={user}
         onClose={() => setIsEditModalOpen(false)}
         onUpdated={(updated: any) => {
-          // Normalize status field after update to ensure UI renders properly
-          updated.status = updated.status || (updated.is_active === false ? 'INACTIVE' : 'ACTIVE');
-          setUser(updated);
+          setUser(updated); // Optimistic UI update
           setIsEditModalOpen(false);
+          fetchUser(true); // Pull fresh data from server
         }}
       />
 
@@ -257,10 +307,9 @@ export default function UserDetailsPage() {
         user={user}
         onClose={() => setIsResetModalOpen(false)}
         onSuccess={(updated: any) => {
-          // Re-normalize status and update local state
-          updated.status = updated.status || (updated.is_active === false ? 'INACTIVE' : 'ACTIVE');
-          setUser(updated);
+          setUser(updated); // Optimistic UI update
           setIsResetModalOpen(false);
+          fetchUser(true); // Pull fresh data from server
         }}
       />
     </div>

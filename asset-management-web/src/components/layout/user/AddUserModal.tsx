@@ -1,16 +1,43 @@
-import { useForm } from "react-hook-form";
+import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, X, Eye, EyeOff } from "lucide-react";
+import {
+  Loader2,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 
 import { Button } from "../../ui/Button";
-import { Input } from "../../ui/AuthPlaceholder";
-import { Select } from "../../ui/Select";
+import { Input } from "../../ui/BackgroundColorPlaceholder";
 import { Message } from "../../ui/Message";
+import { Modal } from "../../ui/Modal";
+import { DropdownList } from "../../ui/DropdownList";
+import { ToggleSwitch } from "../../ui/ToggleSwitch";
 
 import type { CreateUserFormValues, UserDto } from "../../../types/user.types";
 import { createUserSchema } from "../../../types/user.types";
 import { createUserApi } from "../../../services/userManagement.service";
-import { useState } from "react";
+import { useTheme } from "../../../hooks/useTheme";
+
+// Baker Tilly logo assets
+import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_Charcoal.png";
+import logoWhite from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_White.png";
+
+const MODULE_INFO = [
+  { id: "ASSET", label: "Asset Management", description: "Allow users to view, create, edit and delete assets." },
+  { id: "ASSIGNMENT", label: "Asset Assignment", description: "Control how assets are assigned and tracked." },
+  { id: "ISSUE", label: "Issue Tracking", description: "Manage asset maintenance and issue reports." },
+  { id: "PROCUREMENT", label: "Procurement", description: "Handle asset purchase requests and vendor info." },
+] as const;
+
+const PERMISSIONS_LIST = [
+  { id: "READ", label: "Read Access", description: "Enables viewing and searching for assets and system records." },
+  { id: "CREATE", label: "Create Access", description: "Enables creation of new assets, vendors, and assignments." },
+  { id: "UPDATE", label: "Update Access", description: "Enables editing of existing asset data and status updates." },
+  { id: "DELETE", label: "Delete Access", description: "Enables archival and permanent deletion of system data." },
+] as const;
+
+
 
 interface AddUserModalProps {
   isOpen: boolean;
@@ -19,17 +46,28 @@ interface AddUserModalProps {
 }
 
 export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModalProps) {
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { theme } = useTheme();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<CreateUserFormValues>({
     resolver: zodResolver(createUserSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+      role: "ADMIN",
+      department: "",
+      permissions: {},
+    },
   });
 
   if (!isOpen) return null;
@@ -37,6 +75,8 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
   const handleClose = () => {
     reset();
     setErrorMsg(null);
+    setSuccessMsg(null);
+    setShowPassword(false);
     onClose();
   };
 
@@ -45,8 +85,9 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
     setErrorMsg(null);
     try {
       const newUser = await createUserApi(data);
-      reset();
       onSuccess(newUser);
+      setSuccessMsg("User created successfully!");
+      setTimeout(() => handleClose(), 1200);
     } catch (err: any) {
       setErrorMsg(
         err?.response?.data?.message || err.message || "Failed to create user."
@@ -57,85 +98,206 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-[var(--surface)] w-full max-w-md rounded-2xl shadow-xl overflow-hidden border border-[var(--border-color)]">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-color)]">
-          <h2 className="text-lg font-semibold text-[var(--text-main)]">Add New User</h2>
-          <button onClick={handleClose} className="p-1 rounded-full text-[var(--text-muted)] hover:bg-[var(--surface-hover)] transition-colors">
-            <X size={20} />
-          </button>
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      maxWidth="max-w-[500px]"
+    >
+      <div className="flex flex-col gap-2">
+        {/* Header - Logo & Title */}
+        <div className="w-full flex flex-col items-center mb-1">
+          <img
+            src={theme === "dark" ? logoWhite : logoCharcoal}
+            alt="Logo"
+            className="h-8 w-auto object-contain mb-4"
+          />
+          <div className="text-center">
+            <h3 className="text-xl font-black tracking-tight text-[var(--text-main)]">Create New User</h3>
+            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-bold uppercase tracking-wider">Account Creation & Permissions</p>
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="p-6">
-          {errorMsg && <Message variant="error" className="mb-4">{errorMsg}</Message>}
+        <div className="h-px bg-[var(--border-color)] w-full opacity-30 mb-2" />
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 text-left">
+          <div className="pt-2 px-1">
+            <h3 className="text-sm font-bold text-[var(--text-main)] mb-2">Basic Information</h3>
+            <div className="h-px bg-[var(--border-color)] w-full opacity-50 mb-4" />
+          </div>
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-[var(--text-main)] mb-1">Username</label>
-              <Input type="text" placeholder="John Doe" {...register("username")} />
-              {errors.username && <p className="mt-1 text-xs text-red-500">{errors.username.message}</p>}
+              <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Username</label>
+              <Input
+                type="text"
+                placeholder="What should we call you?"
+                className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                {...register("username")}
+              />
+              {errors.username && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.username.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[var(--text-main)] mb-1">Email</label>
-              <Input type="email" placeholder="john@example.com" {...register("email")} />
-              {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}
+              <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Email address</label>
+              <Input
+                type="email"
+                placeholder="Email Address"
+                className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                {...register("email")}
+              />
+              {errors.email && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.email.message}</p>}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-main)] mb-1">Password</label>
-              <div className="relative">
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  {...register("password")}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col">
+                <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Password</label>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                    {...register("password")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+                {errors.password && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.password.message}</p>}
               </div>
-              {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>}
+
+              <div className="flex flex-col">
+                <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Role</label>
+                <Controller
+                  name="role"
+                  control={control}
+                  render={({ field }) => (
+                    <DropdownList
+                      options={[
+                        { label: "Super Admin", value: "SUPER_ADMIN" },
+                        { label: "Admin", value: "ADMIN" }
+                      ]}
+                      value={field.value}
+                      onChange={field.onChange}
+                      className="w-full"
+                    />
+                  )}
+                />
+                {errors.role && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.role.message}</p>}
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[var(--text-main)] mb-1">Role</label>
-              <Select {...register("role")}>
-                <option value="">Select a role...</option>
-                <option value="SUPER_ADMIN">Super Admin</option>
-                <option value="ADMIN">Admin</option>
-                <option value="Manager">Manager</option>
-              </Select>
-              {errors.role && <p className="mt-1 text-xs text-red-500">{errors.role.message}</p>}
+              <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Department</label>
+              <Controller
+                name="department"
+                control={control}
+                render={({ field }) => (
+                  <DropdownList
+                    options={[
+                      { label: "— None —", value: "" },
+                      { label: "Office Admin", value: "OFFICE_ADMIN" },
+                      { label: "Tax & Accounting Advisory", value: "TAX_ACCOUNTING_ADVISORY" },
+                      { label: "Legal & Corporate Advisory", value: "LEGAL_CORPORATE_ADVISORY" },
+                      { label: "Audit & Assurance", value: "AUDIT_ASSURANCE" },
+                      { label: "Practice Development & Management", value: "PRACTICE_DEVELOPMENT_MANAGEMENT" },
+                      { label: "Client & Operation Management", value: "CLIENT_OPERATION_MANAGEMENT" },
+                      { label: "Finance & Human Resource", value: "FINANCE_HUMAN_RESOURCE" },
+                      { label: "Technology Innovation and Development", value: "TECHNOLOGY_INNOVATION_DEVELOPMENT" },
+                    ]}
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                    className="w-full"
+                  />
+                )}
+              />
+              {errors.department && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.department.message}</p>}
             </div>
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-main)] mb-1">Department</label>
-              <Select {...register("department")}>
-                <option value="">Select a department...</option>
-                <option value="OFFICE_ADMIN">Office Admin</option>
-                <option value="TAX_ACCOUNTING_ADVISORY">Tax & Accounting Advisory</option>
-                <option value="LEGAL_CORPORATE_ADVISORY">Legal & Corporate Advisory</option>
-              </Select>
-              {errors.department && <p className="mt-1 text-xs text-red-500">{errors.department.message}</p>}
-            </div>
+          <div className="pt-2">
+            <h3 className="text-sm font-bold text-[var(--text-main)] mb-2 px-1">Access Permissions</h3>
+            <div className="h-px bg-[var(--border-color)] w-full mb-4" />
+            <div className="flex flex-col">
+              {MODULE_INFO.map((module) => (
+                <div key={module.id} className="border-b border-[var(--border-color)]/20 last:border-0 transition-all duration-200">
+                  <Controller
+                    name={`permissions.${module.id}`}
+                    control={control}
+                    defaultValue={[]}
+                    render={({ field }) => {
+                      const isEnabled = (field.value || []).length > 0;
+                      return (
+                        <div className="flex flex-col">
+                          <ToggleSwitch
+                            label={module.label}
+                            description={module.description}
+                            checked={isEnabled}
+                            size="sm"
+                            onChange={(checked) => {
+                              field.onChange(checked ? ["READ"] : []);
+                            }}
+                            className="px-2 !py-3 hover:bg-[var(--surface-hover)]/30 transition-colors rounded-lg flex-1"
+                          />
 
-            <div className="pt-4 flex justify-end gap-3">
-              <Button type="button" variant="outline" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button type="submit" variant="primary" disabled={loading}>
-                {loading ? <Loader2 size={16} className="animate-spin" /> : "Create User"}
-              </Button>
+                          {isEnabled && (
+                            <div className="flex flex-col gap-1 pb-4 pr-2 pl-6 animate-in slide-in-from-top-2 fade-in duration-300">
+                              <div className="flex flex-col">
+                                {PERMISSIONS_LIST.map((perm) => (
+                                  <ToggleSwitch
+                                    key={perm.id}
+                                    label={perm.label}
+                                    description={perm.description}
+                                    size="sm"
+                                    reverse={true}
+                                    checked={(field.value || []).includes(perm.id as any)}
+                                    onChange={(checked) => {
+                                      const current = field.value || [];
+                                      const next = checked
+                                        ? [...current, perm.id]
+                                        : current.filter((p: string) => p !== perm.id);
+                                      field.onChange(next);
+                                    }}
+                                    className="!py-2 border-b border-[var(--border-color)]/20 last:border-0 !justify-start gap-4"
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }}
+                  />
+                </div>
+              ))}
             </div>
-          </form>
-        </div>
+          </div>
+
+          {errorMsg && <Message variant="error">{errorMsg}</Message>}
+          {successMsg && <Message variant="success">{successMsg}</Message>}
+
+          <div className="pt-1 flex items-center justify-end gap-3 translate-y-1">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              className="bg-transparent border-[var(--border-color)] text-[var(--text-main)] hover:bg-[var(--surface-hover)] rounded-full px-8 h-11 text-xs font-bold transition-all border-opacity-30"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={loading}
+              className="w-auto min-w-[160px] h-11 gap-2 px-8 py-2 text-xs font-bold bg-[var(--color-growth-green)] text-[var(--btn-primary-text)] border-0 transition-all rounded-full shadow-[0_2px_8px_var(--btn-primary-shadow)] hover:shadow-[0_4px_14px_var(--btn-primary-shadow)] hover:brightness-110 transform active:scale-95"
+            >
+              {loading ? <Loader2 size={16} className="animate-spin" /> : "Create User"}
+            </Button>
+          </div>
+        </form>
       </div>
-    </div>
+    </Modal>
   );
 }

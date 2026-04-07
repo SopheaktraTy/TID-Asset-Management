@@ -10,7 +10,7 @@
 -- Regenerate: https://bcrypt-generator.com → password "btc@001", rounds = 12
 -- ===========================================================
 
-INSERT INTO users (image, username, email, password_hash, department, role, created_at, updated_at, is_active)
+INSERT INTO users (image, username, email, password_hash, department, role, created_at, updated_at, status)
 VALUES (
     NULL,
     'btc',
@@ -20,6 +20,6 @@ VALUES (
     'SUPER_ADMIN',
     NOW(),
     NOW(),
-    TRUE
+    'ACTIVE'
 ) ON CONFLICT (email) DO NOTHING;
 

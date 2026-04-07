@@ -32,6 +32,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final EmailService emailService;
     private final RefreshTokenService refreshTokenService;
+    private final com.tid.asset_management_bridge.common.service.FileStorageService fileStorageService;
 
     public AuthServiceImpl(
             UserRepository userRepository,
@@ -40,7 +41,8 @@ public class AuthServiceImpl implements AuthService {
             UserMapper userMapper,
             PasswordResetTokenRepository passwordResetTokenRepository,
             EmailService emailService,
-            RefreshTokenService refreshTokenService) {
+            RefreshTokenService refreshTokenService,
+            com.tid.asset_management_bridge.common.service.FileStorageService fileStorageService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
@@ -48,6 +50,7 @@ public class AuthServiceImpl implements AuthService {
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.emailService = emailService;
         this.refreshTokenService = refreshTokenService;
+        this.fileStorageService = fileStorageService;
     }
 
     @Override
@@ -60,8 +63,12 @@ public class AuthServiceImpl implements AuthService {
             throw new BadCredentialsException("Incorrect password");
         }
 
-        if (Boolean.FALSE.equals(user.getIsActive())) {
+        if (com.tid.asset_management_bridge.auth_module.entity.UserStatusEnum.INACTIVE.equals(user.getStatus())) {
             throw new BadCredentialsException("Account is pending approval from super admin");
+        }
+
+        if (com.tid.asset_management_bridge.auth_module.entity.UserStatusEnum.SUSPENDED.equals(user.getStatus())) {
+            throw new BadCredentialsException("Your account has been suspended. Please contact an administrator.");
         }
 
         CustomUserDetails userDetails = new CustomUserDetails(user);
@@ -181,8 +188,8 @@ public class AuthServiceImpl implements AuthService {
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setDepartment(request.getDepartment());
         user.setRole(com.tid.asset_management_bridge.auth_module.entity.RoleEnum.ADMIN);
-        // User needs to be approved by SUPER_ADMIN, so set isActive to false
-        user.setIsActive(false);
+        // New users need approval from SUPER_ADMIN, so default status is INACTIVE
+        user.setStatus(com.tid.asset_management_bridge.auth_module.entity.UserStatusEnum.INACTIVE);
 
         userRepository.save(user);
     }
@@ -207,11 +214,36 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public LoginResponse updateProfile(@NonNull Long userId, UpdateProfileRequest request) {
+    public LoginResponse updateProfile(@NonNull Long userId, String username, String department, org.springframework.web.multipart.MultipartFile imageFile, boolean removeImage) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        userMapper.updateProfile(request, user);
+        if (username != null && !username.isBlank()) {
+            user.setUsername(username);
+        }
+        if (department != null && !department.isBlank()) {
+            try {
+                user.setDepartment(com.tid.asset_management_bridge.auth_module.entity.DepartmentEnum.valueOf(department));
+            } catch (IllegalArgumentException e) {
+                // Keep old value or log error if invalid
+            }
+        }
+        
+        // 🗑️ Handle explicit removal
+        if (removeImage) {
+            user.setImage(null);
+        }
+        
+        // 💾 URL Path Method: 
+        // Store physical file and save the relative path in the database.
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String path = fileStorageService.storeFile(imageFile, "profiles");
+            if (path != null) {
+                // Prefix with /uploads so the frontend utility can identify it as a server path
+                user.setImage("/uploads/" + path);
+            }
+        }
+
         @SuppressWarnings("null")
         User savedUser = userRepository.save(user);
 

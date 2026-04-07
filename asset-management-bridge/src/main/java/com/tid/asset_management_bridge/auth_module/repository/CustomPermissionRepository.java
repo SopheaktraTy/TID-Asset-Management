@@ -11,5 +11,7 @@ import java.util.List;
 public interface CustomPermissionRepository extends JpaRepository<CustomPermission, Long> {
     List<CustomPermission> findByUserId(Long userId);
 
+    void deleteByUserId(Long userId);
+
     void deleteByUserIdAndModule(Long userId, ModuleEnum module);
 }

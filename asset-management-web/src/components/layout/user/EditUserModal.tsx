@@ -1,18 +1,26 @@
 import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import {
+  Loader2,
+} from "lucide-react";
 
 import { Button } from "../../ui/Button";
 import { Input } from "../../ui/BackgroundColorPlaceholder";
 import { Message } from "../../ui/Message";
+import { Modal } from "../../ui/Modal";
+import { DropdownList } from "../../ui/DropdownList";
+import { ToggleSwitch } from "../../ui/ToggleSwitch";
 
 import type { EditUserFormValues, UserDto } from "../../../types/user.types";
 import { editUserSchema } from "../../../types/user.types";
 import { updateUserApi } from "../../../services/userManagement.service";
-import { Modal } from "../../ui/Modal";
-import { DropdownList } from "../../ui/DropdownList";
-import { ToggleSwitch } from "../../ui/ToggleSwitch";
+import { useTheme } from "../../../hooks/useTheme";
+import { getSafeImageUrl } from "../../../utils/image";
+
+// Baker Tilly logo assets
+import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_Charcoal.png";
+import logoWhite from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_White.png";
 
 interface EditUserModalProps {
   isOpen: boolean;
@@ -37,7 +45,9 @@ const PERMISSIONS_LIST = [
 
 
 export default function EditUserModal({ isOpen, user, onClose, onUpdated }: EditUserModalProps) {
+  const { theme } = useTheme();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const {
@@ -48,7 +58,17 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
     formState: { errors },
   } = useForm<EditUserFormValues>({
     resolver: zodResolver(editUserSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+      role: "",
+      status: "ACTIVE",
+      department: "",
+      permissions: {},
+    },
   });
+
+
 
   useEffect(() => {
     if (user && isOpen) {
@@ -57,6 +77,7 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
         email: user.email,
         role: user.role,
         status: user.status,
+        department: user.department || "",
         permissions: user.permissions || {},
       });
     }
@@ -67,15 +88,20 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
   const handleClose = () => {
     reset();
     setErrorMsg(null);
+    setSuccessMsg(null);
     onClose();
   };
 
   const onSubmit = async (data: EditUserFormValues) => {
     setLoading(true);
     setErrorMsg(null);
+    setSuccessMsg(null);
     try {
       const updatedUser = await updateUserApi(user.id, data);
       onUpdated(updatedUser);
+      setSuccessMsg("User updated successfully!");
+      // Auto-close after 1.2s so the user sees the success message
+      setTimeout(() => handleClose(), 1200);
     } catch (err: any) {
       setErrorMsg(
         err?.response?.data?.message || err.message || "Failed to update user."
@@ -91,14 +117,27 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
       onClose={handleClose}
       maxWidth="max-w-[500px]"
     >
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2">
 
+
+        {/* Header - Logo & Title */}
+        <div className="w-full flex flex-col items-center mb-1">
+          <img
+            src={theme === "dark" ? logoWhite : logoCharcoal}
+            alt="Logo"
+            className="h-8 w-auto object-contain mb-4"
+          />
+          <div className="text-center">
+            <h3 className="text-xl font-black tracking-tight text-[var(--text-main)]">Edit User</h3>
+            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-bold uppercase tracking-wider">Modify Account & Permissions</p>
+          </div>
+        </div>
         {/* Horizontal Info Card with Dashed Border - User Summary */}
         <div className="flex items-center gap-5 px-5 py-5 border border-dashed border-[var(--border-color)] dark:border-[var(--text-muted)]/30 rounded-xl bg-[var(--surface-hover)]/30 shadow-sm dark:shadow-none mb-2 transition-all">
           <div className="flex shrink-0">
             <div className="w-14 h-14 rounded-full border border-[var(--border-color)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-main)] font-bold text-lg overflow-hidden ring-4 ring-[var(--surface-hover)]/50">
               {user.image ? (
-                <img src={user.image} alt={user.username} className="w-full h-full object-cover" />
+                <img src={getSafeImageUrl(user.image)} alt={user.username} className="w-full h-full object-cover" />
               ) : (
                 user.username?.slice(0, 2).toUpperCase()
               )}
@@ -117,22 +156,21 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
 
             <div className="flex items-center gap-3">
               <span className="text-xs text-[var(--text-muted)] truncate">{user.email}</span>
-              <div className={`w-1.5 h-1.5 rounded-full ${user.is_active || user.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-orange-500'}`} />
-              <span className={`text-[11px] font-semibold tracking-tight ${(user.is_active || user.status === 'ACTIVE') ? 'text-emerald-500' : 'text-orange-500'}`}>
-                {(user.is_active || user.status === 'ACTIVE') ? 'Active' : 'Inactive'}
+              <div className={`w-1.5 h-1.5 rounded-full ${user.status === 'ACTIVE' ? 'bg-[#10b981]' : user.status === 'SUSPENDED' ? 'bg-[#ef4444]' : 'bg-[#f59e0b]'}`} />
+              <span className={`text-[11px] font-semibold tracking-tight ${user.status === 'ACTIVE' ? 'text-[#10b981]' : user.status === 'SUSPENDED' ? 'text-[#ef4444]' : 'text-[#f59e0b]'}`}>
+                {user.status === 'ACTIVE' ? 'Active' : user.status === 'SUSPENDED' ? 'Suspended' : 'Inactive'}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col">
-          <h3 className="text-base font-semibold text-[var(--text-main)] mb-2">Edit User Information</h3>
-          <div className="h-px bg-[var(--border-color)] w-full" />
-        </div>
-
-        {errorMsg && <Message variant="error" className="mb-4">{errorMsg}</Message>}
+        <div className="h-px bg-[var(--border-color)] w-full opacity-30 mb-2" />
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 text-left">
+          <div className="pt-2 px-1">
+            <h3 className="text-sm font-bold text-[var(--text-main)] mb-2">Basic Information</h3>
+            <div className="h-px bg-[var(--border-color)] w-full opacity-50 mb-4" />
+          </div>
           <div className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Nickname</label>
@@ -187,6 +225,7 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
                       options={[
                         { label: "Active", value: "ACTIVE" },
                         { label: "Inactive", value: "INACTIVE" },
+                        { label: "Suspended", value: "SUSPENDED" },
                       ]}
                       value={field.value}
                       onChange={field.onChange}
@@ -196,6 +235,32 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
                 />
                 {errors.status && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.status.message}</p>}
               </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Department</label>
+              <Controller
+                name="department"
+                control={control}
+                render={({ field }) => (
+                  <DropdownList
+                    options={[
+                      { label: "— None —", value: "" },
+                      { label: "Office Admin", value: "OFFICE_ADMIN" },
+                      { label: "Tax & Accounting Advisory", value: "TAX_ACCOUNTING_ADVISORY" },
+                      { label: "Legal & Corporate Advisory", value: "LEGAL_CORPORATE_ADVISORY" },
+                      { label: "Audit & Assurance", value: "AUDIT_ASSURANCE" },
+                      { label: "Practice Development & Management", value: "PRACTICE_DEVELOPMENT_MANAGEMENT" },
+                      { label: "Client & Operation Management", value: "CLIENT_OPERATION_MANAGEMENT" },
+                      { label: "Finance & Human Resource", value: "FINANCE_HUMAN_RESOURCE" },
+                      { label: "Technology Innovation and Development", value: "TECHNOLOGY_INNOVATION_DEVELOPMENT" },
+                    ]}
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                    className="w-full"
+                  />
+                )}
+              />
             </div>
           </div>
 
@@ -208,6 +273,7 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
                   <Controller
                     name={`permissions.${module.id}`}
                     control={control}
+                    defaultValue={[]}
                     render={({ field }) => {
                       const isEnabled = (field.value || []).length > 0;
                       return (
@@ -238,7 +304,7 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
                                       const current = field.value || [];
                                       const next = checked
                                         ? [...current, perm.id]
-                                        : current.filter((p) => p !== perm.id);
+                                        : current.filter((p: string) => p !== perm.id);
                                       field.onChange(next);
                                     }}
                                     className="!py-2 border-b border-[var(--border-color)]/20 last:border-0 !justify-start gap-4"
@@ -255,6 +321,8 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
               ))}
             </div>
           </div>
+          {errorMsg && <Message variant="error">{errorMsg}</Message>}
+          {successMsg && <Message variant="success">{successMsg}</Message>}
 
           <div className="pt-1 flex items-center justify-end gap-3 translate-y-1">
             <Button

@@ -32,8 +32,11 @@ api.interceptors.response.use(
     const isRetry = originalRequest._retry === true;
     const isRefreshEndpoint = originalRequest.url?.includes("/api/auth/refresh");
     const isAuthCheckEndpoint = originalRequest.url?.includes("/api/auth/view-profile");
+    // Skip refresh for login — a 401 here means wrong credentials, not expired token.
+    const isLoginEndpoint = originalRequest.url?.includes("/api/auth/signin") ||
+      originalRequest.url?.includes("/api/auth/login");
 
-    if (is401 && !isRetry && !isRefreshEndpoint && !isAuthCheckEndpoint) {
+    if (is401 && !isRetry && !isRefreshEndpoint && !isAuthCheckEndpoint && !isLoginEndpoint) {
       originalRequest._retry = true;
       // 🔄 Use shared lock: Wait for the single active refresh call to finish,
       // avoiding duplicate calls that would invalidate rotating refresh tokens.

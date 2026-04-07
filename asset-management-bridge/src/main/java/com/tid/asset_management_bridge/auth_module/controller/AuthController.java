@@ -3,9 +3,10 @@ package com.tid.asset_management_bridge.auth_module.controller;
 import com.tid.asset_management_bridge.auth_module.dto.*;
 import com.tid.asset_management_bridge.auth_module.service.AuthService;
 import jakarta.validation.Valid;
-
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import com.tid.asset_management_bridge.common.dto.ApiResponse;
 import org.springframework.lang.NonNull;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -100,12 +101,15 @@ public class AuthController {
         return ResponseEntity.ok(new ApiResponse<>(200, "Password changed successfully"));
     }
 
-    @PutMapping("/update-profile")
+    @PutMapping(value = "/update-profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<LoginResponse>> updateProfile(
-            @RequestBody UpdateProfileRequest request) {
+            @RequestPart("username") String username,
+            @RequestPart("department") String department,
+            @RequestPart(value = "removeImage", required = false) String removeImage,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
         Long userId = getAuthenticatedUserId();
         return ResponseEntity
-                .ok(new ApiResponse<>(200, "Profile updated successfully", authService.updateProfile(userId, request)));
+                .ok(new ApiResponse<>(200, "Profile updated successfully", authService.updateProfile(userId, username, department, image, "true".equalsIgnoreCase(removeImage))));
     }
 
     @GetMapping("/view-profile")

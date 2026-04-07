@@ -3,6 +3,7 @@ package com.tid.asset_management_bridge.user_management_module.dto;
 import com.tid.asset_management_bridge.auth_module.entity.ModuleEnum;
 import com.tid.asset_management_bridge.auth_module.entity.PermissionEnum;
 import com.tid.asset_management_bridge.auth_module.entity.RoleEnum;
+import com.tid.asset_management_bridge.auth_module.entity.DepartmentEnum;
 import jakarta.validation.constraints.Email;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,9 @@ public class UpdateUserRequest {
     
     private RoleEnum role;
     
-    private Boolean isActive;
+    private DepartmentEnum department;
+    
+    private com.tid.asset_management_bridge.auth_module.entity.UserStatusEnum status;
     
     private Map<ModuleEnum, List<PermissionEnum>> permissions;
 
@@ -28,8 +31,11 @@ public class UpdateUserRequest {
     public RoleEnum getRole() { return role; }
     public void setRole(RoleEnum role) { this.role = role; }
 
-    public Boolean getIsActive() { return isActive; }
-    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
+    public DepartmentEnum getDepartment() { return department; }
+    public void setDepartment(DepartmentEnum department) { this.department = department; }
+
+    public com.tid.asset_management_bridge.auth_module.entity.UserStatusEnum getStatus() { return status; }
+    public void setStatus(com.tid.asset_management_bridge.auth_module.entity.UserStatusEnum status) { this.status = status; }
 
     public Map<ModuleEnum, List<PermissionEnum>> getPermissions() { return permissions; }
     public void setPermissions(Map<ModuleEnum, List<PermissionEnum>> permissions) { this.permissions = permissions; }

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, KeyRound, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
 
 import { Modal } from "../../ui/Modal";
 import { Button } from "../../ui/Button";
@@ -10,6 +10,12 @@ import { Input } from "../../ui/BackgroundColorPlaceholder";
 import { Message } from "../../ui/Message";
 import { forceResetPasswordApi } from "../../../services/userManagement.service";
 import type { UserDto } from "../../../types/user.types";
+import { useTheme } from "../../../hooks/useTheme";
+
+// Baker Tilly logo assets
+import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_Charcoal.png";
+import logoWhite from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_White.png";
+
 
 const resetPasswordSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -34,6 +40,7 @@ export default function ResetPasswordModal({
   onClose,
   onSuccess,
 }: ResetPasswordModalProps) {
+  const { theme } = useTheme();
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -79,17 +86,21 @@ export default function ResetPasswordModal({
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} maxWidth="max-w-[400px]">
-      <div className="flex flex-col gap-6">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500">
-            <KeyRound size={24} />
-          </div>
-          <div>
+      <div className="flex flex-col gap-2">
+        {/* Header - Logo & Title */}
+        <div className="w-full flex flex-col items-center mb-1">
+          <img
+            src={theme === "dark" ? logoWhite : logoCharcoal}
+            alt="Logo"
+            className="h-8 w-auto object-contain mb-4"
+          />
+          <div className="text-center">
             <h3 className="text-lg font-bold text-[var(--text-main)]">Reset Password</h3>
             <p className="text-xs text-[var(--text-muted)]">Force a password update for administrative purposes.</p>
           </div>
         </div>
+
+        <div className="h-px bg-[var(--border-color)] w-full opacity-30" />
 
         {errorMsg && <Message variant="error">{errorMsg}</Message>}
 
