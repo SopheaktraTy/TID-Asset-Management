@@ -1,6 +1,13 @@
 import { Users } from "lucide-react";
 import type { UserDto } from "../../../types/user.types";
 import { Table, type ColumnDef } from "../../ui/Table";
+import { 
+  toPascalCase, 
+  formatDate, 
+  getInitials, 
+  getAvatarColor 
+} from "../../../utils/format";
+import { getSafeImageUrl } from "../../../utils/image";
 
 export const USER_TABLE_COLUMN_OPTIONS = [
   { key: "username", label: "User" },
@@ -20,44 +27,7 @@ interface UserTableProps {
   hiddenCols: Set<string>;
   onSort: (field: string, dir?: "asc" | "desc") => void;
   onRowClick: (user: UserDto) => void;
-}
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-function toPascalCase(str: string | null | undefined) {
-  if (!str) return "–";
-  return str
-    .split(/[_\s]+/)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
-}
-
-function formatDate(iso: string | null | undefined) {
-  if (!iso) return "–";
-  return new Date(iso).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function getInitials(name: string) {
-  if (!name) return "?";
-  return name.slice(0, 2).toUpperCase();
-}
-
-function avatarColor(name: string) {
-  const colors = [
-    "bg-violet-100 text-violet-700",
-    "bg-blue-100 text-blue-700",
-    "bg-emerald-100 text-emerald-700",
-    "bg-amber-100 text-amber-700",
-    "bg-rose-100 text-rose-700",
-    "bg-cyan-100 text-cyan-700",
-  ];
-  if (!name) return colors[0];
-  let hash = 0;
-  for (const c of name) hash = c.charCodeAt(0) + hash * 31;
-  return colors[Math.abs(hash) % colors.length];
+  menuClassName?: string;
 }
 
 export default function UserTable({
@@ -69,6 +39,7 @@ export default function UserTable({
   hiddenCols,
   onSort,
   onRowClick,
+  menuClassName = "",
 }: UserTableProps) {
   const columns: ColumnDef<UserDto>[] = [
     {
@@ -80,13 +51,13 @@ export default function UserTable({
           <div className="flex items-center shrink-0 relative z-10">
             {user?.image ? (
               <img
-                src={user.image}
+                src={getSafeImageUrl(user.image)}
                 alt={user.username || "User"}
-                className="w-8 h-8 rounded-full object-cover ring-1 ring-[#2b2b2b] shadow-sm"
+                className="w-8 h-8 rounded-full object-cover shadow-sm"
               />
             ) : (
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold border border-[#2b2b2b] ${avatarColor(
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${getAvatarColor(
                   user?.username || ""
                 )}`}
               >
@@ -176,6 +147,7 @@ export default function UserTable({
       onSort={onSort}
       onRowClick={onRowClick}
       emptyMessage={EmptyState}
+      menuClassName={menuClassName}
     />
   );
 }

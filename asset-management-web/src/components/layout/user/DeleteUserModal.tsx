@@ -5,6 +5,7 @@ import { Button } from "../../ui/Button";
 import type { UserDto } from "../../../types/user.types";
 import { deleteUserApi } from "../../../services/userManagement.service";
 import { useTheme } from "../../../hooks/useTheme";
+import { getSafeImageUrl } from "../../../utils/image";
 
 // Baker Tilly logo assets
 import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_Charcoal.png";
@@ -72,7 +73,7 @@ export default function DeleteUserModal({ isOpen, user, onClose, onDeleted }: De
           <div className="shrink-0">
             <div className="w-12 h-12 rounded-full border border-[var(--border-color)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-main)] font-bold text-base overflow-hidden">
               {user.image ? (
-                <img src={user.image} alt={user.username} className="w-full h-full object-cover" />
+                <img src={getSafeImageUrl(user.image)} alt={user.username} className="w-full h-full object-cover" />
               ) : (
                 user.username?.slice(0, 2).toUpperCase()
               )}

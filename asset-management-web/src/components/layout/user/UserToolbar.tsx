@@ -78,6 +78,7 @@ export default function UserToolbar({
           options={ROLE_OPTIONS}
           value={roleFilter}
           onChange={onRoleChange}
+          panelClassName="bg-[var(--bg)]"
         />
 
         {/* Status filter */}
@@ -85,6 +86,7 @@ export default function UserToolbar({
           options={STATUS_OPTIONS}
           value={statusFilter}
           onChange={onStatusChange}
+          panelClassName="bg-[var(--bg)]"
         />
 
         {/* Column display */}
@@ -93,6 +95,7 @@ export default function UserToolbar({
           hiddenColumns={hiddenCols}
           onToggleColumn={onToggleColumn}
           onSetHiddenColumns={onSetHiddenCols}
+          panelClassName="bg-[var(--bg)]"
         />
       </div>
 

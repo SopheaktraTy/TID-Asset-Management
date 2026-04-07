@@ -1,5 +1,7 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { Columns, ChevronDown, Check } from "lucide-react";
+import { Portal } from "./Portal";
+import { useOnClickOutside } from "../../hooks/useOnClickOutside";
 
 export interface ColumnOption {
   key: string;
@@ -11,36 +13,21 @@ interface ColumnGridDropdownProps {
   hiddenColumns: Set<string>;
   onToggleColumn: (key: string) => void;
   onSetHiddenColumns?: (keys: Set<string>) => void;
+  panelClassName?: string;
 }
 
-function useOnClickOutside(
-  ref: React.RefObject<HTMLElement | null>,
-  handler: () => void
-) {
-  useEffect(() => {
-    const listener = (event: MouseEvent | TouchEvent) => {
-      if (!ref.current || ref.current.contains(event.target as Node)) return;
-      handler();
-    };
-    document.addEventListener("mousedown", listener);
-    document.addEventListener("touchstart", listener);
-    return () => {
-      document.removeEventListener("mousedown", listener);
-      document.removeEventListener("touchstart", listener);
-    };
-  }, [ref, handler]);
-}
 
 export function ColumnGridDropdown({
   columns,
   hiddenColumns,
   onToggleColumn,
   onSetHiddenColumns,
+  panelClassName = "",
 }: ColumnGridDropdownProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  useOnClickOutside(containerRef, () => setOpen(false));
+  const panelRef = useRef<HTMLDivElement>(null);
+  useOnClickOutside([containerRef, panelRef], () => setOpen(false));
 
   // ── Smart responsive auto-hiding ──────────────────────────────────────────
   useEffect(() => {
@@ -78,12 +65,40 @@ export function ColumnGridDropdown({
     return () => window.removeEventListener("resize", handleResize);
   }, [onSetHiddenColumns, hiddenColumns]);
 
+  const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
+
+  const updateCoords = React.useCallback(() => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setCoords({
+        top: rect.bottom,
+        left: rect.left,
+        width: rect.width,
+      });
+    }
+  }, []);
+
+  useLayoutEffect(() => {
+    if (open) {
+      updateCoords();
+      window.addEventListener("resize", updateCoords);
+      window.addEventListener("scroll", updateCoords, true);
+    }
+    return () => {
+      window.removeEventListener("resize", updateCoords);
+      window.removeEventListener("scroll", updateCoords, true);
+    };
+  }, [open, updateCoords]);
+
   return (
     <div className="relative inline-block text-left" ref={containerRef}>
       {/* Trigger button */}
       <button
         type="button"
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() => {
+          if (!open) updateCoords();
+          setOpen((prev) => !prev);
+        }}
         className={`
           flex items-center gap-1.5 px-3 py-2 text-xs font-medium
           bg-[var(--bg)] border border-[var(--border-color)] rounded-lg
@@ -101,50 +116,59 @@ export function ColumnGridDropdown({
         />
       </button>
 
-      {/* Dropdown panel */}
-      <div
-        className={`
-          absolute right-0 z-50 mt-1 w-44
-          bg-[var(--surface)] border border-[var(--border-color)] rounded-xl
-          shadow-lg shadow-black/10
-          overflow-hidden
-          transition-all duration-150 origin-top
-          ${open ? "opacity-100 scale-y-100 pointer-events-auto" : "opacity-0 scale-y-95 pointer-events-none"}
-        `}
-      >
-        <ul className="py-1" role="listbox">
-          {columns.map((col) => {
-            const isVisible = !hiddenColumns.has(col.key);
-            return (
-              <li
-                key={col.key}
-                role="option"
-                aria-selected={isVisible}
-                onClick={() => onToggleColumn(col.key)}
-                className="flex items-center gap-2 px-3 py-2 text-xs cursor-pointer select-none
-                  text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors duration-100 rounded-lg mx-1"
-              >
-                {/* Custom checkbox */}
-                <div
-                  className={`flex items-center justify-center w-4 h-4 rounded border shrink-0 transition-colors duration-100 ${isVisible
-                    ? "bg-[var(--color-growth-green)] border-[var(--color-growth-green)]"
-                    : "border-[var(--border-color)] bg-transparent"
-                    }`}
-                >
-                  {isVisible && (
-                    <Check
-                      size={11}
-                      strokeWidth={3}
-                      className="text-white"
-                    />
-                  )}
-                </div>
-                <span>{col.label}</span>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+      {/* Dropdown panel via Portal */}
+      {open && coords.top !== 0 && (
+        <Portal>
+          <div
+            ref={panelRef}
+            className={`
+              fixed z-[9999] mt-1 w-44
+              border border-[var(--border-color)] rounded-xl
+              shadow-lg shadow-black/10
+              overflow-hidden
+              transition-opacity duration-150
+              ${panelClassName || "bg-[var(--surface)]"}
+              ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
+            `}
+            style={{
+              top: `${coords.top}px`,
+              left: `${coords.left + coords.width - 176}px`, // Adjusting for right alignment (w-44 = 176px)
+            }}
+          >
+            <ul className="py-1" role="listbox">
+              {columns.map((col) => {
+                const isVisible = !hiddenColumns.has(col.key);
+                return (
+                  <li
+                    key={col.key}
+                    role="option"
+                    aria-selected={isVisible}
+                    onClick={() => onToggleColumn(col.key)}
+                    className="flex items-center gap-2 px-3 py-2 text-xs cursor-pointer select-none
+                      text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors duration-100 rounded-lg mx-1"
+                  >
+                    <div
+                      className={`flex items-center justify-center w-4 h-4 rounded border shrink-0 transition-colors duration-100 ${isVisible
+                        ? "bg-[var(--color-growth-green)] border-[var(--color-growth-green)]"
+                        : "border-[var(--border-color)] bg-transparent"
+                        }`}
+                    >
+                      {isVisible && (
+                        <Check
+                          size={11}
+                          strokeWidth={3}
+                          className="text-white"
+                        />
+                      )}
+                    </div>
+                    <span>{col.label}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </Portal>
+      )}
     </div>
   );
 }

@@ -1,12 +1,12 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect } from "react";
 import { Camera, X, User as UserIcon, Loader2, Pencil } from "lucide-react";
-import { useAuthStore } from "../../../store/authStore";
-import { updateProfileApi } from "../../../services/user.service";
-import { getSafeImageUrl, createLocalPreviewUrl, revokeLocalPreviewUrl } from "../../../utils/image";
+import { getSafeImageUrl } from "../../../utils/image";
 import { Modal } from "../../ui/Modal";
 import { Button } from "../../ui/Button";
+import { Message } from "../../ui/Message";
 import { useTheme } from "../../../hooks/useTheme";
 import { DropdownReverseList, type DropdownOption } from "../../ui/DropdownReverseList";
+import { useProfileUpdate } from "../../../hooks/useProfileUpdate";
 
 // Baker Tilly logo assets
 import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_Charcoal.png";
@@ -29,39 +29,37 @@ interface ProfileWithViewAndEditModalProps {
 }
 
 export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithViewAndEditModalProps) => {
-  const { user, setAuth, token } = useAuthStore();
   const { theme } = useTheme();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Refs for click-outside detection
-  const nameRowRef = useRef<HTMLDivElement>(null);
-  const deptRowRef = useRef<HTMLDivElement>(null);
-  const footerRef = useRef<HTMLDivElement>(null);
-
-  const [editedName, setEditedName] = useState("");
-  const [editedDept, setEditedDept] = useState("");
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [isEditingDept, setIsEditingDept] = useState(false);
-  const [tempImage, setTempImage] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isImageDeleted, setIsImageDeleted] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    user,
+    editedName,
+    setEditedName,
+    editedDept,
+    setEditedDept,
+    isEditing,
+    setIsEditing,
+    tempImage,
+    handleImageUpload,
+    handleRemoveImage,
+    isUpdating,
+    errorMsg,
+    successMsg,
+    handleUpdateProfile,
+    fileInputRef,
+    nameRowRef,
+    deptRowRef,
+    footerRef,
+    resetForm,
+  } = useProfileUpdate({ onClose });
 
   useEffect(() => {
-    if (isOpen && user) {
-      setEditedName(user.username);
-      setEditedDept((user as any).department || "");
-      setTempImage(user.image || null);
-      setSelectedFile(null);
-      setIsImageDeleted(false);
-      setIsEditingName(false);
-      setIsEditingDept(false);
-      setError(null);
+    if (isOpen) {
+      resetForm();
     }
-  }, [isOpen, user]);
+  }, [isOpen, resetForm]);
 
-  // Handle click outside to close editing modes
+  // Handle click outside to close editing mode
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
@@ -72,71 +70,29 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
         return;
       }
 
-      // If editing name, close if click is not in name row
-      if (isEditingName && nameRowRef.current && !nameRowRef.current.contains(target)) {
-        setEditedName(user.username);
-        setIsEditingName(false);
-      }
-
-      // If editing dept, close if click is not in dept row
-      if (isEditingDept && deptRowRef.current && !deptRowRef.current.contains(target)) {
-        setEditedDept((user as any).department || "");
-        setIsEditingDept(false);
+      // If editing, close if click is not in any row
+      if (isEditing) {
+        const inNameRow = nameRowRef.current && nameRowRef.current.contains(target);
+        const inDeptRow = deptRowRef.current && deptRowRef.current.contains(target);
+        
+        if (!inNameRow && !inDeptRow) {
+          setEditedName(user.username);
+          setEditedDept((user as any).department || "");
+          setIsEditing(false);
+        }
       }
     };
 
-    if (isEditingName || isEditingDept) {
+    if (isEditing) {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isEditingName, isEditingDept]);
+  }, [isEditing, user, editedName, editedDept, setEditedName, setEditedDept, setIsEditing, footerRef, nameRowRef, deptRowRef]);
 
   if (!user) return null;
-
-  const handleUpdateProfile = async () => {
-    setIsUpdating(true);
-    setError(null);
-    try {
-      const formData = new FormData();
-      formData.append("username", editedName);
-      formData.append("department", editedDept);
-      formData.append("removeImage", String(isImageDeleted));
-      
-      if (selectedFile) {
-        formData.append("image", selectedFile);
-      }
-
-      const data = await updateProfileApi(formData);
-      if (token && user) setAuth(token, { ...user, ...data });
-      setIsEditingName(false);
-      setIsEditingDept(false);
-      onClose();
-      window.location.reload();
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to update profile");
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  const handleModalImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // 💡 High Performance 'URL Base Method':
-      // Create a fast, local reference URL for immediate preview without reading the whole file yet.
-      const localUrl = createLocalPreviewUrl(file);
-
-      // Revoke the old preview URL if it exists to avoid memory leaks
-      revokeLocalPreviewUrl(tempImage);
-
-      setTempImage(localUrl);
-      setSelectedFile(file);
-      setIsImageDeleted(false);
-    }
-  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -144,7 +100,18 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
         {/* Header - Logo on Right */}
         <div className="flex items-center justify-between mb-10 w-full px-2">
           <div className="flex flex-col gap-1">
-            <h3 className="text-normal  font-black text-[var(--text-main)] tracking-tight">Account Settings</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-normal font-black text-[var(--text-main)] tracking-tight">Account Settings</h3>
+              {user.isActive ? (
+                <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-bold border border-emerald-500/20 uppercase tracking-wider">
+                  Active
+                </span>
+              ) : (
+                <span className="px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-500 text-[10px] font-bold border border-red-500/20 uppercase tracking-wider">
+                  Inactive
+                </span>
+              )}
+            </div>
             <p className="text-xs text-[var(--text-muted)] font-medium">Manage your profile and personal information</p>
           </div>
           <img
@@ -154,9 +121,15 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
           />
         </div>
 
-        {error && (
-          <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs text-center">
-            {error}
+        {errorMsg && (
+          <div className="mb-4">
+            <Message variant="error">{errorMsg}</Message>
+          </div>
+        )}
+
+        {successMsg && (
+          <div className="mb-4">
+            <Message variant="success">{successMsg}</Message>
           </div>
         )}
 
@@ -169,7 +142,12 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
                 className="w-32 h-32 rounded-full border-2 border-emerald-500 p-1.5 overflow-hidden ring-4 ring-emerald-500/5 transition-all cursor-pointer relative"
               >
                 {tempImage ? (
-                  <img src={getSafeImageUrl(tempImage)} alt="Profile" className="w-full h-full rounded-full object-cover" />
+                  <img 
+                    src={getSafeImageUrl(tempImage)} 
+                    alt="Profile" 
+                    className="w-full h-full rounded-full object-cover shadow-inner"
+                    style={{ imageRendering: "auto" }}
+                  />
                 ) : (
                   <div className="w-full h-full rounded-full bg-[var(--surface-hover)] flex items-center justify-center">
                     <UserIcon size={48} className="text-[var(--text-muted)]" />
@@ -184,18 +162,13 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
               </div>
               {tempImage && (
                 <button
-                  onClick={(e) => { 
-                    e.stopPropagation(); 
-                    setTempImage(null); 
-                    setSelectedFile(null);
-                    setIsImageDeleted(true);
-                  }}
+                  onClick={handleRemoveImage}
                   className="absolute top-1 left-1 w-7 h-7 bg-[var(--surface)] border border-[var(--border-color)] rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-red-500 shadow-sm transition-colors z-20"
                 >
                   <X size={16} />
                 </button>
               )}
-              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleModalImageUpload} />
+              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
             </div>
           </div>
 
@@ -205,7 +178,7 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
             <div className="py-4 grid grid-cols-[120px_1fr] items-center group">
               <label className="text-sm [0.75rem] font-bold text-[var(--text-muted)]">Username</label>
               <div ref={nameRowRef} className="flex items-center justify-between gap-4 min-h-[36px]">
-                {isEditingName ? (
+                {isEditing ? (
                   <div className="w-full relative flex items-center">
                     <input
                       autoFocus
@@ -215,30 +188,21 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
                       placeholder="Enter username"
                       className="w-full bg-[var(--surface-hover)] border border-emerald-500/50 rounded-lg px-3 py-1.5 text-sm font-semibold text-[var(--text-main)] outline-none focus:ring-2 focus:ring-emerald-500/5 transition-all"
                     />
-                    <button
-                      onClick={() => setIsEditingName(false)}
-                      className="absolute right-2 p-1 text-emerald-500 hover:bg-emerald-500/10 rounded-md transition-colors"
-                    >
+                    <div className="absolute right-2 p-1 text-emerald-500 opacity-50">
                       <Pencil size={12} />
-                    </button>
+                    </div>
                   </div>
                 ) : (
                   <div className="flex items-center justify-between w-full">
                     <span
                       className="text-xs font-bold text-[var(--text-main)] cursor-pointer hover:text-emerald-500 transition-colors"
-                      onClick={() => {
-                        setIsEditingName(true);
-                        setIsEditingDept(false);
-                      }}
+                      onClick={() => setIsEditing(true)}
                     >
                       {user.username}
                     </span>
                     <button
-                      onClick={() => {
-                        setIsEditingName(true);
-                        setIsEditingDept(false);
-                      }}
-                      className="p-1.5 opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-emerald-500 transition-all"
+                      onClick={() => setIsEditing(true)}
+                      className="p-1.5 opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-emerald-500 transition-all font-semibold"
                     >
                       <Pencil size={14} />
                     </button>
@@ -251,32 +215,28 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
             <div className="py-4 grid grid-cols-[120px_1fr] items-center group">
               <label className="text-sm [0.75rem] font-bold text-[var(--text-muted)]">Department</label>
               <div ref={deptRowRef} className="flex items-center justify-between gap-4 min-h-[36px]">
-                {isEditingDept ? (
+                {isEditing ? (
                   <div className="w-full">
                     <DropdownReverseList
                       options={DEPARTMENTS}
                       value={editedDept}
                       onChange={(val) => setEditedDept(val)}
                       placeholder="Select department..."
-                      className="w-full"
+                      className="w-full font-semibold"
+                      panelClassName="bg-[var(--bg)]"
+                      triggerClassName="border-emerald-500/50 focus:border-emerald-500"
                     />
                   </div>
                 ) : (
                   <div className="flex items-center justify-between w-full">
                     <span
                       className="text-xs font-medium text-[var(--text-main)] cursor-pointer hover:text-emerald-500 transition-colors"
-                      onClick={() => {
-                        setIsEditingDept(true);
-                        setIsEditingName(false);
-                      }}
+                      onClick={() => setIsEditing(true)}
                     >
                       {DEPARTMENTS.find(d => d.value === (user as any).department)?.label || (user as any).department || "Not specified"}
                     </span>
                     <button
-                      onClick={() => {
-                        setIsEditingDept(true);
-                        setIsEditingName(false);
-                      }}
+                      onClick={() => setIsEditing(true)}
                       className="p-1.5 opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-emerald-500 transition-all"
                     >
                       <Pencil size={14} />

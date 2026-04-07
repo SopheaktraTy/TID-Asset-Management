@@ -42,7 +42,6 @@ export function Modal({ isOpen, onClose, children, maxWidth = "max-w-[500px]" }:
     >
       <div
         className={`w-full ${maxWidth} bg-[var(--bg)] rounded-3xl shadow-2xl border border-[var(--border-color)] overflow-hidden transition-all duration-300 animate-in fade-in zoom-in-95 pointer-events-auto flex flex-col max-h-[90vh]`}
-        onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Content with internal scroll */}

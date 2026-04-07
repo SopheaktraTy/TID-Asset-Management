@@ -9,6 +9,8 @@ import {
   ArrowLeft,
   ArrowRight,
 } from "lucide-react";
+import { Portal } from "./Portal";
+import { useOnClickOutside } from "../../hooks/useOnClickOutside";
 
 export interface ColumnDef<T> {
   key: string;
@@ -29,26 +31,9 @@ interface TableProps<T> {
   onSort?: (field: string, dir?: "asc" | "desc") => void;
   onRowClick?: (item: T) => void;
   emptyMessage?: React.ReactNode;
+  menuClassName?: string;
 }
 
-// ─── Click Outside Hook ────────────────────────────────────────────────────────
-function useOnClickOutside(
-  ref: React.RefObject<HTMLElement | null>,
-  handler: () => void
-) {
-  useEffect(() => {
-    const listener = (event: MouseEvent | TouchEvent) => {
-      if (!ref.current || ref.current.contains(event.target as Node)) return;
-      handler();
-    };
-    document.addEventListener("mousedown", listener);
-    document.addEventListener("touchstart", listener);
-    return () => {
-      document.removeEventListener("mousedown", listener);
-      document.removeEventListener("touchstart", listener);
-    };
-  }, [ref, handler]);
-}
 
 export function Table<T>({
   data,
@@ -60,6 +45,7 @@ export function Table<T>({
   onSort,
   onRowClick,
   emptyMessage = "No data found",
+  menuClassName = "",
 }: TableProps<T>) {
   // ── Column order state (keys) ──────────────────────────────────────────────
   const [colOrder, setColOrder] = useState<string[]>(() =>
@@ -82,6 +68,8 @@ export function Table<T>({
   const menuRef = useRef<HTMLDivElement>(null);
 
   useOnClickOutside(menuRef, () => setMenuOpen(null));
+
+  const [menuCoords, setMenuCoords] = useState({ top: 0, left: 0 });
 
   // ── Drag & Drop State ──────────────────────────────────────────────────────
   const [draggedCol, setDraggedCol] = useState<string | null>(null);
@@ -161,7 +149,7 @@ export function Table<T>({
   );
 
   return (
-    <div className="w-full transition-all duration-200 pb-2 overflow-x-auto custom-scrollbar">
+    <div className="w-full transition-all duration-200 overflow-x-auto custom-scrollbar">
       <table className="w-full min-w-max text-xs">
         <thead className="relative z-20">
           <tr className="border-b border-[var(--border-color)] dark:border-[var(--border-color)]/80">
@@ -185,6 +173,12 @@ export function Table<T>({
                       onClick={(e) => {
                         if (!col.sortable) return;
                         e.stopPropagation();
+                        // Instead of just toggling the key, we also want to capture the rect
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setMenuCoords({
+                          top: rect.bottom,
+                          left: rect.left,
+                        });
                         setMenuOpen(menuOpen === col.key ? null : col.key);
                       }}
                     >
@@ -197,69 +191,75 @@ export function Table<T>({
                         />
                       )}
 
-                      {/* Column Menu Dropdown (SortDropdown) */}
-                      {menuOpen === col.key && (
-                        <div
-                          ref={menuRef}
-                          className="absolute top-full left-0 mt-2 w-38 bg-[var(--surface)] border border-[var(--border-color)] rounded-lg shadow-xl z-50 text-[var(--text-main)] py-1 font-normal normal-case tracking-normal overflow-hidden cursor-default"
-                          style={{ minWidth: "148px" }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {col.sortable && (
-                            <>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleSort(col.key, "asc");
-                                }}
-                                className="flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors duration-100"
-                              >
-                                <ArrowUp size={13} className="text-[var(--text-muted)] shrink-0" />
-                                Sort Ascending
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleSort(col.key, "desc");
-                                }}
-                                className="flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors duration-100"
-                              >
-                                <ArrowDown size={13} className="text-[var(--text-muted)] shrink-0" />
-                                Sort Descending
-                              </button>
-                              <div className="h-px bg-[var(--border-color)] dark:bg-[var(--border-color)]/50 my-1" />
-                            </>
-                          )}
+                      {/* Column Menu Dropdown (SortDropdown) — now via Portal */}
+                      {menuOpen === col.key && menuCoords.top !== 0 && (
+                        <Portal>
+                          <div
+                            ref={menuRef}
+                            className={`fixed z-[9999] mt-2 w-38 border border-[var(--border-color)] rounded-lg shadow-xl text-[var(--text-main)] py-1 font-normal normal-case tracking-normal overflow-hidden cursor-default transition-opacity duration-150 ${menuClassName || "bg-[var(--surface)]"}`}
+                            style={{
+                              top: `${menuCoords.top}px`,
+                              left: `${menuCoords.left}px`,
+                              minWidth: "148px",
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {col.sortable && (
+                              <>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleSort(col.key, "asc");
+                                  }}
+                                  className="flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors duration-100"
+                                >
+                                  <ArrowUp size={13} className="text-[var(--text-muted)] shrink-0" />
+                                  Sort Ascending
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleSort(col.key, "desc");
+                                  }}
+                                  className="flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors duration-100"
+                                >
+                                  <ArrowDown size={13} className="text-[var(--text-muted)] shrink-0" />
+                                  Sort Descending
+                                </button>
+                                <div className="h-px bg-[var(--border-color)] dark:bg-[var(--border-color)]/50 my-1" />
+                              </>
+                            )}
 
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (!isFirst) moveColumn(col.key, "left");
-                            }}
-                            disabled={isFirst}
-                            className={`flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs transition-colors duration-100 ${isFirst
-                              ? "text-[var(--text-muted)] opacity-40 cursor-not-allowed"
-                              : "text-[var(--text-main)] hover:bg-[var(--surface-hover)] cursor-pointer"
-                              }`}
-                          >
-                            <ArrowLeft size={13} className="shrink-0" />
-                            Move to Left
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (!isLast) moveColumn(col.key, "right");
-                            }}
-                            disabled={isLast}
-                            className={`flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs transition-colors duration-100 ${isLast
-                              ? "text-[var(--text-muted)] opacity-40 cursor-not-allowed"
-                              : "text-[var(--text-main)] hover:bg-[var(--surface-hover)] cursor-pointer"
-                              }`}
-                          >
-                            <ArrowRight size={13} className="shrink-0" />
-                            Move to Right
-                          </button>
-                        </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (!isFirst) moveColumn(col.key, "left");
+                              }}
+                              disabled={isFirst}
+                              className={`flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs transition-colors duration-100 ${isFirst
+                                ? "text-[var(--text-muted)] opacity-40 cursor-not-allowed"
+                                : "text-[var(--text-main)] hover:bg-[var(--surface-hover)] cursor-pointer"
+                                }`}
+                            >
+                              <ArrowLeft size={13} className="shrink-0" />
+                              Move to Left
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (!isLast) moveColumn(col.key, "right");
+                              }}
+                              disabled={isLast}
+                              className={`flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs transition-colors duration-100 ${isLast
+                                ? "text-[var(--text-muted)] opacity-40 cursor-not-allowed"
+                                : "text-[var(--text-main)] hover:bg-[var(--surface-hover)] cursor-pointer"
+                                }`}
+                            >
+                              <ArrowRight size={13} className="shrink-0" />
+                              Move to Right
+                            </button>
+                          </div>
+                        </Portal>
                       )}
                     </span>
                   </div>

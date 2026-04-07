@@ -55,6 +55,7 @@ export interface ProfileResponse {
   image: string | null;
   role: RoleEnum;
   department: string | null;
+  isActive: boolean;
   permissions: Record<ModuleEnum, PermissionEnum[]>;
 }
 

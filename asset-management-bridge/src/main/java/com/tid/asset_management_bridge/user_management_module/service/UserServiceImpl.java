@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@SuppressWarnings("null")
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -98,16 +97,16 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserResponse getUserById(@NonNull Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        User user = java.util.Objects.requireNonNull(userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id)));
         return userMapper.toUserResponse(user);
     }
 
     @Override
     @Transactional
     public void deleteUser(@NonNull Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        User user = java.util.Objects.requireNonNull(userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id)));
         userRepository.delete(user);
     }
 
@@ -141,8 +140,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponse updateUser(@NonNull Long id,
             @NonNull com.tid.asset_management_bridge.user_management_module.dto.UpdateUserRequest request) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        User user = java.util.Objects.requireNonNull(userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id)));
 
         if (request.getUsername() != null && !request.getUsername().equals(user.getUsername())) {
             if (userRepository.findByUsername(request.getUsername()).isPresent()) {
@@ -197,15 +196,15 @@ public class UserServiceImpl implements UserService {
 
         // Single save — Hibernate flushes the collection changes (DELETE orphans +
         // INSERT new)
-        User saved = userRepository.save(user);
+        User saved = java.util.Objects.requireNonNull(userRepository.save(user));
         return userMapper.toUserResponse(saved);
     }
 
     @Override
     @Transactional
     public void forceResetPassword(@NonNull Long id, @NonNull String newPassword) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        User user = java.util.Objects.requireNonNull(userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id)));
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }

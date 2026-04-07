@@ -197,6 +197,7 @@ export const SignUpForm = () => {
                                 onChange={field.onChange}
                                 placeholder="Select a department..."
                                 className="w-full"
+                                triggerClassName="text-sm focus:ring-2 focus:ring-[var(--color-growth-green)]/20"
                             />
                         )}
                     />

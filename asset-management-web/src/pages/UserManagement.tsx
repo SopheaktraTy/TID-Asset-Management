@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Users, ChevronRight as ArrowRight } from "lucide-react";
 import Header from "../components/layout/Header";
@@ -34,39 +33,10 @@ export default function UserManagementPage() {
     setEditUser,
     handleSort,
     handleSearch,
+    hiddenCols,
+    setHiddenCols,
+    handleToggleColumn,
   } = useUserManagement();
-
-  const [hiddenCols, setHiddenCols] = useState<Set<string>>(new Set());
-
-  const handleToggleColumn = (key: string) => {
-    setHiddenCols((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  };
-
-  // ── Auto-hide columns based on screen width on mount ────────────────────────
-  useEffect(() => {
-    const width = window.innerWidth;
-    setHiddenCols((prev) => {
-      const next = new Set(prev);
-      // Mobile (< 768px): Hide Department, Joined, Updated At
-      if (width < 768) {
-        next.add("department");
-        next.add("created_at");
-        next.add("updated_at");
-      }
-      // Tablet (< 1024px): Hide Joined, Updated At
-      else if (width < 1024) {
-        next.add("created_at");
-        next.add("updated_at");
-      }
-      return next;
-    });
-  }, []); // Only on mount to establish a default
-
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
@@ -111,6 +81,7 @@ export default function UserManagementPage() {
             hiddenCols={hiddenCols}
             onSort={handleSort}
             onRowClick={(user) => navigate(`/user-detail/${user.id}`)}
+            menuClassName="bg-[var(--bg)]"
           />
 
           <Pagination
@@ -120,6 +91,7 @@ export default function UserManagementPage() {
             totalPages={totalPages}
             onPageChange={setPage}
             onPageSizeChange={(size: number) => { setPageSize(size); setPage(0); }}
+            panelClassName="bg-[var(--bg)]"
           />
         </div>
       </main>

@@ -9,6 +9,7 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
   pageSizeOptions?: number[];
+  panelClassName?: string;
 }
 
 export default function Pagination({
@@ -19,6 +20,7 @@ export default function Pagination({
   onPageChange,
   onPageSizeChange,
   pageSizeOptions = [5, 10, 20, 50],
+  panelClassName = "",
 }: PaginationProps) {
   // Pagination pages to show
   const pageRange = () => {
@@ -48,6 +50,7 @@ export default function Pagination({
             value={String(pageSize)}
             onChange={(val) => onPageSizeChange(Number(val))}
             className="[&>button]:!text-[11px] [&>button]:!py-1 [&>button]:!px-2 [&>div]:!min-w-[70px] [&_ul]:!py-1 [&_li]:!py-1 [&_li]:!px-2 [&_li]:!text-[11px] [&_svg]:!w-3 [&_svg]:!h-3"
+            panelClassName={panelClassName}
           />
         </div>
       </div>

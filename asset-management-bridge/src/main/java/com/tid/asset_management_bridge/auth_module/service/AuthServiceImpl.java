@@ -214,11 +214,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public LoginResponse updateProfile(@NonNull Long userId, String username, String department, org.springframework.web.multipart.MultipartFile imageFile, boolean removeImage) {
+    public ProfileResponse updateProfile(@NonNull Long userId, String username, String department, org.springframework.web.multipart.MultipartFile imageFile, boolean removeImage) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if (username != null && !username.isBlank()) {
+        if (username != null && !username.isBlank() && !username.equals(user.getUsername())) {
+            if (userRepository.findByUsername(username).isPresent()) {
+                throw new ConflictException("Username is already taken");
+            }
             user.setUsername(username);
         }
         if (department != null && !department.isBlank()) {
@@ -229,8 +232,12 @@ public class AuthServiceImpl implements AuthService {
             }
         }
         
+        // Capture old image path for cleanup
+        String oldImage = user.getImage();
+        
         // 🗑️ Handle explicit removal
-        if (removeImage) {
+        if (removeImage && oldImage != null) {
+            fileStorageService.deleteFile(oldImage);
             user.setImage(null);
         }
         
@@ -239,17 +246,18 @@ public class AuthServiceImpl implements AuthService {
         if (imageFile != null && !imageFile.isEmpty()) {
             String path = fileStorageService.storeFile(imageFile, "profiles");
             if (path != null) {
+                // If there was an old image, remove it physically now
+                if (oldImage != null) {
+                    fileStorageService.deleteFile(oldImage);
+                }
                 // Prefix with /uploads so the frontend utility can identify it as a server path
                 user.setImage("/uploads/" + path);
             }
         }
 
-        @SuppressWarnings("null")
-        User savedUser = userRepository.save(user);
+        User savedUser = java.util.Objects.requireNonNull(userRepository.save(user));
 
-        CustomUserDetails userDetails = new CustomUserDetails(savedUser);
-        String token = jwtUtil.generateToken(userDetails);
-        return new LoginResponse(token, savedUser.getId());
+        return userMapper.toProfileResponse(savedUser);
     }
 
     @Override

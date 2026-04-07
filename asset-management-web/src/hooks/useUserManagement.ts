@@ -22,6 +22,32 @@ export function useUserManagement() {
   const [addOpen, setAddOpen] = useState(false);
   const [editUser, setEditUser] = useState<UserDto | null>(null);
 
+  // Table Columns
+  const [hiddenCols, setHiddenCols] = useState<Set<string>>(new Set());
+
+  const handleToggleColumn = (key: string) => {
+    setHiddenCols((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  // ── Auto-hide columns based on screen width on mount ────────────────────────
+  useEffect(() => {
+    const width = window.innerWidth;
+    setHiddenCols((prev) => {
+      const next = new Set(prev);
+      if (width < 768) {
+        ["department", "created_at", "updated_at"].forEach(k => next.add(k));
+      } else if (width < 1024) {
+        ["created_at", "updated_at"].forEach(k => next.add(k));
+      }
+      return next;
+    });
+  }, []);
+
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
@@ -91,5 +117,8 @@ export function useUserManagement() {
     setEditUser,
     handleSort,
     handleSearch,
+    hiddenCols,
+    setHiddenCols,
+    handleToggleColumn,
   };
 }

@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
 
@@ -8,6 +6,7 @@ import { Modal } from "../../ui/Modal";
 import { Button } from "../../ui/Button";
 import { Input } from "../../ui/BackgroundColorPlaceholder";
 import { Message } from "../../ui/Message";
+import { useUserForm } from "../../../hooks/useUserForm";
 import { forceResetPasswordApi } from "../../../services/userManagement.service";
 import type { UserDto } from "../../../types/user.types";
 import { useTheme } from "../../../hooks/useTheme";
@@ -41,48 +40,34 @@ export default function ResetPasswordModal({
   onSuccess,
 }: ResetPasswordModalProps) {
   const { theme } = useTheme();
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
-    handleSubmit,
-    reset,
     formState: { errors },
-  } = useForm<ResetPasswordValues>({
-    resolver: zodResolver(resetPasswordSchema),
+    loading,
+    errorMsg,
+    successMsg,
+    handleClose,
+    handleSubmit,
+  } = useUserForm<ResetPasswordValues>({
+    schema: resetPasswordSchema,
+    defaultValues: {
+      password: "",
+      confirmPassword: "",
+    },
+    onSubmit: (values) => forceResetPasswordApi(user!.id, values.password),
+    onSuccess: () => onSuccess(user!),
+    onClose: () => {
+      setShowPassword(false);
+      setShowConfirmPassword(false);
+      onClose();
+    },
+    successMessage: "Password updated successfully!",
   });
 
   if (!isOpen || !user) return null;
-
-  const handleClose = () => {
-    reset();
-    setErrorMsg(null);
-    setIsSuccess(false);
-    setShowPassword(false);
-    setShowConfirmPassword(false);
-    onClose();
-  };
-
-  const onSubmit = async (values: ResetPasswordValues) => {
-    setLoading(true);
-    setErrorMsg(null);
-    try {
-      await forceResetPasswordApi(user.id, values.password);
-      setIsSuccess(true);
-      setTimeout(() => {
-        onSuccess(user);
-        handleClose();
-      }, 1500);
-    } catch (err: any) {
-      setErrorMsg(err?.response?.data?.message || err.message || "Failed to reset password.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} maxWidth="max-w-[400px]">
@@ -104,14 +89,14 @@ export default function ResetPasswordModal({
 
         {errorMsg && <Message variant="error">{errorMsg}</Message>}
 
-        {isSuccess ? (
+        {successMsg ? (
           <div className="py-8 flex flex-col items-center justify-center gap-3 animate-in fade-in zoom-in duration-300">
             <CheckCircle2 size={48} className="text-emerald-500" />
             <p className="font-bold text-[var(--text-main)]">Password Updated!</p>
-            <p className="text-xs text-[var(--text-muted)] text-center">The user's credentials have been successfully reset.</p>
+            <p className="text-xs text-[var(--text-muted)] text-center">{successMsg}</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="bg-[var(--surface-hover)]/30 border border-dashed border-[var(--border-color)] rounded-xl p-4 flex items-start gap-3">
               <AlertCircle size={16} className="text-orange-500 shrink-0 mt-0.5" />
               <p className="text-[11px] text-[var(--text-muted)] leading-relaxed italic">

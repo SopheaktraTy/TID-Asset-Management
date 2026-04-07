@@ -102,14 +102,14 @@ public class AuthController {
     }
 
     @PutMapping(value = "/update-profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<LoginResponse>> updateProfile(
+    public ResponseEntity<ApiResponse<ProfileResponse>> updateProfile(
             @RequestPart("username") String username,
             @RequestPart("department") String department,
-            @RequestPart(value = "removeImage", required = false) String removeImage,
+            @RequestParam(value = "removeImage", defaultValue = "false") boolean removeImage,
             @RequestPart(value = "image", required = false) MultipartFile image) {
         Long userId = getAuthenticatedUserId();
         return ResponseEntity
-                .ok(new ApiResponse<>(200, "Profile updated successfully", authService.updateProfile(userId, username, department, image, "true".equalsIgnoreCase(removeImage))));
+                .ok(new ApiResponse<>(200, "Profile updated successfully", authService.updateProfile(userId, username, department, image, removeImage)));
     }
 
     @GetMapping("/view-profile")

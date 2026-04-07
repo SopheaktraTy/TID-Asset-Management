@@ -51,3 +51,66 @@ export const revokeLocalPreviewUrl = (url: string | null | undefined) => {
     }
   }
 };
+
+/**
+ * Optimizes an image before upload by resizing and compressing it.
+ * Improves performance (small file size) and consistency (standard resolution).
+ */
+export const optimizeImage = (file: File, maxWidth = 800, maxHeight = 800, quality = 0.8): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const url = e.target?.result as string;
+      img.src = url;
+    };
+
+    img.onload = () => {
+      let width = img.width;
+      let height = img.height;
+
+      // Keep aspect ratio
+      if (width > height) {
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width = Math.round((height * maxHeight) / height);
+          height = maxHeight;
+        }
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return reject(new Error("Failed to get canvas context"));
+
+      // Higher quality scaling
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+
+      ctx.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error("Canvas to Blob conversion failed"));
+          }
+        },
+        "image/jpeg",
+        quality
+      );
+    };
+
+    img.onerror = () => reject(new Error("Image loading failed"));
+    reader.onerror = () => reject(new Error("File reading failed"));
+    reader.readAsDataURL(file);
+  });
+};

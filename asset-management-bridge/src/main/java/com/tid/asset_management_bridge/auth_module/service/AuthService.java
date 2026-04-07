@@ -15,7 +15,7 @@ public interface AuthService {
 
     void changePassword(@NonNull Long userId, ChangePasswordRequest request);
 
-    LoginResponse updateProfile(@NonNull Long userId, String username, String department, org.springframework.web.multipart.MultipartFile imageFile, boolean removeImage);
+    ProfileResponse updateProfile(@NonNull Long userId, String username, String department, org.springframework.web.multipart.MultipartFile imageFile, boolean removeImage);
 
     void forgotPassword(ForgotPasswordRequest request);
 

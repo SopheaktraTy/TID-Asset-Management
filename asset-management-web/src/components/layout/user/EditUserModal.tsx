@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import {
   Loader2,
+  User as UserIcon,
 } from "lucide-react";
 
 import { Button } from "../../ui/Button";
@@ -10,8 +9,11 @@ import { Input } from "../../ui/BackgroundColorPlaceholder";
 import { Message } from "../../ui/Message";
 import { Modal } from "../../ui/Modal";
 import { DropdownList } from "../../ui/DropdownList";
+import { DropdownReverseList } from "../../ui/DropdownReverseList";
 import { ToggleSwitch } from "../../ui/ToggleSwitch";
+import { Controller } from "react-hook-form";
 
+import { useUserForm } from "../../../hooks/useUserForm";
 import type { EditUserFormValues, UserDto } from "../../../types/user.types";
 import { editUserSchema } from "../../../types/user.types";
 import { updateUserApi } from "../../../services/userManagement.service";
@@ -46,18 +48,20 @@ const PERMISSIONS_LIST = [
 
 export default function EditUserModal({ isOpen, user, onClose, onUpdated }: EditUserModalProps) {
   const { theme } = useTheme();
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
   const {
     register,
-    handleSubmit,
     reset,
     control,
+    watch,
     formState: { errors },
-  } = useForm<EditUserFormValues>({
-    resolver: zodResolver(editUserSchema),
+    loading,
+    errorMsg,
+    successMsg,
+    handleClose,
+    handleSubmit,
+  } = useUserForm<EditUserFormValues>({
+    schema: editUserSchema,
     defaultValues: {
       username: "",
       email: "",
@@ -66,7 +70,13 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
       department: "",
       permissions: {},
     },
+    onSubmit: (data) => updateUserApi(user!.id, data),
+    onSuccess: onUpdated,
+    onClose,
+    successMessage: "User updated successfully!",
   });
+
+  const currentRole = watch("role");
 
 
 
@@ -84,32 +94,6 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
   }, [user, isOpen, reset]);
 
   if (!isOpen || !user) return null;
-
-  const handleClose = () => {
-    reset();
-    setErrorMsg(null);
-    setSuccessMsg(null);
-    onClose();
-  };
-
-  const onSubmit = async (data: EditUserFormValues) => {
-    setLoading(true);
-    setErrorMsg(null);
-    setSuccessMsg(null);
-    try {
-      const updatedUser = await updateUserApi(user.id, data);
-      onUpdated(updatedUser);
-      setSuccessMsg("User updated successfully!");
-      // Auto-close after 1.2s so the user sees the success message
-      setTimeout(() => handleClose(), 1200);
-    } catch (err: any) {
-      setErrorMsg(
-        err?.response?.data?.message || err.message || "Failed to update user."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <Modal
@@ -166,7 +150,7 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
 
         <div className="h-px bg-[var(--border-color)] w-full opacity-30 mb-2" />
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 text-left">
+        <form onSubmit={handleSubmit} className="space-y-6 text-left">
           <div className="pt-2 px-1">
             <h3 className="text-sm font-bold text-[var(--text-main)] mb-2">Basic Information</h3>
             <div className="h-px bg-[var(--border-color)] w-full opacity-50 mb-4" />
@@ -209,6 +193,7 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
                       value={field.value}
                       onChange={field.onChange}
                       className="w-full"
+                      panelClassName="bg-[var(--bg)]"
                     />
                   )}
                 />
@@ -230,6 +215,7 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
                       value={field.value}
                       onChange={field.onChange}
                       className="w-full"
+                      panelClassName="bg-[var(--bg)]"
                     />
                   )}
                 />
@@ -243,7 +229,7 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
                 name="department"
                 control={control}
                 render={({ field }) => (
-                  <DropdownList
+                  <DropdownReverseList
                     options={[
                       { label: "— None —", value: "" },
                       { label: "Office Admin", value: "OFFICE_ADMIN" },
@@ -258,6 +244,8 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
                     value={field.value ?? ""}
                     onChange={field.onChange}
                     className="w-full"
+                    triggerClassName="bg-[var(--bg)]"
+                    panelClassName="bg-[var(--bg)]"
                   />
                 )}
               />
@@ -267,59 +255,74 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
           <div className="pt-2">
             <h3 className="text-sm font-bold text-[var(--text-main)] mb-2 px-1">Access Permissions</h3>
             <div className="h-px bg-[var(--border-color)] w-full mb-4" />
-            <div className="flex flex-col">
-              {MODULE_INFO.map((module) => (
-                <div key={module.id} className="border-b border-[var(--border-color)]/20 last:border-0 transition-all duration-200">
-                  <Controller
-                    name={`permissions.${module.id}`}
-                    control={control}
-                    defaultValue={[]}
-                    render={({ field }) => {
-                      const isEnabled = (field.value || []).length > 0;
-                      return (
-                        <div className="flex flex-col">
-                          <ToggleSwitch
-                            label={module.label}
-                            description={module.description}
-                            checked={isEnabled}
-                            size="sm"
-                            onChange={(checked) => {
-                              field.onChange(checked ? ["READ"] : []);
-                            }}
-                            className="px-2 !py-3 hover:bg-[var(--surface-hover)]/30 transition-colors rounded-lg flex-1"
-                          />
-
-                          {isEnabled && (
-                            <div className="flex flex-col gap-1 pb-4 pr-2 pl-6 animate-in slide-in-from-top-2 fade-in duration-300">
-                              <div className="flex flex-col">
-                                {PERMISSIONS_LIST.map((perm) => (
-                                  <ToggleSwitch
-                                    key={perm.id}
-                                    label={perm.label}
-                                    description={perm.description}
-                                    size="sm"
-                                    reverse={true}
-                                    checked={(field.value || []).includes(perm.id as any)}
-                                    onChange={(checked) => {
-                                      const current = field.value || [];
-                                      const next = checked
-                                        ? [...current, perm.id]
-                                        : current.filter((p: string) => p !== perm.id);
-                                      field.onChange(next);
-                                    }}
-                                    className="!py-2 border-b border-[var(--border-color)]/20 last:border-0 !justify-start gap-4"
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    }}
-                  />
+            
+            {currentRole === "SUPER_ADMIN" ? (
+              <div className="flex items-center gap-3 px-4 py-5 rounded-xl bg-emerald-500/5 border border-emerald-500/10 mb-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0">
+                  <UserIcon size={20} />
                 </div>
-              ))}
-            </div>
+                <div>
+                  <h4 className="text-emerald-600 dark:text-emerald-400 font-bold text-sm">Full System Access</h4>
+                  <p className="text-[var(--text-muted)] text-[11px] mt-1 leading-relaxed">
+                    This user has a <span className="text-emerald-500 font-bold">Super Admin</span> role and bypasses individual module permission checks.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col">
+                {MODULE_INFO.map((module) => (
+                  <div key={module.id} className="border-b border-[var(--border-color)]/20 last:border-0 transition-all duration-200">
+                    <Controller
+                      name={`permissions.${module.id}`}
+                      control={control}
+                      defaultValue={[]}
+                      render={({ field }) => {
+                        const isEnabled = (field.value || []).length > 0;
+                        return (
+                          <div className="flex flex-col">
+                            <ToggleSwitch
+                              label={module.label}
+                              description={module.description}
+                              checked={isEnabled}
+                              size="sm"
+                              onChange={(checked) => {
+                                field.onChange(checked ? ["READ"] : []);
+                              }}
+                              className="px-2 !py-3 hover:bg-[var(--surface-hover)]/30 transition-colors rounded-lg flex-1"
+                            />
+
+                            {isEnabled && (
+                              <div className="flex flex-col gap-1 pb-4 pr-2 pl-6 animate-in slide-in-from-top-2 fade-in duration-300">
+                                <div className="flex flex-col">
+                                  {PERMISSIONS_LIST.map((perm) => (
+                                    <ToggleSwitch
+                                      key={perm.id}
+                                      label={perm.label}
+                                      description={perm.description}
+                                      size="sm"
+                                      reverse={true}
+                                      checked={(field.value || []).includes(perm.id as any)}
+                                      onChange={(checked) => {
+                                        const current = field.value || [];
+                                        const next = checked
+                                          ? [...current, perm.id]
+                                          : current.filter((p: string) => p !== perm.id);
+                                        field.onChange(next);
+                                      }}
+                                      className="!py-2 border-b border-[var(--border-color)]/20 last:border-0 !justify-start gap-4"
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           {errorMsg && <Message variant="error">{errorMsg}</Message>}
           {successMsg && <Message variant="success">{successMsg}</Message>}
