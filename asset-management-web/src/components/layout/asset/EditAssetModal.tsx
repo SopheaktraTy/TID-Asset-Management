@@ -1,348 +1,476 @@
-import { useState, useEffect } from "react";
-import { Loader2, HardDrive, Cpu, Monitor, FileText } from "lucide-react";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
+import { Loader2, Cpu, Tag, ClipboardList, Laptop, Monitor, MonitorSmartphone, MonitorPlay } from "lucide-react";
+import { Controller } from "react-hook-form";
 
 import { Button } from "../../ui/Button";
+import { Input } from "../../ui/BackgroundColorPlaceholder";
 import { Message } from "../../ui/Message";
 import { Modal } from "../../ui/Modal";
-import { DropdownList } from "../../ui/DropdownList";
+import { DropdownReverseList } from "../../ui/DropdownReverseList";
 import { ToggleSwitch } from "../../ui/ToggleSwitch";
+import { DeviceTypeCard } from "./DeviceTypeCard";
+import { SuggestionInput } from "../../ui/SuggestionInput";
+import { 
+  MANUFACTURER_SUGGESTIONS, 
+  CPU_SUGGESTIONS, 
+  DISK_TYPE_SUGGESTIONS, 
+  DISK_MODEL_SUGGESTIONS,
+  OS_SUGGESTIONS,
+  OS_VERSION_SUGGESTIONS,
+  CONDITION_SUGGESTIONS
+} from "../../../constants/suggestions";
 
-import {
-  editAssetSchema,
-  type EditAssetFormValues,
-  type AssetDto,
-} from "../../../types/asset.types";
+import { useUserForm } from "../../../hooks/useUserForm";
+import type { EditAssetFormValues, AssetDto } from "../../../types/asset.types";
+import { editAssetSchema } from "../../../types/asset.types";
 import { updateAssetApi } from "../../../services/asset.service";
+import { useTheme } from "../../../hooks/useTheme";
 
-// ── Constants ─────────────────────────────────────────────────────────────────
-const STATUS_OPTIONS = [
-  { value: "AVAILABLE", label: "Available" },
-  { value: "IN_USE", label: "In Use" },
-  { value: "DAMAGED", label: "Damaged" },
-  { value: "UNDER_REPAIR", label: "Under Repair" },
-  { value: "LOST", label: "Lost" },
-  { value: "MALFUNCTION", label: "Malfunction" },
-  { value: "MAINTENANCE", label: "Maintenance" },
-  { value: "OTHER", label: "Other" },
+// Baker Tilly logo assets
+import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_Charcoal.png";
+import logoWhite from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_White.png";
+
+const STATUS_OPTIONS: { label: string; value: string }[] = [
+  { label: "Available", value: "AVAILABLE" },
+  { label: "In Use", value: "IN_USE" },
+  { label: "Damaged", value: "DAMAGED" },
+  { label: "Under Repair", value: "UNDER_REPAIR" },
+  { label: "Lost", value: "LOST" },
+  { label: "Malfunction", value: "MALFUNCTION" },
+  { label: "Maintenance", value: "MAINTENANCE" },
+  { label: "Other", value: "OTHER" },
 ];
 
-const DISK_TYPE_OPTIONS = [
-  { value: "", label: "— None —" },
-  { value: "SSD", label: "SSD" },
-  { value: "HDD", label: "HDD" },
-  { value: "NVMe", label: "NVMe" },
-  { value: "eMMC", label: "eMMC" },
-];
-
-import { DeviceTypeGridSelector } from "./DeviceTypeGridSelector";
-
-// ── Shared styles ─────────────────────────────────────────────────────────────
-const fieldCls =
-  "w-full px-3 py-2 text-xs bg-[var(--bg)] border border-[var(--border-color)]/50 rounded-lg text-[var(--text-main)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--color-growth-green)] transition-colors";
-const labelCls = "block text-xs font-bold text-[var(--text-main)] mb-2 ml-1";
-const errorCls = "mt-1 text-[10px] text-red-500 ml-1";
-
-function SectionHeader({
-  icon: Icon,
-  title,
-}: {
-  icon: React.ElementType;
-  title: string;
-}) {
-  return (
-    <div className="pt-2 px-1">
-      <div className="flex items-center gap-2 mb-2">
-        <Icon size={14} className="text-[var(--color-growth-green)]" />
-        <h3 className="text-sm font-bold text-[var(--text-main)]">{title}</h3>
-      </div>
-      <div className="h-px bg-[var(--border-color)] w-full opacity-50 mb-4" />
-    </div>
-  );
-}
-
-// ── Props ─────────────────────────────────────────────────────────────────────
 interface EditAssetModalProps {
   isOpen: boolean;
   asset: AssetDto | null;
   onClose: () => void;
-  onUpdated: (updated: AssetDto) => void;
+  onUpdated: (asset: AssetDto) => void;
 }
 
-export default function EditAssetModal({
-  isOpen,
-  asset,
-  onClose,
-  onUpdated,
-}: EditAssetModalProps) {
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
-
-  const form = useForm<EditAssetFormValues>({
-    resolver: zodResolver(editAssetSchema) as any,
-  });
+export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: EditAssetModalProps) {
+  const { theme } = useTheme();
 
   const {
     register,
-    control,
-    handleSubmit,
     reset,
+    control,
+    watch,
     formState: { errors },
-  } = form;
+    loading,
+    errorMsg,
+    successMsg,
+    handleClose,
+    handleSubmit,
+  } = useUserForm<EditAssetFormValues>({
+    schema: editAssetSchema,
+    defaultValues: {
+      assetTag: "",
+      deviceName: "",
+      deviceType: "LAPTOP",
+      status: "AVAILABLE",
+      serialNumber: "",
+      manufacturer: "",
+      model: "",
+      cpu: "",
+      ramGb: null,
+      diskType: "",
+      diskModel: "",
+      storageSizeGb: null,
+      screenSizeInch: null,
+      operatingSystem: "",
+      osVersion: "",
+      domainJoined: false,
+      condition: "",
+      issueDescription: "",
+    },
+    onSubmit: (data) => updateAssetApi(asset!.id, data),
+    onSuccess: onUpdated,
+    onClose,
+    successMessage: "Asset updated successfully!",
+  });
 
-  // Pre-fill form whenever the asset changes
+  const deviceType = watch("deviceType");
+
   useEffect(() => {
-    if (asset) {
+    if (asset && isOpen) {
       reset({
-        assetTag: asset.assetTag ?? "",
-        serialNumber: asset.serialNumber ?? "",
-        deviceName: asset.deviceName ?? "",
+        assetTag: asset.assetTag,
+        deviceName: asset.deviceName,
         deviceType: asset.deviceType,
+        status: asset.status,
+        serialNumber: asset.serialNumber ?? "",
         manufacturer: asset.manufacturer ?? "",
         model: asset.model ?? "",
-        status: asset.status,
         cpu: asset.cpu ?? "",
-        ramGb: asset.ramGb ?? undefined,
+        ramGb: asset.ramGb,
         diskType: asset.diskType ?? "",
         diskModel: asset.diskModel ?? "",
-        storageSizeGb: asset.storageSizeGb ?? undefined,
-        screenSizeInch: asset.screenSizeInch ?? undefined,
+        storageSizeGb: asset.storageSizeGb,
+        screenSizeInch: asset.screenSizeInch,
         operatingSystem: asset.operatingSystem ?? "",
         osVersion: asset.osVersion ?? "",
-        domainJoined: asset.domainJoined ?? false,
+        domainJoined: !!asset.domainJoined,
         condition: asset.condition ?? "",
         issueDescription: asset.issueDescription ?? "",
-        image: asset.image ?? "",
       });
     }
-  }, [asset, reset]);
-
-  const handleClose = () => {
-    setErrorMsg(null);
-    setSuccessMsg(null);
-    onClose();
-  };
-
-  const onSubmit = async (data: EditAssetFormValues) => {
-    if (!asset) return;
-    setLoading(true);
-    setErrorMsg(null);
-    setSuccessMsg(null);
-    try {
-      const updated = await updateAssetApi(asset.id, data);
-      setSuccessMsg("Asset updated successfully!");
-      setTimeout(() => {
-        onUpdated(updated);
-        handleClose();
-      }, 800);
-    } catch (err: any) {
-      const msg =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Failed to update asset.";
-      setErrorMsg(msg);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [asset, isOpen, reset]);
 
   if (!isOpen || !asset) return null;
 
+  const getDeviceIcon = (type: string) => {
+    switch (type) {
+      case "LAPTOP": return <Laptop size={24} />;
+      case "DESKTOP": return <Monitor size={24} />;
+      case "PORTABLE_MONITOR": return <MonitorSmartphone size={24} />;
+      case "STAND_MONITOR": return <MonitorPlay size={24} />;
+      default: return <Monitor size={24} />;
+    }
+  };
+
+  const getStatusDisplay = (status: string) => {
+    const opt = STATUS_OPTIONS.find(o => o.value === status);
+    return opt ? opt.label : status;
+  };
+
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} maxWidth="max-w-[700px]">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      maxWidth="max-w-[700px]"
+    >
       <div className="flex flex-col gap-2">
-        {/* Header */}
-        <div className="w-full flex flex-col items-center mb-1">
-          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-4">
-            <HardDrive size={22} className="text-blue-500" />
-          </div>
+        {/* Header - Logo & Title */}
+        <div className="w-full flex flex-col items-center mb-6 pt-2">
+          <img
+            src={theme === "dark" ? logoWhite : logoCharcoal}
+            alt="Logo"
+            className="h-10 w-auto object-contain mb-4"
+          />
           <div className="text-center">
-            <h3 className="text-xl font-black tracking-tight text-[var(--text-main)]">
-              Edit Asset
-            </h3>
-            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-bold uppercase tracking-wider font-mono">
-              {asset.assetTag}
+            <h3 className="text-xl font-black tracking-tighter text-[var(--text-main)] leading-none text-center">Edit Asset</h3>
+            <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mt-2 text-center opacity-70">
+              Inventory Management
             </p>
           </div>
         </div>
 
-        <div className="h-px bg-[var(--border-color)] w-full opacity-30 mb-2" />
-
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="space-y-6 text-left max-h-[75vh] overflow-y-auto pr-2 px-1 custom-scrollbar"
-        >
-          {/* ── Device Identity ── */}
-          <SectionHeader icon={HardDrive} title="Device Identity" />
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-            <div>
-              <label className={labelCls}>Asset Tag *</label>
-              <input className={fieldCls} {...register("assetTag")} />
-              {errors.assetTag && <p className={errorCls}>{errors.assetTag.message}</p>}
-            </div>
-            <div>
-              <label className={labelCls}>Serial Number</label>
-              <input className={fieldCls} {...register("serialNumber")} />
-            </div>
-
-            <div className="col-span-2">
-              <label className={labelCls}>Device Name *</label>
-              <input className={fieldCls} {...register("deviceName")} />
-              {errors.deviceName && <p className={errorCls}>{errors.deviceName.message}</p>}
-            </div>
-
-            <div className="col-span-2">
-              <label className={labelCls}>Device Type *</label>
-              <Controller
-                name="deviceType"
-                control={control}
-                render={({ field }) => (
-                  <DeviceTypeGridSelector
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-              {errors.deviceType && <p className={errorCls}>{errors.deviceType.message}</p>}
-            </div>
-            <div>
-              <label className={labelCls}>Status *</label>
-              <Controller
-                name="status"
-                control={control}
-                render={({ field }) => (
-                  <DropdownList
-                    options={STATUS_OPTIONS}
-                    value={field.value}
-                    onChange={field.onChange}
-                    className="w-full"
-                    panelClassName="bg-[var(--bg)]"
-                  />
-                )}
-              />
-              {errors.status && <p className={errorCls}>{errors.status.message}</p>}
-            </div>
-            <div />
-
-            <div>
-              <label className={labelCls}>Manufacturer</label>
-              <input className={fieldCls} {...register("manufacturer")} />
-            </div>
-            <div>
-              <label className={labelCls}>Model</label>
-              <input className={fieldCls} {...register("model")} />
+        {/* Asset Summary Card */}
+        <div className="flex items-center gap-5 px-4 py-4 border border-dashed border-[var(--border-color)] dark:border-[var(--text-muted)]/30 rounded-xl bg-[var(--surface-hover)]/30 shadow-sm dark:shadow-none mb-1 transition-all">
+          <div className="flex shrink-0">
+            <div className="w-14 h-14 rounded-2xl border border-[var(--border-color)] flex items-center justify-center bg-[var(--surface)] text-[var(--color-growth-green)] shadow-sm">
+              {getDeviceIcon(asset.deviceType)}
             </div>
           </div>
 
-
-          {/* ── Hardware Specs ── */}
-          <SectionHeader icon={Cpu} title="Hardware Specs" />
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-            <div className="col-span-2">
-              <label className={labelCls}>CPU</label>
-              <input className={fieldCls} {...register("cpu")} />
+          <div className="flex flex-col min-w-0 flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-base font-bold text-[var(--text-main)] truncate leading-none">{asset.assetTag}</span>
+              <span className="px-2 py-0.5 rounded border border-[var(--border-color)] bg-[var(--surface-hover)]/40 text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-tight">
+                {asset.deviceType.replace('_', ' ')}
+              </span>
             </div>
 
-            <div className="grid grid-cols-3 col-span-2 gap-4">
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-[var(--text-muted)] truncate">{asset.deviceName}</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-growth-green)]" />
+              <span className="text-[11px] font-semibold tracking-tight text-[var(--color-growth-green)]">
+                {getStatusDisplay(asset.status)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4 text-left">
+          {/* ── Asset Identity ── */}
+          <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
+            <div className="px-1 mb-3 flex items-center gap-2">
+              <Tag size={16} className="text-[var(--color-growth-green)]" />
+              <h3 className="text-sm font-bold text-[var(--text-main)]">Asset Identity</h3>
+            </div>
+            <div className="px-2 space-y-4">
               <div>
-                <label className={labelCls}>RAM (GB)</label>
-                <input type="number" min={0} className={fieldCls} {...register("ramGb")} />
-                {errors.ramGb && <p className={errorCls}>{errors.ramGb.message}</p>}
+                <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Device Category *</label>
+                <Controller
+                  name="deviceType"
+                  control={control}
+                  render={({ field }) => (
+                    <DeviceTypeCard
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={!!errors.deviceType}
+                    />
+                  )}
+                />
+                {errors.deviceType && <p className="mt-2 text-[10px] text-red-500 ml-1 font-bold">{errors.deviceType.message}</p>}
               </div>
-              <div>
-                <label className={labelCls}>Storage (GB)</label>
-                <input type="number" min={0} className={fieldCls} {...register("storageSizeGb")} />
-                {errors.storageSizeGb && <p className={errorCls}>{errors.storageSizeGb.message}</p>}
-              </div>
-              <div>
-                <label className={labelCls}>Screen (inch)</label>
-                <input type="number" min={0} step="0.1" className={fieldCls} {...register("screenSizeInch")} />
-                {errors.screenSizeInch && <p className={errorCls}>{errors.screenSizeInch.message}</p>}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-[10px]">
+                <div>
+                  <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Asset Tag *</label>
+                  <Input
+                    placeholder="e.g. BT-LP-001"
+                    className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                    {...register("assetTag")}
+                  />
+                  {errors.assetTag && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.assetTag.message}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Device Name *</label>
+                  <Input
+                    placeholder="e.g. BT-LP-001"
+                    className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                    {...register("deviceName")}
+                  />
+                  {errors.deviceName && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.deviceName.message}</p>}
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Serial Number</label>
+                  <Input
+                    placeholder="e.g. SN12345678"
+                    className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                    {...register("serialNumber")}
+                  />
+                  {errors.serialNumber && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.serialNumber.message}</p>}
+                </div>
               </div>
             </div>
+          </div>
 
-            <div>
-              <label className={labelCls}>Disk Type</label>
-              <Controller
-                name="diskType"
-                control={control}
-                render={({ field }) => (
-                  <DropdownList
-                    options={DISK_TYPE_OPTIONS}
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    className="w-full"
-                    panelClassName="bg-[var(--bg)]"
+          {(deviceType === "LAPTOP" || deviceType === "DESKTOP") && (
+            <>
+              {/* ── Hardware Specifications ── */}
+              <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
+                <div className="px-1 mb-3 flex items-center gap-2">
+                  <Cpu size={16} className="text-[var(--color-growth-green)]" />
+                  <h3 className="text-sm font-bold text-[var(--text-main)]">Hardware Specifications</h3>
+                </div>
+                <div className="px-[10px] grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Manufacturer</label>
+                    <Controller
+                      name="manufacturer"
+                      control={control}
+                      render={({ field }) => (
+                        <SuggestionInput
+                          {...field}
+                          suggestions={MANUFACTURER_SUGGESTIONS}
+                          placeholder="e.g. Dell / Apple"
+                          className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                        />
+                      )}
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Model</label>
+                    <Input
+                      placeholder="e.g. Latitude / MacBook"
+                      className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                      {...register("model")}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">CPU</label>
+                    <Controller
+                      name="cpu"
+                      control={control}
+                      render={({ field }) => (
+                        <SuggestionInput
+                          {...field}
+                          suggestions={CPU_SUGGESTIONS}
+                          placeholder="e.g. i7 Gen 11 / M2"
+                          className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                        />
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">RAM (GB)</label>
+                    <Input
+                      type="number"
+                      placeholder="e.g. 16"
+                      className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                      {...register("ramGb")}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Screen (Inch)</label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      placeholder="e.g. 14"
+                      className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                      {...register("screenSizeInch")}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Disk Type</label>
+                    <Controller
+                      name="diskType"
+                      control={control}
+                      render={({ field }) => (
+                        <SuggestionInput
+                          {...field}
+                          suggestions={DISK_TYPE_SUGGESTIONS}
+                          placeholder="e.g. SSD / HDD"
+                          className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                        />
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Storage (GB)</label>
+                    <Input
+                      type="number"
+                      placeholder="e.g. 512"
+                      className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                      {...register("storageSizeGb")}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Disk Model</label>
+                    <Controller
+                      name="diskModel"
+                      control={control}
+                      render={({ field }) => (
+                        <SuggestionInput
+                          {...field}
+                          suggestions={DISK_MODEL_SUGGESTIONS}
+                          placeholder="e.g. Samsung NVMe"
+                          className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Software & Network ── */}
+              <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
+                <div className="px-1 mb-3 flex items-center gap-2">
+                  <MonitorSmartphone size={16} className="text-[var(--color-growth-green)]" />
+                  <h3 className="text-sm font-bold text-[var(--text-main)]">Software & Network</h3>
+                </div>
+                <div className="px-[10px] space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Operating System</label>
+                      <Controller
+                        name="operatingSystem"
+                        control={control}
+                        render={({ field }) => (
+                          <SuggestionInput
+                            {...field}
+                            suggestions={OS_SUGGESTIONS}
+                            placeholder="e.g. Windows 11 / macOS"
+                            className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                          />
+                        )}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">OS Version</label>
+                      <Controller
+                        name="osVersion"
+                        control={control}
+                        render={({ field }) => (
+                          <SuggestionInput
+                            {...field}
+                            suggestions={OS_VERSION_SUGGESTIONS}
+                            placeholder="e.g. 23H2, Sonoma 14.2"
+                            className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Controller
+                      name="domainJoined"
+                      control={control}
+                      render={({ field }) => (
+                        <ToggleSwitch
+                          label="Domain Joined"
+                          description="Connect device to corporate network Active Directory domain."
+                          checked={!!field.value}
+                          onChange={field.onChange}
+                          size="sm"
+                          className="!py-2"
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* ── Status & Condition ── */}
+          <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
+            <div className="px-1 mb-3 flex items-center gap-2">
+              <ClipboardList size={16} className="text-[var(--color-growth-green)]" />
+              <h3 className="text-sm font-bold text-[var(--text-main)]">Status & Condition</h3>
+            </div>
+            <div className="px-[10px] space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Status</label>
+                  <Controller
+                    name="status"
+                    control={control}
+                    render={({ field }) => (
+                      <DropdownReverseList
+                        options={STATUS_OPTIONS}
+                        value={field.value ?? "AVAILABLE"}
+                        onChange={field.onChange}
+                        className="w-full"
+                        panelClassName="bg-[var(--bg)]"
+                      />
+                    )}
                   />
-                )}
-              />
-            </div>
-            <div>
-              <label className={labelCls}>Disk Model</label>
-              <input className={fieldCls} {...register("diskModel")} />
-            </div>
-          </div>
-
-          {/* ── Software & OS ── */}
-          <SectionHeader icon={Monitor} title="Software & OS" />
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-            <div>
-              <label className={labelCls}>Operating System</label>
-              <input className={fieldCls} {...register("operatingSystem")} />
-            </div>
-            <div>
-              <label className={labelCls}>OS Version</label>
-              <input className={fieldCls} {...register("osVersion")} />
-            </div>
-
-            <div className="col-span-2 px-1">
-              <Controller
-                name="domainJoined"
-                control={control}
-                render={({ field }) => (
-                  <ToggleSwitch
-                    label="Domain Joined"
-                    description="Device is joined to the company domain."
-                    checked={!!field.value}
-                    onChange={field.onChange}
-                    size="sm"
-                    className="!py-2"
+                  {errors.status && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.status.message}</p>}
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Condition</label>
+                  <Controller
+                    name="condition"
+                    control={control}
+                    render={({ field }) => (
+                      <SuggestionInput
+                        {...field}
+                        suggestions={CONDITION_SUGGESTIONS}
+                        placeholder="e.g. Excellent / Good"
+                        className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                      />
+                    )}
                   />
-                )}
-              />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Issue Description (If any)</label>
+                <textarea
+                  {...register("issueDescription")}
+                  className="w-full px-3 py-2 bg-[var(--bg)] border border-[var(--border-color)]/50 rounded-lg focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-2 focus:ring-[var(--color-growth-green)]/20 text-[11px] text-[var(--text-main)] placeholder:text-[var(--text-muted)] placeholder:text-[11px] transition-all duration-200 min-h-[80px] resize-none"
+                  placeholder="Describe physical or technical issues here..."
+                />
+              </div>
             </div>
           </div>
 
-          {/* ── Notes ── */}
-          <SectionHeader icon={FileText} title="Notes & Condition" />
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-            <div className="col-span-1">
-              <label className={labelCls}>Condition</label>
-              <input className={fieldCls} {...register("condition")} />
-            </div>
-            <div className="col-span-2">
-              <label className={labelCls}>Issue Description</label>
-              <textarea
-                rows={3}
-                className={`${fieldCls} resize-none`}
-                {...register("issueDescription")}
-              />
-            </div>
-          </div>
-
-          {/* Messages */}
           {errorMsg && <Message variant="error">{errorMsg}</Message>}
           {successMsg && <Message variant="success">{successMsg}</Message>}
 
-          {/* Actions */}
-          <div className="pt-2 flex items-center justify-end gap-3 translate-y-1 sticky bottom-0 bg-[var(--surface)] pb-2">
+          <div className="pt-2 flex items-center justify-end gap-3 translate-y-1">
             <Button
               type="button"
               variant="outline"
               onClick={handleClose}
-              className="bg-transparent border-[var(--border-color)] text-[var(--text-main)] hover:bg-[var(--surface-hover)] rounded-full px-8 h-11 text-xs font-bold transition-all border-opacity-30"
+              className="bg-transparent border-[var(--border-color)] text-[var(--text-main)] hover:bg-[var(--surface-hover)] rounded-full px-8 h-10 text-sm font-bold transition-all border-opacity-30"
             >
               Cancel
             </Button>
@@ -350,7 +478,7 @@ export default function EditAssetModal({
               type="submit"
               variant="primary"
               disabled={loading}
-              className="w-auto min-w-[160px] h-11 gap-2 px-8 py-2 text-xs font-bold bg-[var(--color-growth-green)] text-[var(--btn-primary-text)] border-0 transition-all rounded-full shadow-[0_2px_8px_var(--btn-primary-shadow)] hover:shadow-[0_4px_14px_var(--btn-primary-shadow)] hover:brightness-110 transform active:scale-95"
+              className="w-auto min-w-[160px] h-10 gap-2 px-8 py-2 text-sm font-bold bg-[var(--color-growth-green)] text-[var(--btn-primary-text)] border-0 transition-all rounded-full shadow-[0_2px_8px_var(--btn-primary-shadow)] hover:shadow-[0_4px_14px_var(--btn-primary-shadow)] hover:brightness-110 transform active:scale-95 flex items-center justify-center"
             >
               {loading ? <Loader2 size={16} className="animate-spin" /> : "Save Changes"}
             </Button>

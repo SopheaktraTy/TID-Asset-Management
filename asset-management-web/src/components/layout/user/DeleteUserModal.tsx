@@ -1,15 +1,12 @@
 import { useState } from "react";
-import { Loader2, TriangleAlert, Trash2 } from "lucide-react";
+import { Loader2, TriangleAlert, Trash2, AlertCircle } from "lucide-react";
 import { Modal } from "../../ui/Modal";
 import { Button } from "../../ui/Button";
 import type { UserDto } from "../../../types/user.types";
 import { deleteUserApi } from "../../../services/userManagement.service";
-import { useTheme } from "../../../hooks/useTheme";
 import { getSafeImageUrl } from "../../../utils/image";
 
-// Baker Tilly logo assets
-import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_Charcoal.png";
-import logoWhite from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_White.png";
+
 
 interface DeleteUserModalProps {
   isOpen: boolean;
@@ -19,7 +16,6 @@ interface DeleteUserModalProps {
 }
 
 export default function DeleteUserModal({ isOpen, user, onClose, onDeleted }: DeleteUserModalProps) {
-  const { theme } = useTheme();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,30 +37,23 @@ export default function DeleteUserModal({ isOpen, user, onClose, onDeleted }: De
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} maxWidth="max-w-[420px]">
-      <div className="flex flex-col gap-2 text-center">
-        {/* Header - Logo & Title */}
-        <div className="w-full flex flex-col items-center mb-1">
-          <img
-            src={theme === "dark" ? logoWhite : logoCharcoal}
-            alt="Logo"
-            className="h-8 w-auto object-contain mb-4"
-          />
-          <div className="text-center">
-            <h3 className="text-xl font-black tracking-tight text-[var(--text-main)]">Delete User</h3>
-            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-bold uppercase tracking-wider">Permanent Account Removal</p>
-          </div>
-        </div>
-
-        <div className="h-px bg-[var(--border-color)] w-full opacity-30" />
-
+      <div className="flex flex-col gap-6 text-center py-4">
+        {/* Status Icon Header */}
         <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-2">
-            <TriangleAlert size={32} />
+          <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 animate-in fade-in zoom-in duration-500">
+            <TriangleAlert size={40} />
           </div>
-          <div className="flex flex-col gap-1">
-            <p className="text-sm text-[var(--text-muted)]">
-              This action cannot be undone. Are you sure you want to permanently remove this user?
-            </p>
+          <div className="space-y-1">
+            <h3 className="text-2xl font-black tracking-tighter text-[var(--text-main)]">
+              Remove User
+            </h3>
+            
+            <div className="mt-4 bg-[var(--surface-hover)]/30 border border-dashed border-red-500/30 rounded-2xl p-4 flex items-start gap-3 text-left">
+              <AlertCircle size={18} className="text-red-500 shrink-0 mt-0.5" />
+              <p className="text-sm text-[var(--text-muted)] leading-relaxed italic">
+                This action cannot be undone. Are you sure you want to permanently remove this user?
+              </p>
+            </div>
           </div>
         </div>
 
@@ -91,27 +80,27 @@ export default function DeleteUserModal({ isOpen, user, onClose, onDeleted }: De
           </div>
         )}
 
-        <div className="flex flex-col gap-2 pt-2">
-          <Button
-            variant="primary"
-            onClick={handleDelete}
-            disabled={loading}
-            className="w-full h-11 bg-red-500 hover:bg-red-600 text-white border-0 shadow-lg shadow-red-500/20 rounded-xl transform active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-          >
-            {loading ? <Loader2 size={18} className="animate-spin" /> : (
-              <>
-                <Trash2 size={16} />
-                Confirm Delete
-              </>
-            )}
-          </Button>
+        <div className="flex items-center justify-end gap-3 pt-4 border-none mt-2">
           <Button
             variant="outline"
             onClick={onClose}
             disabled={loading}
-            className="w-full h-11 border-[var(--border-color)] text-[var(--text-main)] hover:bg-[var(--surface-hover)] rounded-xl"
+            className="flex-1 max-w-[120px] h-10 border-[var(--border-color)]/30 text-[var(--text-main)] hover:bg-[var(--surface-hover)] rounded-full text-sm font-bold"
           >
             Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleDelete}
+            disabled={loading}
+            className="flex-1 min-w-[160px] h-10 bg-red-500 hover:bg-red-600 text-white border-0 shadow-lg shadow-red-500/20 rounded-full transform active:scale-95 transition-all flex items-center justify-center gap-2 text-sm font-bold"
+          >
+            {loading ? <Loader2 size={18} className="animate-spin" /> : (
+              <>
+                <Trash2 size={16} />
+                Delete User
+              </>
+            )}
           </Button>
         </div>
       </div>

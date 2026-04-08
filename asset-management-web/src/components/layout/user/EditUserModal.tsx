@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import {
   Loader2,
   User as UserIcon,
+  Fingerprint,
+  ShieldCheck,
 } from "lucide-react";
 
 import { Button } from "../../ui/Button";
@@ -105,19 +107,21 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
 
 
         {/* Header - Logo & Title */}
-        <div className="w-full flex flex-col items-center mb-1">
+        <div className="w-full flex flex-col items-center mb-6 pt-2">
           <img
             src={theme === "dark" ? logoWhite : logoCharcoal}
             alt="Logo"
-            className="h-8 w-auto object-contain mb-4"
+            className="h-10 w-auto object-contain mb-4"
           />
           <div className="text-center">
-            <h3 className="text-xl font-black tracking-tight text-[var(--text-main)]">Edit User</h3>
-            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-bold uppercase tracking-wider">Modify Account & Permissions</p>
+            <h3 className="text-xl font-black tracking-tighter text-[var(--text-main)] leading-none text-center">Edit User</h3>
+            <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mt-2 text-center opacity-70">
+              Profile Update
+            </p>
           </div>
         </div>
         {/* Horizontal Info Card with Dashed Border - User Summary */}
-        <div className="flex items-center gap-5 px-5 py-5 border border-dashed border-[var(--border-color)] dark:border-[var(--text-muted)]/30 rounded-xl bg-[var(--surface-hover)]/30 shadow-sm dark:shadow-none mb-2 transition-all">
+        <div className="flex items-center gap-5 px-4 py-4 border border-dashed border-[var(--border-color)] dark:border-[var(--text-muted)]/30 rounded-xl bg-[var(--surface-hover)]/30 shadow-sm dark:shadow-none mb-1 transition-all">
           <div className="flex shrink-0">
             <div className="w-14 h-14 rounded-full border border-[var(--border-color)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-main)] font-bold text-lg overflow-hidden ring-4 ring-[var(--surface-hover)]/50">
               {user.image ? (
@@ -148,191 +152,199 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
           </div>
         </div>
 
-        <div className="h-px bg-[var(--border-color)] w-full opacity-30 mb-2" />
 
-        <form onSubmit={handleSubmit} className="space-y-6 text-left">
-          <div className="pt-2 px-1">
-            <h3 className="text-sm font-bold text-[var(--text-main)] mb-2">Basic Information</h3>
-            <div className="h-px bg-[var(--border-color)] w-full opacity-50 mb-4" />
-          </div>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Nickname</label>
-              <Input
-                type="text"
-                placeholder="What should we call you?"
-                className="bg-[var(--bg)] border-[var(--border-color)]/50"
-                {...register("username")}
-              />
-              {errors.username && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.username.message}</p>}
+        {/* Header content below (no line) */}
+
+        <form onSubmit={handleSubmit} className="space-y-3 text-left">
+          {/* ── Basic Information ── */}
+          <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
+            <div className="px-1 mb-3 flex items-center gap-2">
+              <Fingerprint size={16} className="text-[var(--color-growth-green)]" />
+              <h3 className="text-sm font-bold text-[var(--text-main)]">Basic Information</h3>
             </div>
-
-            <div>
-              <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Email address</label>
-              <Input
-                type="email"
-                placeholder="Email Address"
-                className="bg-[var(--bg)] border-[var(--border-color)]/50"
-                {...register("email")}
-              />
-              {errors.email && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.email.message}</p>}
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col">
-                <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Role</label>
-                <Controller
-                  name="role"
-                  control={control}
-                  render={({ field }) => (
-                    <DropdownList
-                      options={[
-                        { label: "Super Admin", value: "SUPER_ADMIN" },
-                        { label: "Admin", value: "ADMIN" },
-                      ]}
-                      value={field.value}
-                      onChange={field.onChange}
-                      className="w-full"
-                      panelClassName="bg-[var(--bg)]"
-                    />
-                  )}
+            <div className="px-[10px] space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Nickname</label>
+                <Input
+                  type="text"
+                  placeholder="What should we call you?"
+                  className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                  {...register("username")}
                 />
-                {errors.role && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.role.message}</p>}
+                {errors.username && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.username.message}</p>}
               </div>
 
-              <div className="flex flex-col">
-                <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Status</label>
-                <Controller
-                  name="status"
-                  control={control}
-                  render={({ field }) => (
-                    <DropdownList
-                      options={[
-                        { label: "Active", value: "ACTIVE" },
-                        { label: "Inactive", value: "INACTIVE" },
-                        { label: "Suspended", value: "SUSPENDED" },
-                      ]}
-                      value={field.value}
-                      onChange={field.onChange}
-                      className="w-full"
-                      panelClassName="bg-[var(--bg)]"
-                    />
-                  )}
+              <div>
+                <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Email address</label>
+                <Input
+                  type="email"
+                  placeholder="Email Address"
+                  className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                  {...register("email")}
                 />
-                {errors.status && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.status.message}</p>}
+                {errors.email && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.email.message}</p>}
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Department</label>
-              <Controller
-                name="department"
-                control={control}
-                render={({ field }) => (
-                  <DropdownReverseList
-                    options={[
-                      { label: "— None —", value: "" },
-                      { label: "Office Admin", value: "OFFICE_ADMIN" },
-                      { label: "Tax & Accounting Advisory", value: "TAX_ACCOUNTING_ADVISORY" },
-                      { label: "Legal & Corporate Advisory", value: "LEGAL_CORPORATE_ADVISORY" },
-                      { label: "Audit & Assurance", value: "AUDIT_ASSURANCE" },
-                      { label: "Practice Development & Management", value: "PRACTICE_DEVELOPMENT_MANAGEMENT" },
-                      { label: "Client & Operation Management", value: "CLIENT_OPERATION_MANAGEMENT" },
-                      { label: "Finance & Human Resource", value: "FINANCE_HUMAN_RESOURCE" },
-                      { label: "Technology Innovation and Development", value: "TECHNOLOGY_INNOVATION_DEVELOPMENT" },
-                    ]}
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    className="w-full"
-                    triggerClassName="bg-[var(--bg)]"
-                    panelClassName="bg-[var(--bg)]"
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col">
+                  <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Role</label>
+                  <Controller
+                    name="role"
+                    control={control}
+                    render={({ field }) => (
+                      <DropdownList
+                        options={[
+                          { label: "Super Admin", value: "SUPER_ADMIN" },
+                          { label: "Admin", value: "ADMIN" },
+                        ]}
+                        value={field.value}
+                        onChange={field.onChange}
+                        className="w-full"
+                        panelClassName="bg-[var(--bg)]"
+                      />
+                    )}
                   />
-                )}
-              />
+                  {errors.role && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.role.message}</p>}
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Status</label>
+                  <Controller
+                    name="status"
+                    control={control}
+                    render={({ field }) => (
+                      <DropdownList
+                        options={[
+                          { label: "Active", value: "ACTIVE" },
+                          { label: "Inactive", value: "INACTIVE" },
+                          { label: "Suspended", value: "SUSPENDED" },
+                        ]}
+                        value={field.value}
+                        onChange={field.onChange}
+                        className="w-full"
+                        panelClassName="bg-[var(--bg)]"
+                      />
+                    )}
+                  />
+                  {errors.status && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.status.message}</p>}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Department</label>
+                <Controller
+                  name="department"
+                  control={control}
+                  render={({ field }) => (
+                    <DropdownReverseList
+                      options={[
+                        { label: "— None —", value: "" },
+                        { label: "Office Admin", value: "OFFICE_ADMIN" },
+                        { label: "Tax & Accounting Advisory", value: "TAX_ACCOUNTING_ADVISORY" },
+                        { label: "Legal & Corporate Advisory", value: "LEGAL_CORPORATE_ADVISORY" },
+                        { label: "Audit & Assurance", value: "AUDIT_ASSURANCE" },
+                        { label: "Practice Development & Management", value: "PRACTICE_DEVELOPMENT_MANAGEMENT" },
+                        { label: "Client & Operation Management", value: "CLIENT_OPERATION_MANAGEMENT" },
+                        { label: "Finance & Human Resource", value: "FINANCE_HUMAN_RESOURCE" },
+                        { label: "Technology Innovation and Development", value: "TECHNOLOGY_INNOVATION_DEVELOPMENT" },
+                      ]}
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      className="w-full"
+                      triggerClassName="bg-[var(--bg)]"
+                      panelClassName="bg-[var(--bg)]"
+                    />
+                  )}
+                />
+              </div>
             </div>
           </div>
 
-          <div className="pt-2">
-            <h3 className="text-sm font-bold text-[var(--text-main)] mb-2 px-1">Access Permissions</h3>
-            <div className="h-px bg-[var(--border-color)] w-full mb-4" />
-            
-            {currentRole === "SUPER_ADMIN" ? (
-              <div className="flex items-center gap-3 px-4 py-5 rounded-xl bg-emerald-500/5 border border-emerald-500/10 mb-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0">
-                  <UserIcon size={20} />
-                </div>
-                <div>
-                  <h4 className="text-emerald-600 dark:text-emerald-400 font-bold text-sm">Full System Access</h4>
-                  <p className="text-[var(--text-muted)] text-[11px] mt-1 leading-relaxed">
-                    This user has a <span className="text-emerald-500 font-bold">Super Admin</span> role and bypasses individual module permission checks.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col">
-                {MODULE_INFO.map((module) => (
-                  <div key={module.id} className="border-b border-[var(--border-color)]/20 last:border-0 transition-all duration-200">
-                    <Controller
-                      name={`permissions.${module.id}`}
-                      control={control}
-                      defaultValue={[]}
-                      render={({ field }) => {
-                        const isEnabled = (field.value || []).length > 0;
-                        return (
-                          <div className="flex flex-col">
-                            <ToggleSwitch
-                              label={module.label}
-                              description={module.description}
-                              checked={isEnabled}
-                              size="sm"
-                              onChange={(checked) => {
-                                field.onChange(checked ? ["READ"] : []);
-                              }}
-                              className="px-2 !py-3 hover:bg-[var(--surface-hover)]/30 transition-colors rounded-lg flex-1"
-                            />
-
-                            {isEnabled && (
-                              <div className="flex flex-col gap-1 pb-4 pr-2 pl-6 animate-in slide-in-from-top-2 fade-in duration-300">
-                                <div className="flex flex-col">
-                                  {PERMISSIONS_LIST.map((perm) => (
-                                    <ToggleSwitch
-                                      key={perm.id}
-                                      label={perm.label}
-                                      description={perm.description}
-                                      size="sm"
-                                      reverse={true}
-                                      checked={(field.value || []).includes(perm.id as any)}
-                                      onChange={(checked) => {
-                                        const current = field.value || [];
-                                        const next = checked
-                                          ? [...current, perm.id]
-                                          : current.filter((p: string) => p !== perm.id);
-                                        field.onChange(next);
-                                      }}
-                                      className="!py-2 border-b border-[var(--border-color)]/20 last:border-0 !justify-start gap-4"
-                                    />
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      }}
-                    />
+          {/* ── Access Permissions ── */}
+          <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
+            <div className="px-1 mb-3 flex items-center gap-2">
+              <ShieldCheck size={16} className="text-[var(--color-growth-green)]" />
+              <h3 className="text-sm font-bold text-[var(--text-main)]">Access Permissions</h3>
+            </div>
+            <div className="px-[10px]">
+              {currentRole === "SUPER_ADMIN" ? (
+                <div className="flex items-center gap-3 px-4 py-5 rounded-xl bg-emerald-500/5 border border-emerald-500/10 mb-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0">
+                    <UserIcon size={20} />
                   </div>
-                ))}
-              </div>
-            )}
+                  <div>
+                    <h4 className="text-emerald-600 dark:text-emerald-400 font-bold text-sm">Full System Access</h4>
+                    <p className="text-[var(--text-muted)] text-[11px] mt-1 leading-relaxed">
+                      This user has a <span className="text-emerald-500 font-bold">Super Admin</span> role and bypasses individual module permission checks.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col">
+                  {MODULE_INFO.map((module) => (
+                    <div key={module.id} className="border-b border-[var(--border-color)]/20 last:border-0 transition-all duration-200">
+                      <Controller
+                        name={`permissions.${module.id}`}
+                        control={control}
+                        defaultValue={[]}
+                        render={({ field }) => {
+                          const isEnabled = (field.value || []).length > 0;
+                          return (
+                            <div className="flex flex-col">
+                              <ToggleSwitch
+                                label={module.label}
+                                description={module.description}
+                                checked={isEnabled}
+                                size="sm"
+                                onChange={(checked) => {
+                                  field.onChange(checked ? ["READ"] : []);
+                                }}
+                                className="px-2 !py-3 hover:bg-[var(--surface-hover)]/30 transition-colors rounded-lg flex-1"
+                              />
+
+                              {isEnabled && (
+                                <div className="flex flex-col gap-1 pb-4 pr-2 pl-6 animate-in slide-in-from-top-2 fade-in duration-300">
+                                  <div className="flex flex-col">
+                                    {PERMISSIONS_LIST.map((perm) => (
+                                      <ToggleSwitch
+                                        key={perm.id}
+                                        label={perm.label}
+                                        description={perm.description}
+                                        size="sm"
+                                        reverse={true}
+                                        checked={(field.value || []).includes(perm.id as any)}
+                                        onChange={(checked) => {
+                                          const current = field.value || [];
+                                          const next = checked
+                                            ? [...current, perm.id]
+                                            : current.filter((p: string) => p !== perm.id);
+                                          field.onChange(next);
+                                        }}
+                                        className="!py-2 border-b border-[var(--border-color)]/20 last:border-0 !justify-start gap-4"
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           {errorMsg && <Message variant="error">{errorMsg}</Message>}
           {successMsg && <Message variant="success">{successMsg}</Message>}
 
-          <div className="pt-1 flex items-center justify-end gap-3 translate-y-1">
+          <div className="pt-2 flex items-center justify-end gap-3 translate-y-1">
             <Button
               type="button"
               variant="outline"
               onClick={handleClose}
-              className="bg-transparent border-[var(--border-color)] text-[var(--text-main)] hover:bg-[var(--surface-hover)] rounded-full px-8 h-11 text-xs font-bold transition-all border-opacity-30"
+              className="bg-transparent border-[var(--border-color)] text-[var(--text-main)] hover:bg-[var(--surface-hover)] rounded-full px-8 h-10 text-sm font-bold transition-all border-opacity-30"
             >
               Cancel
             </Button>
@@ -340,7 +352,7 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
               type="submit"
               variant="primary"
               disabled={loading}
-              className="w-auto min-w-[160px] h-11 gap-2 px-8 py-2 text-xs font-bold bg-[var(--color-growth-green)] text-[var(--btn-primary-text)] border-0 transition-all rounded-full shadow-[0_2px_8px_var(--btn-primary-shadow)] hover:shadow-[0_4px_14px_var(--btn-primary-shadow)] hover:brightness-110 transform active:scale-95"
+              className="w-auto min-w-[160px] h-10 gap-2 px-8 py-2 text-sm font-bold bg-[var(--color-growth-green)] text-[var(--btn-primary-text)] border-0 transition-all rounded-full shadow-[0_2px_8px_var(--btn-primary-shadow)] hover:shadow-[0_4px_14px_var(--btn-primary-shadow)] hover:brightness-110 transform active:scale-95"
             >
               {loading ? <Loader2 size={16} className="animate-spin" /> : "Save Changes"}
             </Button>

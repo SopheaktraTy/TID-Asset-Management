@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { z } from "zod";
-import { Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle2, Eye, EyeOff, ShieldCheck } from "lucide-react";
 
 import { Modal } from "../../ui/Modal";
 import { Button } from "../../ui/Button";
@@ -73,19 +73,22 @@ export default function ResetPasswordModal({
     <Modal isOpen={isOpen} onClose={handleClose} maxWidth="max-w-[400px]">
       <div className="flex flex-col gap-2">
         {/* Header - Logo & Title */}
-        <div className="w-full flex flex-col items-center mb-1">
+        <div className="w-full flex flex-col items-center mb-6 pt-2">
           <img
             src={theme === "dark" ? logoWhite : logoCharcoal}
             alt="Logo"
-            className="h-8 w-auto object-contain mb-4"
+            className="h-10 w-auto object-contain mb-6"
           />
           <div className="text-center">
-            <h3 className="text-lg font-bold text-[var(--text-main)]">Reset Password</h3>
-            <p className="text-xs text-[var(--text-muted)]">Force a password update for administrative purposes.</p>
+            <h3 className="text-xl font-black tracking-tighter text-[var(--text-main)] leading-none text-center">Reset Password</h3>
+            <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mt-2 text-center opacity-70">
+              Security Protocol
+            </p>
           </div>
         </div>
 
-        <div className="h-px bg-[var(--border-color)] w-full opacity-30" />
+
+        {/* Header content below (no line) */}
 
         {errorMsg && <Message variant="error">{errorMsg}</Message>}
 
@@ -104,54 +107,61 @@ export default function ResetPasswordModal({
               </p>
             </div>
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">New Password</label>
-                <div className="relative group">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Min 6 characters"
-                    className="bg-[var(--bg)] border-[var(--border-color)]/50 focus:border-orange-500/50 pr-10"
-                    {...register("password")}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-orange-500 transition-colors"
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-                {errors.password && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.password.message}</p>}
+            <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
+              <div className="px-1 mb-3 flex items-center gap-2">
+                <ShieldCheck size={16} className="text-orange-500" />
+                <h3 className="text-sm font-bold text-[var(--text-main)]">Authentication Settings</h3>
               </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Confirm Password</label>
-                <div className="relative group">
-                  <Input
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Repeat new password"
-                    className="bg-[var(--bg)] border-[var(--border-color)]/50 focus:border-orange-500/50 pr-10"
-                    {...register("confirmPassword")}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-orange-500 transition-colors"
-                  >
-                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
+              
+              <div className="px-[10px] space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">New Password</label>
+                  <div className="relative group">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Min 6 characters"
+                      className="bg-[var(--bg)] border-[var(--border-color)]/50 focus:border-orange-500/50 pr-10"
+                      {...register("password")}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-orange-500 transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {errors.password && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.password.message}</p>}
                 </div>
-                {errors.confirmPassword && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.confirmPassword.message}</p>}
+
+                <div>
+                  <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Confirm Password</label>
+                  <div className="relative group">
+                    <Input
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Repeat new password"
+                      className="bg-[var(--bg)] border-[var(--border-color)]/50 focus:border-orange-500/50 pr-10"
+                      {...register("confirmPassword")}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-orange-500 transition-colors"
+                    >
+                      {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {errors.confirmPassword && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.confirmPassword.message}</p>}
+                </div>
               </div>
             </div>
 
-            <div className="pt-4 flex items-center justify-end gap-3 border-t border-[var(--border-color)] mt-4">
+            <div className="flex items-center justify-end gap-3 pt-2 border-none mt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleClose}
-                className="bg-transparent border-[var(--border-color)] text-[var(--text-main)] hover:bg-[var(--surface-hover)] rounded-full px-6 h-10 text-xs font-bold transition-all"
+                className="flex-1 max-w-[120px] h-10 border-[var(--border-color)]/30 text-[var(--text-main)] hover:bg-[var(--surface-hover)] rounded-full text-sm font-bold"
               >
                 Cancel
               </Button>
@@ -159,7 +169,7 @@ export default function ResetPasswordModal({
                 type="submit"
                 variant="primary"
                 disabled={loading}
-                className="w-auto min-w-[140px] h-10 gap-2 px-6 py-2 text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white border-0 transition-all rounded-full shadow-lg shadow-orange-600/20 active:scale-95"
+                className="flex-1 min-w-[160px] h-10 bg-orange-500 text-white border-0 shadow-lg shadow-orange-500/20 rounded-full transform active:scale-95 transition-all flex items-center justify-center gap-2 text-sm font-bold"
               >
                 {loading ? <Loader2 size={16} className="animate-spin" /> : "Reset Password"}
               </Button>

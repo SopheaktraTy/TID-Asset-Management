@@ -45,7 +45,7 @@ export function Modal({ isOpen, onClose, children, maxWidth = "max-w-[500px]" }:
         onClick={(e) => e.stopPropagation()}
       >
         {/* Content with internal scroll */}
-        <div className="flex-1 overflow-y-auto px-7 py-8 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto px-5 py-5 custom-scrollbar">
           {children}
         </div>
       </div>
