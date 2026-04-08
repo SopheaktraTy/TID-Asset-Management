@@ -214,7 +214,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public ProfileResponse updateProfile(@NonNull Long userId, String username, String department, org.springframework.web.multipart.MultipartFile imageFile, boolean removeImage) {
+    public ProfileResponse updateProfile(@NonNull Long userId, String username, String department, org.springframework.web.multipart.MultipartFile imageFile, boolean removeImage, String currentPassword, String newPassword) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -232,6 +232,20 @@ public class AuthServiceImpl implements AuthService {
             }
         }
         
+        // 🔒 Handle Password Update if provided
+        if (newPassword != null && !newPassword.isBlank()) {
+            if (currentPassword == null || currentPassword.isBlank()) {
+                throw new BadCredentialsException("Current password is required to set a new password");
+            }
+            if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+                throw new BadCredentialsException("Current password is incorrect");
+            }
+            if (passwordEncoder.matches(newPassword, user.getPasswordHash())) {
+                throw new ConflictException("New password must be different from the current password");
+            }
+            user.setPasswordHash(passwordEncoder.encode(newPassword));
+        }
+
         // Capture old image path for cleanup
         String oldImage = user.getImage();
         

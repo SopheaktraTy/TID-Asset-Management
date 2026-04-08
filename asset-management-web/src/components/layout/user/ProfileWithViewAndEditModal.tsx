@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { Camera, X, User as UserIcon, Loader2, Pencil } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Camera, X, User as UserIcon, Loader2, Pencil, Eye, EyeOff } from "lucide-react";
 import { getSafeImageUrl } from "../../../utils/image";
 import { Modal } from "../../ui/Modal";
 import { Button } from "../../ui/Button";
@@ -51,7 +51,13 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
     deptRowRef,
     footerRef,
     resetForm,
+    currentPassword,
+    setCurrentPassword,
+    newPassword,
+    setNewPassword,
   } = useProfileUpdate({ onClose });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -74,7 +80,7 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
       if (isEditing) {
         const inNameRow = nameRowRef.current && nameRowRef.current.contains(target);
         const inDeptRow = deptRowRef.current && deptRowRef.current.contains(target);
-        
+
         if (!inNameRow && !inDeptRow) {
           setEditedName(user.username);
           setEditedDept((user as any).department || "");
@@ -101,16 +107,8 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
         <div className="flex items-center justify-between mb-10 w-full px-2">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
-              <h3 className="text-normal font-black text-[var(--text-main)] tracking-tight">Account Settings</h3>
-              {user.isActive ? (
-                <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-bold border border-emerald-500/20 uppercase tracking-wider">
-                  Active
-                </span>
-              ) : (
-                <span className="px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-500 text-[10px] font-bold border border-red-500/20 uppercase tracking-wider">
-                  Inactive
-                </span>
-              )}
+              <h3 className="text-lg font-bold text-[var(--text-main)] tracking-tight">Account Settings</h3>
+
             </div>
             <p className="text-xs text-[var(--text-muted)] font-medium">Manage your profile and personal information</p>
           </div>
@@ -133,18 +131,18 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
           </div>
         )}
 
-        <div className="space-y-6 px-2">
+        <div className="space-y-3 px-2">
           {/* Clean Avatar Section */}
           <div className="flex flex-col items-center">
             <div className="relative group">
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="w-32 h-32 rounded-full border-2 border-emerald-500 p-1.5 overflow-hidden ring-4 ring-emerald-500/5 transition-all cursor-pointer relative"
+                className="w-32 h-32 rounded-full border-2 border-[var(--color-growth-green)] p-1.5 overflow-hidden ring-4 ring-[var(--color-growth-green)]/10 transition-all cursor-pointer relative"
               >
                 {tempImage ? (
-                  <img 
-                    src={getSafeImageUrl(tempImage)} 
-                    alt="Profile" 
+                  <img
+                    src={getSafeImageUrl(tempImage)}
+                    alt="Profile"
                     className="w-full h-full rounded-full object-cover shadow-inner"
                     style={{ imageRendering: "auto" }}
                   />
@@ -157,7 +155,7 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
                   <Camera size={24} className="text-white" />
                 </div>
               </div>
-              <div className="absolute bottom-1 right-1 w-8 h-8 bg-emerald-500 border-2 border-[var(--surface)] rounded-full flex items-center justify-center text-white shadow-md z-10 pointer-events-none">
+              <div className="absolute bottom-1 right-1 w-8 h-8 bg-[var(--color-growth-green)] border-2 border-[var(--surface)] rounded-full flex items-center justify-center text-white shadow-md z-10 pointer-events-none">
                 <Pencil size={14} />
               </div>
               {tempImage && (
@@ -172,11 +170,17 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
             </div>
           </div>
 
-          {/* Form Content - Compact Grid */}
-          <div className="divide-y divide-[var(--border-color)] border-t border-b border-[var(--border-color)]">
+          {/* Form Content - Clean Stack */}
+          <div className="space-y-1">
+            {/* Basic Info Section Title */}
+            <div className="pt-2">
+              <h3 className="text-sm font-bold text-[var(--text-main)]">Basic Information</h3>
+              <div className="h-px bg-[var(--border-color)] w-full opacity-50 mt-2" />
+            </div>
+
             {/* Username Row */}
-            <div className="py-4 grid grid-cols-[120px_1fr] items-center group">
-              <label className="text-sm [0.75rem] font-bold text-[var(--text-muted)]">Username</label>
+            <div className="py-1.5 grid grid-cols-[120px_1fr] items-center group">
+              <label className="text-xs font-bold text-[var(--text-main)]">Username</label>
               <div ref={nameRowRef} className="flex items-center justify-between gap-4 min-h-[36px]">
                 {isEditing ? (
                   <div className="w-full relative flex items-center">
@@ -186,23 +190,23 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
                       value={editedName}
                       onChange={(e) => setEditedName(e.target.value)}
                       placeholder="Enter username"
-                      className="w-full bg-[var(--surface-hover)] border border-emerald-500/50 rounded-lg px-3 py-1.5 text-sm font-semibold text-[var(--text-main)] outline-none focus:ring-2 focus:ring-emerald-500/5 transition-all"
+                      className="w-full bg-[var(--surface-hover)] border border-[var(--color-growth-green)]/50 rounded-lg px-3 py-1.5 text-[11px] font-semibold text-[var(--text-main)] outline-none focus:ring-2 focus:ring-[var(--color-growth-green)]/10 focus:border-[var(--color-growth-green)]/50 transition-all"
                     />
-                    <div className="absolute right-2 p-1 text-emerald-500 opacity-50">
+                    <div className="absolute right-2 p-1 text-[var(--color-growth-green)] opacity-50">
                       <Pencil size={12} />
                     </div>
                   </div>
                 ) : (
                   <div className="flex items-center justify-between w-full">
                     <span
-                      className="text-xs font-bold text-[var(--text-main)] cursor-pointer hover:text-emerald-500 transition-colors"
+                      className="text-[11px] font-bold text-[var(--text-main)] cursor-pointer hover:text-[var(--color-growth-green)] transition-colors"
                       onClick={() => setIsEditing(true)}
                     >
                       {user.username}
                     </span>
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="p-1.5 opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-emerald-500 transition-all font-semibold"
+                      className="p-1.5 opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-[var(--color-growth-green)] transition-all font-semibold"
                     >
                       <Pencil size={14} />
                     </button>
@@ -212,8 +216,8 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
             </div>
 
             {/* Department Row */}
-            <div className="py-4 grid grid-cols-[120px_1fr] items-center group">
-              <label className="text-sm [0.75rem] font-bold text-[var(--text-muted)]">Department</label>
+            <div className="py-1.5 grid grid-cols-[120px_1fr] items-center group">
+              <label className="text-xs font-bold text-[var(--text-main)]">Department</label>
               <div ref={deptRowRef} className="flex items-center justify-between gap-4 min-h-[36px]">
                 {isEditing ? (
                   <div className="w-full">
@@ -224,25 +228,81 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
                       placeholder="Select department..."
                       className="w-full font-semibold"
                       panelClassName="bg-[var(--bg)]"
-                      triggerClassName="border-emerald-500/50 focus:border-emerald-500"
+                      triggerClassName="border-[var(--color-growth-green)]/50 focus:border-[var(--color-growth-green)]"
                     />
                   </div>
                 ) : (
                   <div className="flex items-center justify-between w-full">
                     <span
-                      className="text-xs font-medium text-[var(--text-main)] cursor-pointer hover:text-emerald-500 transition-colors"
+                      className="text-[11px] font-medium text-[var(--text-main)] cursor-pointer hover:text-[var(--color-growth-green)] transition-colors"
                       onClick={() => setIsEditing(true)}
                     >
                       {DEPARTMENTS.find(d => d.value === (user as any).department)?.label || (user as any).department || "Not specified"}
                     </span>
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="p-1.5 opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-emerald-500 transition-all"
+                      className="p-1.5 opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-[var(--color-growth-green)] transition-all"
                     >
                       <Pencil size={14} />
                     </button>
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Password Section Title */}
+            <div className="pt-3">
+              <h3 className="text-sm font-bold text-[var(--text-main)] px-1">Security Settings</h3>
+              <div className="h-px bg-[var(--border-color)] w-full opacity-50 mt-2" />
+            </div>
+
+            {/* Current Password Row */}
+            <div className="py-1.5 grid grid-cols-[120px_1fr] items-center group">
+              <label className="text-xs font-bold text-[var(--text-main)]">Current Password</label>
+              <div className="flex items-center justify-between gap-4 min-h-[36px]">
+                <div className="w-full relative flex items-center">
+                  <input
+                    type={showCurrentPassword ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="Enter current password"
+                    className="w-full bg-[var(--surface-hover)] border border-[var(--border-color)] rounded-lg px-3 py-1.5 pr-10 text-[11px] font-semibold text-[var(--text-main)] outline-none focus:ring-2 focus:ring-[var(--color-growth-green)]/10 focus:border-[var(--color-growth-green)]/50 transition-all placeholder:text-[var(--text-muted)] placeholder:opacity-50"
+                  />
+                  {currentPassword && (
+                    <button
+                      type="button"
+                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      className="absolute right-2 p-1 text-[var(--text-muted)] hover:text-[var(--color-growth-green)] transition-colors"
+                    >
+                      {showCurrentPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* New Password Row */}
+            <div className="py-1.5 grid grid-cols-[120px_1fr] items-center group">
+              <label className="text-xs font-bold text-[var(--text-main)]">New Password</label>
+              <div className="flex items-center justify-between gap-4 min-h-[36px]">
+                <div className="w-full relative flex items-center">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Enter new password"
+                    className="w-full bg-[var(--surface-hover)] border border-[var(--border-color)] rounded-lg px-3 py-1.5 pr-10 text-[11px] font-semibold text-[var(--text-main)] outline-none focus:ring-2 focus:ring-[var(--color-growth-green)]/10 focus:border-[var(--color-growth-green)]/50 transition-all placeholder:text-[var(--text-muted)] placeholder:opacity-50"
+                  />
+                  {newPassword && (
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute right-2 p-1 text-[var(--text-muted)] hover:text-[var(--color-growth-green)] transition-colors"
+                    >
+                      {showNewPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -260,7 +320,7 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
               variant="primary"
               onClick={handleUpdateProfile}
               disabled={isUpdating}
-              className="px-7 py-2.5 rounded-lg text-xs font-bold shadow-lg shadow-emerald-500/10"
+              className="px-7 py-2.5 rounded-lg text-xs font-bold shadow-lg shadow-[var(--color-growth-green)]/10"
             >
               {isUpdating ? <Loader2 size={12} className="animate-spin" /> : "Save Changes"}
             </Button>

@@ -7,6 +7,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import UserManagement from "./pages/UserManagement";
 import UserDetailsPage from "./pages/UserDetails";
+import AssetManagement from "./pages/AssetManagement";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/layout/ProtectedRoute";
 import LoadingScreen from "./components/ui/LoadingScreen";
@@ -36,6 +37,7 @@ function AppRoutes() {
       <Route element={<ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN"]} />}>
         <Route path="/users-management" element={<UserManagement />} />
         <Route path="/user-detail/:id" element={<UserDetailsPage />} />
+        <Route path="/assets-management" element={<AssetManagement />} />
       </Route>
 
       {/* Default route */}

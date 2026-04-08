@@ -21,6 +21,8 @@ export function useProfileUpdate({ onClose }: UseProfileUpdateOptions) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const nameRowRef = useRef<HTMLDivElement>(null);
@@ -37,6 +39,8 @@ export function useProfileUpdate({ onClose }: UseProfileUpdateOptions) {
       setIsEditing(false);
       setErrorMsg(null);
       setSuccessMsg(null);
+      setCurrentPassword("");
+      setNewPassword("");
     }
   }, [user]);
 
@@ -69,6 +73,11 @@ export function useProfileUpdate({ onClose }: UseProfileUpdateOptions) {
       formData.append("department", editedDept);
       formData.append("removeImage", String(isImageDeleted));
       
+      if (newPassword) {
+        formData.append("currentPassword", currentPassword);
+        formData.append("newPassword", newPassword);
+      }
+      
       if (selectedFile) {
         const optimizedBlob = await optimizeImage(selectedFile, 800, 800, 0.8);
         formData.append("image", optimizedBlob, "profile.jpg");
@@ -81,7 +90,8 @@ export function useProfileUpdate({ onClose }: UseProfileUpdateOptions) {
       setTimeout(() => {
         onClose();
         setSuccessMsg(null);
-      }, 1500);
+        window.location.reload();
+      }, 2500);
       
     } catch (err: any) {
       setErrorMsg(err.response?.data?.message || "Failed to update profile");
@@ -110,5 +120,9 @@ export function useProfileUpdate({ onClose }: UseProfileUpdateOptions) {
     deptRowRef,
     footerRef,
     resetForm,
+    currentPassword,
+    setCurrentPassword,
+    newPassword,
+    setNewPassword,
   };
 }

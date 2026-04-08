@@ -106,10 +106,12 @@ public class AuthController {
             @RequestPart("username") String username,
             @RequestPart("department") String department,
             @RequestParam(value = "removeImage", defaultValue = "false") boolean removeImage,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestPart(value = "currentPassword", required = false) String currentPassword,
+            @RequestPart(value = "newPassword", required = false) String newPassword) {
         Long userId = getAuthenticatedUserId();
         return ResponseEntity
-                .ok(new ApiResponse<>(200, "Profile updated successfully", authService.updateProfile(userId, username, department, image, removeImage)));
+                .ok(new ApiResponse<>(200, "Profile updated successfully", authService.updateProfile(userId, username, department, image, removeImage, currentPassword, newPassword)));
     }
 
     @GetMapping("/view-profile")

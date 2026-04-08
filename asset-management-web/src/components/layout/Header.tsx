@@ -1,10 +1,13 @@
 import { useHeader } from "../../hooks/useHeader";
 import { useOnClickOutside } from "../../hooks/useOnClickOutside";
 import { useRef } from "react";
+import { NavLink } from "react-router-dom";
 import {
   Bell,
   User,
   Moon,
+  HardDrive,
+  Users,
 } from "lucide-react";
 import { useTheme } from "../../hooks/useTheme";
 import { ProfileWithViewAndEditModal } from "./user/ProfileWithViewAndEditModal";
@@ -28,9 +31,51 @@ export default function Header() {
 
   return (
     <>
-      <header className="h-16 flex items-center justify-end px-6 bg-[var(--bg)] shadow-sm transition-colors border-b border-[var(--border-color)]">
-        {/* Right Side: Notification and User Profile */}
-        <div className="flex items-center space-x-4">
+      <header className="h-16 flex items-center justify-between px-6 bg-[var(--bg)] shadow-sm transition-colors border-b border-[var(--border-color)] sticky top-0 z-40">
+
+        {/* ── Left: Brand ── */}
+        <div className="flex items-center gap-2 min-w-[160px]">
+          <div className="w-7 h-7 rounded-lg bg-[var(--color-growth-green)]/15 flex items-center justify-center">
+            <HardDrive size={14} className="text-[var(--color-growth-green)]" />
+          </div>
+          <span className="text-sm font-black text-[var(--text-main)] tracking-tight hidden sm:block">
+            TID Assets
+          </span>
+        </div>
+
+        {/* ── Center: Nav Links ── */}
+        <nav className="flex items-center gap-1">
+          <NavLink
+            to="/assets-management"
+            className={({ isActive }) =>
+              `flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                isActive
+                  ? "bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)]"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]"
+              }`
+            }
+          >
+            <HardDrive size={14} />
+            <span>Assets</span>
+          </NavLink>
+
+          <NavLink
+            to="/users-management"
+            className={({ isActive }) =>
+              `flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                isActive
+                  ? "bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)]"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]"
+              }`
+            }
+          >
+            <Users size={14} />
+            <span>Users</span>
+          </NavLink>
+        </nav>
+
+        {/* ── Right: Notification + Avatar ── */}
+        <div className="flex items-center space-x-4 min-w-[160px] justify-end">
           <button className=" rounded-full hover:bg-[var(--surface-hover)] transition-colors text-[var(--text-muted)] hover:text-[var(--text-main)]">
             <Bell size={20} />
           </button>

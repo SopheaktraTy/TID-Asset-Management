@@ -83,6 +83,15 @@
 }
 
 .custom-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;     /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+/* 🔒 Hide default browser eyes */
+input::-ms-reveal,
+input::-ms-clear,
+input::-webkit-contacts-auto-fill-button {
+  display: none !important;
 }
