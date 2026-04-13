@@ -24,8 +24,9 @@ import { createUserApi } from "../../../services/userManagement.service";
 import { useTheme } from "../../../hooks/useTheme";
 
 // Baker Tilly logo assets
-import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_Charcoal.png";
-import logoWhite from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_White.png";
+import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Growth Symbol Charcoal.png";
+import logoWhite from "../../../assets/Logo_Bakertilly/Baker Tilly Growth Symbol White.png";
+
 
 const MODULE_INFO = [
   { id: "ASSET", label: "Asset Management", description: "Allow users to view, create, edit and delete assets." },
@@ -91,16 +92,16 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
     >
       <div className="flex flex-col gap-2">
         {/* Header - Logo & Title */}
-        <div className="w-full flex flex-col items-center mb-6 pt-2">
+        <div className="w-full flex items-center justify-center mb-2 pt-2">
           <img
             src={theme === "dark" ? logoWhite : logoCharcoal}
             alt="Logo"
-            className="h-10 w-auto object-contain mb-4"
+            className="h-14 w-auto object-contain"
           />
-          <div className="text-center">
-            <h3 className="text-xl font-black tracking-tighter text-[var(--text-main)] leading-none text-center">Create New User</h3>
-            <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mt-2 text-center opacity-70">
-              User Registration
+          <div className="flex flex-col text-left">
+            <h3 className="text-xl mt-2 font-bold tracking-tight text-[var(--text-main)] leading-none">Create New User</h3>
+            <p className="text-[13px] text-[var(--text-muted)] opacity-80 lowercase font-medium">
+              user registration
             </p>
           </div>
         </div>

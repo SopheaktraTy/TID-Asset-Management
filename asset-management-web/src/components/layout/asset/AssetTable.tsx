@@ -2,6 +2,7 @@ import { HardDrive } from "lucide-react";
 import type { AssetDto, AssetStatus, DeviceType } from "../../../types/asset.types";
 import { Table, type ColumnDef } from "../../ui/Table";
 import { formatDate } from "../../../utils/format";
+import { getSafeImageUrl } from "../../../utils/image";
 
 // ── Column picker options exported for toolbar ────────────────────────────────
 export const ASSET_TABLE_COLUMN_OPTIONS = [
@@ -18,16 +19,16 @@ export const ASSET_TABLE_COLUMN_OPTIONS = [
 // ── Status badge config ───────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<
   AssetStatus,
-  { color: string; bg: string; label: string }
+  { color: string; bg: string; border: string; label: string }
 > = {
-  AVAILABLE:    { color: "text-[#10b981]", bg: "bg-[#10b981]", label: "Available" },
-  IN_USE:       { color: "text-[#3b82f6]", bg: "bg-[#3b82f6]", label: "In Use" },
-  DAMAGED:      { color: "text-[#ef4444]", bg: "bg-[#ef4444]", label: "Damaged" },
-  UNDER_REPAIR: { color: "text-[#f59e0b]", bg: "bg-[#f59e0b]", label: "Under Repair" },
-  LOST:         { color: "text-[#dc2626]", bg: "bg-[#dc2626]", label: "Lost" },
-  MALFUNCTION:  { color: "text-[#f97316]", bg: "bg-[#f97316]", label: "Malfunction" },
-  MAINTENANCE:  { color: "text-[#8b5cf6]", bg: "bg-[#8b5cf6]", label: "Maintenance" },
-  OTHER:        { color: "text-[#6b7280]", bg: "bg-[#6b7280]", label: "Other" },
+  AVAILABLE: { color: "text-[#10b981]", bg: "bg-[#10b981]/15", border: "border-[#10b981]/20", label: "Available" },
+  IN_USE: { color: "text-[#3b82f6]", bg: "bg-[#3b82f6]/15", border: "border-[#3b82f6]/20", label: "In Use" },
+  DAMAGED: { color: "text-red-500", bg: "bg-red-500/15", border: "border-red-500/20", label: "Damaged" },
+  UNDER_REPAIR: { color: "text-amber-500", bg: "bg-amber-500/15", border: "border-amber-500/20", label: "Under Repair" },
+  LOST: { color: "text-red-600", bg: "bg-red-600/15", border: "border-red-600/20", label: "Lost" },
+  MALFUNCTION: { color: "text-orange-500", bg: "bg-orange-500/15", border: "border-orange-500/20", label: "Malfunction" },
+  MAINTENANCE: { color: "text-purple-500", bg: "bg-purple-500/15", border: "border-purple-500/20", label: "Maintenance" },
+  OTHER: { color: "text-[var(--text-muted)]", bg: "bg-[var(--text-muted)]/15", border: "border-[var(--text-muted)]/20", label: "Other" },
 };
 
 // ── Device type badge config ──────────────────────────────────────────────────
@@ -35,10 +36,10 @@ const DEVICE_TYPE_CONFIG: Record<
   DeviceType,
   { bg: string; text: string; label: string }
 > = {
-  LAPTOP:           { bg: "bg-blue-500/10 border border-blue-500/20",   text: "text-blue-500",   label: "Laptop" },
-  DESKTOP:          { bg: "bg-violet-500/10 border border-violet-500/20", text: "text-violet-500", label: "Desktop" },
-  PORTABLE_MONITOR: { bg: "bg-cyan-500/10 border border-cyan-500/20",   text: "text-cyan-500",   label: "Portable Monitor" },
-  STAND_MONITOR:    { bg: "bg-gray-500/10 border border-gray-500/20",   text: "text-gray-400",   label: "Stand Monitor" },
+  LAPTOP: { bg: "bg-blue-600/20 border border-blue-600/40", text: "text-blue-600 dark:text-blue-400", label: "Laptop" },
+  DESKTOP: { bg: "bg-violet-600/20 border border-violet-600/40", text: "text-violet-600 dark:text-violet-400", label: "Desktop" },
+  PORTABLE_MONITOR: { bg: "bg-cyan-600/20 border border-cyan-600/40", text: "text-cyan-600 dark:text-cyan-400", label: "Portable Monitor" },
+  STAND_MONITOR: { bg: "bg-gray-600/20 border border-gray-600/40", text: "text-gray-700 dark:text-gray-300", label: "Stand Monitor" },
 };
 
 // ── Compact hardware spec builder ─────────────────────────────────────────────
@@ -81,9 +82,27 @@ export default function AssetTable({
       sortable: true,
       cell: (asset) => (
         <div className="flex items-center gap-3 min-w-0 py-1">
-          {/* Device icon avatar */}
-          <div className="w-9 h-9 rounded-lg bg-[var(--surface-hover)] flex items-center justify-center shrink-0">
-            <HardDrive size={16} className="text-[var(--text-muted)]" />
+          {/* Thumbnail or fallback icon */}
+          <div className="w-12 h-12 rounded-lg bg-[var(--surface-hover)] flex items-center justify-center shrink-0 overflow-hidden border border-[var(--border-color)] shadow-sm">
+            {asset.image ? (
+              <img
+                src={getSafeImageUrl(asset.image)}
+                alt={asset.deviceName}
+                className="w-full h-full object-cover"
+                style={{ imageRendering: "-webkit-optimize-contrast" }}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = "none";
+                  (e.currentTarget.nextElementSibling as HTMLElement | null)?.style.setProperty("display", "flex");
+                }}
+              />
+
+            ) : null}
+            <div
+              className="w-full h-full flex items-center justify-center"
+              style={{ display: asset.image ? "none" : "flex" }}
+            >
+              <HardDrive size={20} className="text-[var(--text-muted)]" />
+            </div>
           </div>
           <div className="min-w-0 flex flex-col leading-tight">
             <p className="text-sm font-bold text-[var(--text-main)] truncate">
@@ -123,9 +142,8 @@ export default function AssetTable({
         const cfg = STATUS_CONFIG[asset.status] ?? STATUS_CONFIG.OTHER;
         return (
           <span
-            className={`inline-flex items-center gap-2 text-xs font-medium ${cfg.color}`}
+            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tight border ${cfg.bg} ${cfg.color} ${cfg.border}`}
           >
-            <span className={`w-1.5 h-1.5 rounded-full ${cfg.bg}`} />
             {cfg.label}
           </span>
         );

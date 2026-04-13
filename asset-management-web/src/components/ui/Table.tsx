@@ -149,7 +149,8 @@ export function Table<T>({
   );
 
   return (
-    <div className="w-full transition-all duration-200 overflow-x-auto custom-scrollbar">
+    <div className="w-full overflow-x-auto custom-scrollbar">
+
       <table className="w-full min-w-max text-xs">
         <thead className="relative z-20">
           <tr className="border-b border-[var(--border-color)] dark:border-[var(--border-color)]/80">

@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { useAuthStore } from "../store/authStore";
 import { updateProfileApi } from "../services/user.service";
-import { createLocalPreviewUrl, revokeLocalPreviewUrl, optimizeImage } from "../utils/image";
+import { revokeLocalPreviewUrl, optimizeImage } from "../utils/image";
 
 interface UseProfileUpdateOptions {
   onClose: () => void;
@@ -9,15 +9,16 @@ interface UseProfileUpdateOptions {
 
 export function useProfileUpdate({ onClose }: UseProfileUpdateOptions) {
   const { user, setAuth, token } = useAuthStore();
-  
+
   const [editedName, setEditedName] = useState("");
   const [editedDept, setEditedDept] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  
+
   const [tempImage, setTempImage] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | Blob | null>(null);
   const [isImageDeleted, setIsImageDeleted] = useState(false);
-  
+  const [pendingCropImage, setPendingCropImage] = useState<string | null>(null);
+
   const [isUpdating, setIsUpdating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -47,13 +48,20 @@ export function useProfileUpdate({ onClose }: UseProfileUpdateOptions) {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const localUrl = createLocalPreviewUrl(file);
-      revokeLocalPreviewUrl(tempImage);
-      setTempImage(localUrl);
-      setSelectedFile(file);
-      setIsImageDeleted(false);
+      if (!file.type.startsWith("image/")) return;
+      setPendingCropImage(URL.createObjectURL(file));
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
+
+  const handleCropComplete = useCallback((croppedBlob: Blob) => {
+    const localUrl = URL.createObjectURL(croppedBlob);
+    revokeLocalPreviewUrl(tempImage);
+    setTempImage(localUrl);
+    setSelectedFile(croppedBlob);
+    setIsImageDeleted(false);
+    setPendingCropImage(null);
+  }, [tempImage]);
 
   const handleRemoveImage = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -64,7 +72,7 @@ export function useProfileUpdate({ onClose }: UseProfileUpdateOptions) {
 
   const handleUpdateProfile = async () => {
     if (!user || !token) return;
-    
+
     setIsUpdating(true);
     setErrorMsg(null);
     try {
@@ -72,12 +80,12 @@ export function useProfileUpdate({ onClose }: UseProfileUpdateOptions) {
       formData.append("username", editedName);
       formData.append("department", editedDept);
       formData.append("removeImage", String(isImageDeleted));
-      
+
       if (newPassword) {
         formData.append("currentPassword", currentPassword);
         formData.append("newPassword", newPassword);
       }
-      
+
       if (selectedFile) {
         const optimizedBlob = await optimizeImage(selectedFile, 800, 800, 0.8);
         formData.append("image", optimizedBlob, "profile.jpg");
@@ -86,13 +94,13 @@ export function useProfileUpdate({ onClose }: UseProfileUpdateOptions) {
       const data = await updateProfileApi(formData);
       setAuth(token, { ...user, ...data });
       setSuccessMsg("Profile updated successfully!");
-      
+
       setTimeout(() => {
         onClose();
         setSuccessMsg(null);
         window.location.reload();
       }, 2500);
-      
+
     } catch (err: any) {
       setErrorMsg(err.response?.data?.message || "Failed to update profile");
     } finally {
@@ -124,5 +132,8 @@ export function useProfileUpdate({ onClose }: UseProfileUpdateOptions) {
     setCurrentPassword,
     newPassword,
     setNewPassword,
+    pendingCropImage,
+    setPendingCropImage,
+    handleCropComplete,
   };
 }

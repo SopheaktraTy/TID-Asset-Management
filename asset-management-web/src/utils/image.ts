@@ -26,7 +26,7 @@ export const getSafeImageUrl = (src: string | null | undefined): string => {
 
   // 🖼️ Fallback for relative paths: assuming they might be server assets too
   if (src.startsWith("/") || src.endsWith(".png") || src.endsWith(".jpg") || src.endsWith(".jpeg") || src.endsWith(".gif") || src.endsWith(".svg")) {
-      return `${API_BASE_URL}${src.startsWith("/") ? src : "/" + src}`;
+    return `${API_BASE_URL}${src.startsWith("/") ? src : "/" + src}`;
   }
 
   return src;
@@ -35,7 +35,7 @@ export const getSafeImageUrl = (src: string | null | undefined): string => {
 /**
  * High-performance 'URL Base Method' (Blob Storage) for instant local previews.
  */
-export const createLocalPreviewUrl = (file: File): string => {
+export const createLocalPreviewUrl = (file: File | Blob): string => {
   return URL.createObjectURL(file);
 };
 
@@ -56,7 +56,7 @@ export const revokeLocalPreviewUrl = (url: string | null | undefined) => {
  * Optimizes an image before upload by resizing and compressing it.
  * Improves performance (small file size) and consistency (standard resolution).
  */
-export const optimizeImage = (file: File, maxWidth = 800, maxHeight = 800, quality = 0.8): Promise<Blob> => {
+export const optimizeImage = (file: File | Blob, maxWidth = 1024, maxHeight = 1024, quality = 0.9): Promise<Blob> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const reader = new FileReader();
@@ -78,7 +78,7 @@ export const optimizeImage = (file: File, maxWidth = 800, maxHeight = 800, quali
         }
       } else {
         if (height > maxHeight) {
-          width = Math.round((height * maxHeight) / height);
+          width = Math.round((width * maxHeight) / height);
           height = maxHeight;
         }
       }
@@ -95,6 +95,7 @@ export const optimizeImage = (file: File, maxWidth = 800, maxHeight = 800, quali
       ctx.imageSmoothingQuality = "high";
 
       ctx.drawImage(img, 0, 0, width, height);
+
 
       canvas.toBlob(
         (blob) => {

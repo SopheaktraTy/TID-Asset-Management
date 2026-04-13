@@ -8,6 +8,28 @@ import type {
   EditAssetFormValues,
 } from "../types/asset.types";
 
+/** Build a FormData payload for the "JSON + File" pattern. */
+function buildFormData(data: Record<string, unknown>, imageFile?: File | Blob | null): FormData {
+  const fd = new FormData();
+
+  // Create a JSON Blob for the asset data part
+  const jsonBlob = new Blob([JSON.stringify(data)], { type: "application/json" });
+  fd.append("asset", jsonBlob);
+
+  if (imageFile) {
+    // If it's a raw Blob (from optimizeImage), it might not have a name.
+    // We provide a default name with .jpg extension so the backend can detect it.
+    if (!(imageFile instanceof File)) {
+      fd.append("imageFile", imageFile, "optimized-image.jpg");
+    } else {
+      fd.append("imageFile", imageFile);
+    }
+  }
+
+  return fd;
+}
+
+
 const BASE = "/api/assets";
 
 export const getAssetsApi = async (
@@ -68,31 +90,37 @@ export const getAssetByIdApi = async (id: number): Promise<AssetDto> => {
 };
 
 export const createAssetApi = async (
-  data: CreateAssetFormValues
+  data: CreateAssetFormValues,
+  imageFile?: File | Blob | null
 ): Promise<AssetDto> => {
-  // Strip empty strings to null/undefined so backend validation passes
   const payload: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(data)) {
-    if (v === "" || v === undefined) continue;
-    payload[k] = v;
+    if (k === "image") continue;
+    // Keep empty strings for required fields so backend validation triggers properly
+    payload[k] = (v === undefined || v === null) ? null : v;
   }
-  const response = await api.post<ApiResponse<AssetDto>>(BASE, payload);
+
+  const fd = buildFormData(payload, imageFile);
+  const response = await api.post<ApiResponse<AssetDto>>(BASE, fd);
   return response.data.data;
 };
 
 export const updateAssetApi = async (
   id: number,
-  data: EditAssetFormValues
+  data: EditAssetFormValues,
+  imageFile?: File | Blob | null,
+  removeImage?: boolean
 ): Promise<AssetDto> => {
   const payload: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(data)) {
-    if (v === "" || v === undefined) continue;
-    payload[k] = v;
+    if (k === "image") continue;
+    payload[k] = (v === undefined || v === null) ? null : v;
   }
-  const response = await api.patch<ApiResponse<AssetDto>>(
-    `${BASE}/${id}`,
-    payload
-  );
+
+  const fd = buildFormData(payload, imageFile);
+  if (removeImage) fd.append("removeImage", String(removeImage));
+
+  const response = await api.patch<ApiResponse<AssetDto>>(`${BASE}/${id}`, fd);
   return response.data.data;
 };
 

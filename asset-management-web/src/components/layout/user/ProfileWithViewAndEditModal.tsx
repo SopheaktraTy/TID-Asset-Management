@@ -7,6 +7,7 @@ import { Message } from "../../ui/Message";
 import { useTheme } from "../../../hooks/useTheme";
 import { DropdownReverseList, type DropdownOption } from "../../ui/DropdownReverseList";
 import { useProfileUpdate } from "../../../hooks/useProfileUpdate";
+import { ImageCropper } from "../../ui/ImageCropper";
 
 // Baker Tilly logo assets
 import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_Charcoal.png";
@@ -55,6 +56,9 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
     setCurrentPassword,
     newPassword,
     setNewPassword,
+    pendingCropImage,
+    setPendingCropImage,
+    handleCropComplete,
   } = useProfileUpdate({ onClose });
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -137,14 +141,13 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
             <div className="relative group">
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="w-32 h-32 rounded-full border-2 border-[var(--color-growth-green)] p-1.5 overflow-hidden ring-4 ring-[var(--color-growth-green)]/10 transition-all cursor-pointer relative"
+                className="w-32 h-32 rounded-full border-2 border-[var(--color-growth-green)] overflow-hidden ring-8 ring-[var(--color-growth-green)]/5 transition-all cursor-pointer relative"
               >
                 {tempImage ? (
                   <img
                     src={getSafeImageUrl(tempImage)}
                     alt="Profile"
-                    className="w-full h-full rounded-full object-cover shadow-inner"
-                    style={{ imageRendering: "auto" }}
+                    className="w-full h-full object-cover shadow-inner"
                   />
                 ) : (
                   <div className="w-full h-full rounded-full bg-[var(--surface-hover)] flex items-center justify-center">
@@ -326,6 +329,16 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
             </Button>
           </div>
         </div>
+
+        {pendingCropImage && (
+          <ImageCropper
+            image={pendingCropImage}
+            onCropComplete={handleCropComplete}
+            onCancel={() => setPendingCropImage(null)}
+            circular={true}
+            aspect={1}
+          />
+        )}
       </div>
     </Modal>
   );

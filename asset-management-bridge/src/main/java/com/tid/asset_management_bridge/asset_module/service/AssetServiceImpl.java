@@ -1,35 +1,50 @@
 package com.tid.asset_management_bridge.asset_module.service;
 
 import com.tid.asset_management_bridge.asset_module.dto.CreateAssetRequest;
+import com.tid.asset_management_bridge.asset_module.dto.UpdateAssetRequest;
 import com.tid.asset_management_bridge.asset_module.dto.AssetResponse;
 import com.tid.asset_management_bridge.asset_module.entity.Asset;
 import com.tid.asset_management_bridge.asset_module.mapper.AssetMapper;
 import com.tid.asset_management_bridge.asset_module.repository.AssetRepository;
 import com.tid.asset_management_bridge.common.exception.ConflictException;
 import com.tid.asset_management_bridge.common.exception.ResourceNotFoundException;
+import com.tid.asset_management_bridge.common.service.FileStorageService;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Objects;
+
 import java.util.stream.Collectors;
 
 @Service
 public class AssetServiceImpl implements AssetService {
 
+    // storeFile writes to: {uploadDir}/{subDir}/file → uploads/assets/file
+    // The /uploads/ prefix is added separately when building the DB URL path.
+    private static final String ASSET_IMAGE_SUBDIR = "assets";
+
     private final AssetRepository assetRepository;
     private final AssetMapper assetMapper;
+    private final FileStorageService fileStorageService;
 
-    public AssetServiceImpl(AssetRepository assetRepository, AssetMapper assetMapper) {
+    public AssetServiceImpl(AssetRepository assetRepository,
+            AssetMapper assetMapper,
+            FileStorageService fileStorageService) {
         this.assetRepository = assetRepository;
         this.assetMapper = assetMapper;
+        this.fileStorageService = fileStorageService;
+    }
+
+    @SuppressWarnings("null")
+    private Asset saveAsset(Asset asset) {
+        return assetRepository.save(asset);
     }
 
     @Override
     @Transactional
-    @SuppressWarnings("null")
-    public AssetResponse createAsset(CreateAssetRequest request) {
+    public AssetResponse createAsset(CreateAssetRequest request, MultipartFile imageFile) {
         String normalizedAssetTag = request.getAssetTag().trim();
 
         if (assetRepository.existsByAssetTagIgnoreCase(normalizedAssetTag)) {
@@ -54,10 +69,18 @@ public class AssetServiceImpl implements AssetService {
 
         request.setAssetTag(normalizedAssetTag);
 
-        Asset asset = assetMapper.toEntity(request);
-        Asset savedAsset = Objects.requireNonNull(assetRepository.save(asset));
+        // ── Save image file ──────────────────────────────────────────────────────
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String imagePath = fileStorageService.storeFile(imageFile, ASSET_IMAGE_SUBDIR);
+            if (imagePath != null) {
+                // Store as URL-style path so frontend can resolve it
+                request.setImage("/uploads/" + imagePath.replace("\\", "/"));
+            }
+        }
+        // ─────────────────────────────────────────────────────────────────────────
 
-        return assetMapper.toResponse(savedAsset);
+        Asset asset = assetMapper.toEntity(request);
+        return assetMapper.toResponse(saveAsset(asset));
     }
 
     @Override
@@ -78,15 +101,15 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     @Transactional
-    @SuppressWarnings("null")
-    public AssetResponse updateAsset(@NonNull Long id, com.tid.asset_management_bridge.asset_module.dto.UpdateAssetRequest request) {
+    public AssetResponse updateAsset(@NonNull Long id, UpdateAssetRequest request, MultipartFile imageFile,
+            boolean removeImage) {
         Asset asset = assetRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Asset not found with id: " + id));
 
         if (request.getAssetTag() != null && !request.getAssetTag().isBlank()) {
             String normalizedAssetTag = request.getAssetTag().trim();
             if (!asset.getAssetTag().equalsIgnoreCase(normalizedAssetTag) &&
-                assetRepository.existsByAssetTagIgnoreCase(normalizedAssetTag)) {
+                    assetRepository.existsByAssetTagIgnoreCase(normalizedAssetTag)) {
                 throw new ConflictException("Asset tag already exists: " + normalizedAssetTag);
             }
             request.setAssetTag(normalizedAssetTag);
@@ -95,7 +118,7 @@ public class AssetServiceImpl implements AssetService {
         if (request.getSerialNumber() != null && !request.getSerialNumber().isBlank()) {
             String normalizedSerial = request.getSerialNumber().trim();
             if (asset.getSerialNumber() != null && !asset.getSerialNumber().equalsIgnoreCase(normalizedSerial) &&
-                assetRepository.existsBySerialNumberIgnoreCase(normalizedSerial)) {
+                    assetRepository.existsBySerialNumberIgnoreCase(normalizedSerial)) {
                 throw new ConflictException("Serial number already exists: " + normalizedSerial);
             }
             request.setSerialNumber(normalizedSerial);
@@ -104,24 +127,58 @@ public class AssetServiceImpl implements AssetService {
         if (request.getDeviceName() != null && !request.getDeviceName().isBlank()) {
             String normalizedDeviceName = request.getDeviceName().trim();
             if (asset.getDeviceName() != null && !asset.getDeviceName().equalsIgnoreCase(normalizedDeviceName) &&
-                assetRepository.existsByDeviceNameIgnoreCase(normalizedDeviceName)) {
+                    assetRepository.existsByDeviceNameIgnoreCase(normalizedDeviceName)) {
                 throw new ConflictException("Device name already exists: " + normalizedDeviceName);
             }
             request.setDeviceName(normalizedDeviceName);
         }
 
-        assetMapper.partialUpdate(request, asset);
-        Asset updatedAsset = Objects.requireNonNull(assetRepository.save(asset));
+        // Capture old image path for cleanup
+        String oldImage = asset.getImage();
 
-        return assetMapper.toResponse(updatedAsset);
+        // 🗑️ Handle explicit removal
+        if (removeImage && oldImage != null) {
+            fileStorageService.deleteFile(oldImage);
+            asset.setImage(null);
+            // It's important to set this in the request or mapper won't update it
+            request.setImage("");
+        }
+
+        // ── Replace/Upload image file
+        // ───────────────────────────────────────────────────
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String imagePath = fileStorageService.storeFile(imageFile, ASSET_IMAGE_SUBDIR);
+            if (imagePath != null) {
+                if (oldImage != null) {
+                    fileStorageService.deleteFile(oldImage);
+                }
+                request.setImage("/uploads/" + imagePath.replace("\\", "/"));
+            }
+        }
+        // ─────────────────────────────────────────────────────────────────────────
+
+        assetMapper.partialUpdate(request, asset);
+
+        // Ensure image is set to null if request.getImage() == "" and we removed it
+        if (removeImage && !(imageFile != null && !imageFile.isEmpty())) {
+            asset.setImage(null);
+        }
+
+        return assetMapper.toResponse(saveAsset(asset));
     }
 
     @Override
     @Transactional
     public void deleteAsset(@NonNull Long id) {
-        if (!assetRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Asset not found with id: " + id);
+        Asset asset = assetRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Asset not found with id: " + id));
+
+        // ── Delete image file from disk ──────────────────────────────────────────
+        if (asset.getImage() != null && !asset.getImage().isBlank()) {
+            fileStorageService.deleteFile(asset.getImage());
         }
+        // ─────────────────────────────────────────────────────────────────────────
+
         assetRepository.deleteById(id);
     }
 

@@ -75,7 +75,7 @@ export const createAssetSchema = z.object({
   serialNumber: z.string().max(100).optional().or(z.literal("")),
   deviceName: z.string().min(1, "Device name is required").max(150),
   deviceType: z.enum(["LAPTOP", "DESKTOP", "PORTABLE_MONITOR", "STAND_MONITOR"], {
-    required_error: "Device type is required",
+    message: "Device type is required",
   }),
   manufacturer: z.string().max(100).optional().or(z.literal("")),
   model: z.string().max(100).optional().or(z.literal("")),

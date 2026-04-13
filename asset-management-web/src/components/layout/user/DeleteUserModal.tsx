@@ -1,10 +1,15 @@
 import { useState } from "react";
-import { Loader2, TriangleAlert, Trash2, AlertCircle } from "lucide-react";
+import { Loader2, Trash2, AlertCircle } from "lucide-react";
 import { Modal } from "../../ui/Modal";
 import { Button } from "../../ui/Button";
 import type { UserDto } from "../../../types/user.types";
 import { deleteUserApi } from "../../../services/userManagement.service";
 import { getSafeImageUrl } from "../../../utils/image";
+import { useTheme } from "../../../hooks/useTheme";
+
+// Baker Tilly logo assets
+import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_Charcoal.png";
+import logoWhite from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_White.png";
 
 
 
@@ -16,6 +21,7 @@ interface DeleteUserModalProps {
 }
 
 export default function DeleteUserModal({ isOpen, user, onClose, onDeleted }: DeleteUserModalProps) {
+  const { theme } = useTheme();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,20 +44,29 @@ export default function DeleteUserModal({ isOpen, user, onClose, onDeleted }: De
   return (
     <Modal isOpen={isOpen} onClose={onClose} maxWidth="max-w-[420px]">
       <div className="flex flex-col gap-6 text-center py-4">
+        {/* Header - Logo & Title */}
+        <div className="w-full flex flex-col items-center mb-2 pt-2">
+          <img
+            src={theme === "dark" ? logoWhite : logoCharcoal}
+            alt="Logo"
+            className="h-10 w-auto object-contain mb-6"
+          />
+          <div className="text-center">
+            <h3 className="text-xl font-black tracking-tighter text-[var(--text-main)] leading-none text-center">Delete User</h3>
+            <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mt-2 text-center opacity-70">
+              data integrity protocol
+            </p>
+          </div>
+        </div>
+
         {/* Status Icon Header */}
         <div className="flex flex-col items-center gap-4">
-          <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 animate-in fade-in zoom-in duration-500">
-            <TriangleAlert size={40} />
-          </div>
+
           <div className="space-y-1">
-            <h3 className="text-2xl font-black tracking-tighter text-[var(--text-main)]">
-              Remove User
-            </h3>
-            
-            <div className="mt-4 bg-[var(--surface-hover)]/30 border border-dashed border-red-500/30 rounded-2xl p-4 flex items-start gap-3 text-left">
+            <div className="mt-2 bg-[var(--surface-hover)]/30 border border-dashed border-red-500/30 rounded-2xl p-4 flex items-start gap-3 text-left">
               <AlertCircle size={18} className="text-red-500 shrink-0 mt-0.5" />
-              <p className="text-sm text-[var(--text-muted)] leading-relaxed italic">
-                This action cannot be undone. Are you sure you want to permanently remove this user?
+              <p className="text-[11px] text-[var(--text-muted)] leading-relaxed italic">
+                This action cannot be undone. Are you sure you want to permanently remove this user? All associated data, including history and permissions, will be erased from our servers immediately.
               </p>
             </div>
           </div>

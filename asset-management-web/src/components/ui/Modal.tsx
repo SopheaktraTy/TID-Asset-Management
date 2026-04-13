@@ -27,7 +27,7 @@ export function Modal({ isOpen, onClose, children, maxWidth = "max-w-[500px]" }:
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-[4px] transition-all duration-300"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 transition-opacity duration-300"
       onMouseDown={(e) => {
         // Only set the flag if mousedown lands directly on the backdrop
         mouseDownOnBackdrop.current = e.target === e.currentTarget;
@@ -41,9 +41,10 @@ export function Modal({ isOpen, onClose, children, maxWidth = "max-w-[500px]" }:
       }}
     >
       <div
-        className={`w-full ${maxWidth} bg-[var(--bg)] rounded-3xl shadow-2xl border border-[var(--border-color)] overflow-hidden transition-all duration-300 animate-in fade-in zoom-in-95 pointer-events-auto flex flex-col max-h-[90vh]`}
+        className={`w-full ${maxWidth} bg-[var(--bg)] rounded-3xl shadow-2xl overflow-hidden border-none transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 pointer-events-auto flex flex-col max-h-[90vh] transform scale-100 translate-z-0`}
         onClick={(e) => e.stopPropagation()}
       >
+
         {/* Content with internal scroll */}
         <div className="flex-1 overflow-y-auto px-5 py-5 custom-scrollbar">
           {children}

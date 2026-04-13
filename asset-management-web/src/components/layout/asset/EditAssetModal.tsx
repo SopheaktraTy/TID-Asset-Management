@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { Loader2, Cpu, Tag, ClipboardList, Laptop, Monitor, MonitorSmartphone, MonitorPlay } from "lucide-react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { Loader2, Cpu, Tag, ClipboardList, Laptop, Monitor, MonitorSmartphone, MonitorPlay, ImagePlus, X, UploadCloud, HardDrive } from "lucide-react";
 import { Controller } from "react-hook-form";
 
 import { Button } from "../../ui/Button";
@@ -10,10 +10,11 @@ import { DropdownReverseList } from "../../ui/DropdownReverseList";
 import { ToggleSwitch } from "../../ui/ToggleSwitch";
 import { DeviceTypeCard } from "./DeviceTypeCard";
 import { SuggestionInput } from "../../ui/SuggestionInput";
-import { 
-  MANUFACTURER_SUGGESTIONS, 
-  CPU_SUGGESTIONS, 
-  DISK_TYPE_SUGGESTIONS, 
+import { ImageCropper } from "../../ui/ImageCropper";
+import {
+  MANUFACTURER_SUGGESTIONS,
+  CPU_SUGGESTIONS,
+  DISK_TYPE_SUGGESTIONS,
   DISK_MODEL_SUGGESTIONS,
   OS_SUGGESTIONS,
   OS_VERSION_SUGGESTIONS,
@@ -25,10 +26,12 @@ import type { EditAssetFormValues, AssetDto } from "../../../types/asset.types";
 import { editAssetSchema } from "../../../types/asset.types";
 import { updateAssetApi } from "../../../services/asset.service";
 import { useTheme } from "../../../hooks/useTheme";
+import { getSafeImageUrl, optimizeImage } from "../../../utils/image";
 
 // Baker Tilly logo assets
-import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_Charcoal.png";
-import logoWhite from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_White.png";
+import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Growth Symbol Charcoal.png";
+import logoWhite from "../../../assets/Logo_Bakertilly/Baker Tilly Growth Symbol White.png";
+
 
 const STATUS_OPTIONS: { label: string; value: string }[] = [
   { label: "Available", value: "AVAILABLE" },
@@ -41,6 +44,49 @@ const STATUS_OPTIONS: { label: string; value: string }[] = [
   { label: "Other", value: "OTHER" },
 ];
 
+const STATUS_STYLES: Record<string, { ring: string; pill: string; shadow: string }> = {
+  AVAILABLE: { 
+    ring: "ring-[#10b981]/30", 
+    pill: "bg-[#10b981]/15 text-[#10b981] border-[#10b981]/20",
+    shadow: "shadow-[#10b981]/10"
+  },
+  IN_USE: { 
+    ring: "ring-[#3b82f6]/30", 
+    pill: "bg-[#3b82f6]/15 text-[#3b82f6] border-[#3b82f6]/20",
+    shadow: "shadow-[#3b82f6]/10"
+  },
+  DAMAGED: { 
+    ring: "ring-red-500/30", 
+    pill: "bg-red-500/15 text-red-500 border-red-500/20",
+    shadow: "shadow-red-500/10"
+  },
+  LOST: { 
+    ring: "ring-red-600/40", 
+    pill: "bg-red-600/15 text-red-600 border-red-600/20",
+    shadow: "shadow-red-600/10"
+  },
+  MALFUNCTION: { 
+    ring: "ring-orange-500/30", 
+    pill: "bg-orange-500/15 text-orange-500 border-orange-500/20",
+    shadow: "shadow-orange-500/10"
+  },
+  MAINTENANCE: { 
+    ring: "ring-purple-500/30", 
+    pill: "bg-purple-500/15 text-purple-500 border-purple-500/20",
+    shadow: "shadow-purple-500/10"
+  },
+  UNDER_REPAIR: { 
+    ring: "ring-amber-500/30", 
+    pill: "bg-amber-500/15 text-amber-500 border-amber-500/20",
+    shadow: "shadow-amber-500/10"
+  },
+  OTHER: { 
+    ring: "ring-[var(--border-color)]/30", 
+    pill: "bg-[var(--text-muted)]/15 text-[var(--text-muted)] border-[var(--text-muted)]/20",
+    shadow: "shadow-transparent"
+  }
+};
+
 interface EditAssetModalProps {
   isOpen: boolean;
   asset: AssetDto | null;
@@ -51,6 +97,71 @@ interface EditAssetModalProps {
 export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: EditAssetModalProps) {
   const { theme } = useTheme();
 
+  // ── Image state ──────────────────────────────────────────────────────────────
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageRemoved, setImageRemoved] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [pendingCropImage, setPendingCropImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  /** Seed the preview from the existing asset image whenever the modal opens */
+  useEffect(() => {
+    if (isOpen && asset?.image) {
+      setImagePreview(getSafeImageUrl(asset.image));
+      setImageFile(null);
+      setImageRemoved(false);
+    } else if (!isOpen) {
+      setImageFile(null);
+      setImagePreview(null);
+      setImageRemoved(false);
+    }
+  }, [isOpen, asset]);
+
+  const handleImageFile = (file: File) => {
+    if (!file.type.startsWith("image/")) return;
+    setPendingCropImage(URL.createObjectURL(file));
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleCropComplete = useCallback((croppedBlob: Blob) => {
+    const localUrl = URL.createObjectURL(croppedBlob);
+    if (imagePreview?.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
+    setImagePreview(localUrl);
+    setImageFile(croppedBlob as File);
+    setImageRemoved(false);
+    setPendingCropImage(null);
+  }, [imagePreview]);
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleImageFile(file);
+  };
+
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleImageFile(file);
+  }, []);
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => setIsDragging(false);
+
+  const clearImage = () => {
+    // Only revoke blob URLs (not server URLs)
+    if (imagePreview?.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
+    setImageFile(null);
+    setImagePreview(null);
+    setImageRemoved(true);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+  // ─────────────────────────────────────────────────────────────────────────────
+
   const {
     register,
     reset,
@@ -60,7 +171,7 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
     loading,
     errorMsg,
     successMsg,
-    handleClose,
+    handleClose: baseHandleClose,
     handleSubmit,
   } = useUserForm<EditAssetFormValues>({
     schema: editAssetSchema,
@@ -84,11 +195,27 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
       condition: "",
       issueDescription: "",
     },
-    onSubmit: (data) => updateAssetApi(asset!.id, data),
+    onSubmit: async (data) => {
+      let finalImage: File | Blob | null = imageFile;
+      if (imageFile) {
+        try {
+          // Optimize to 1024px max, 0.9 quality
+          finalImage = await optimizeImage(imageFile, 1024, 1024, 0.9);
+        } catch (err) {
+          console.error("Image optimization failed, uploading original:", err);
+        }
+      }
+      return updateAssetApi(asset!.id, data, finalImage as File, imageRemoved);
+    },
     onSuccess: onUpdated,
     onClose,
     successMessage: "Asset updated successfully!",
   });
+
+  const handleClose = () => {
+    clearImage();
+    baseHandleClose();
+  };
 
   const deviceType = watch("deviceType");
 
@@ -142,49 +269,98 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
     >
       <div className="flex flex-col gap-2">
         {/* Header - Logo & Title */}
-        <div className="w-full flex flex-col items-center mb-6 pt-2">
+        <div className="w-full flex items-center justify-center mb-2 pt-2">
           <img
             src={theme === "dark" ? logoWhite : logoCharcoal}
             alt="Logo"
-            className="h-10 w-auto object-contain mb-4"
+            className="h-14 w-auto object-contain"
           />
-          <div className="text-center">
-            <h3 className="text-xl font-black tracking-tighter text-[var(--text-main)] leading-none text-center">Edit Asset</h3>
-            <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mt-2 text-center opacity-70">
-              Inventory Management
+          <div className="flex flex-col text-left">
+            <h3 className="text-xl mt-2 font-bold tracking-tight text-[var(--text-main)] leading-none">Edit Asset</h3>
+            <p className="text-[13px] text-[var(--text-muted)] mt-1.5 lowercase font-bold">
+              inventory management
             </p>
           </div>
         </div>
 
-        {/* Asset Summary Card */}
-        <div className="flex items-center gap-5 px-4 py-4 border border-dashed border-[var(--border-color)] dark:border-[var(--text-muted)]/30 rounded-xl bg-[var(--surface-hover)]/30 shadow-sm dark:shadow-none mb-1 transition-all">
-          <div className="flex shrink-0">
-            <div className="w-14 h-14 rounded-2xl border border-[var(--border-color)] flex items-center justify-center bg-[var(--surface)] text-[var(--color-growth-green)] shadow-sm">
-              {getDeviceIcon(asset.deviceType)}
+        {/* Asset Summary Card - Full Height Visual Style */}
+        {/* Asset Summary Card - Minimalist Style */}
+        <div className="relative flex gap-0 rounded-[1.5rem] bg-[var(--surface-hover)]/40 border border-dashed border-[var(--border-color)] dark:border-[var(--text-muted)]/30 shadow-sm mb-6 transition-all duration-500 overflow-hidden group/summary">
+          <div className="w-40 self-stretch bg-[var(--surface-hover)]/20 flex items-center justify-center shrink-0 p-2.5 relative rounded-l-[1.5rem] overflow-hidden">
+            <div className={`w-full h-full rounded-xl overflow-hidden shadow-sm relative transition-all duration-700 ring-1
+                ${(STATUS_STYLES[asset.status] || STATUS_STYLES.OTHER).ring} 
+                ${(STATUS_STYLES[asset.status] || STATUS_STYLES.OTHER).shadow}`}
+            >
+              {imagePreview ? (
+                <img src={imagePreview} alt={asset.deviceName} className="w-full h-full object-cover" />
+              ) : (
+                <div className="flex items-center justify-center w-full h-full bg-[var(--surface)] text-[var(--color-growth-green)]">
+                  <div className="scale-125 opacity-80">
+                    {getDeviceIcon(asset.deviceType)}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
+          <div className="flex flex-col flex-1 min-w-0 p-2 pr-5 justify-center">
+            {/* Header: Identity Group - Centered Alignment */}
+            <div className="flex flex-start justify-between">
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">{asset.assetTag}</span>
+                </div>
+                <h2 className="text-[19px] font-extrabold text-[var(--text-main)] truncate leading-tight tracking-tight uppercase group-hover/summary:text-[var(--color-growth-green)] transition-colors">
+                  {asset.deviceName}
+                </h2>
+                <div className="mt-1 flex items-center gap-2.5">
+                  <div className="flex items-center gap-1.5 opacity-80">
+                    <span className="text-[11px] font-black text-[var(--color-growth-green)]">#</span>
+                    <p className="text-[13px] font-mono font-bold text-[var(--text-main)] tracking-tight">
+                      {asset.serialNumber || "No Serial recorded"}
+                    </p>
+                  </div>
 
-          <div className="flex flex-col min-w-0 flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-base font-bold text-[var(--text-main)] truncate leading-none">{asset.assetTag}</span>
-              <span className="px-2 py-0.5 rounded border border-[var(--border-color)] bg-[var(--surface-hover)]/40 text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-tight">
-                {asset.deviceType.replace('_', ' ')}
-              </span>
-            </div>
+                  <span className={`text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm border
+                    ${(STATUS_STYLES[asset.status] || STATUS_STYLES.OTHER).pill}`}
+                  >
+                    {getStatusDisplay(asset.status)}
+                  </span>
+                </div>
 
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-[var(--text-muted)] truncate">{asset.deviceName}</span>
-              <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-growth-green)]" />
-              <span className="text-[11px] font-semibold tracking-tight text-[var(--color-growth-green)]">
-                {getStatusDisplay(asset.status)}
-              </span>
+
+              </div>
+
+              <div className="flex flex-col items-end gap-2.5 shrink-0">
+                <span className="px-3 py-1 rounded-lg border border-[var(--color-growth-green)]/40 bg-[var(--color-growth-green)]/10 text-[9px] font-black text-[var(--color-growth-green)] uppercase tracking-[0.1em] shadow-sm">
+                  {asset.deviceType.replace('_', ' ')}
+                </span>
+                {/* Quick Specs - Visible on Hover for Laptops/Desktops */}
+                {(asset.deviceType === 'LAPTOP' || asset.deviceType === 'DESKTOP') && (
+                  <div className="mt-2.5 flex items-center gap-3.5 opacity-0 group-hover/summary:opacity-100 transition-all duration-500 transform translate-y-2 group-hover/summary:translate-y-0">
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--surface-hover)] shadow-sm border border-[var(--border-color)]/20">
+                      <Cpu size={10} className="text-[var(--color-growth-green)]" />
+                      <span className="text-[10px] font-black text-[var(--text-main)] uppercase tracking-tight">{asset.ramGb || '?'} GB</span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--surface-hover)] shadow-sm border border-[var(--border-color)]/20">
+                      <HardDrive size={10} className="text-[var(--color-growth-green)]" />
+                      <span className="text-[10px] font-black text-[var(--text-main)] uppercase tracking-tight">{asset.storageSizeGb || '?'} GB</span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--surface-hover)] shadow-sm border border-[var(--border-color)]/20">
+                      <Monitor size={10} className="text-[var(--color-growth-green)]" />
+                      <span className="text-[10px] font-black text-[var(--text-main)] uppercase tracking-tight">{asset.screenSizeInch || '?'}" LCD</span>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
           {/* ── Asset Identity ── */}
-          <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
+          <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
             <div className="px-1 mb-3 flex items-center gap-2">
               <Tag size={16} className="text-[var(--color-growth-green)]" />
               <h3 className="text-sm font-bold text-[var(--text-main)]">Asset Identity</h3>
@@ -243,7 +419,7 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
           {(deviceType === "LAPTOP" || deviceType === "DESKTOP") && (
             <>
               {/* ── Hardware Specifications ── */}
-              <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
+              <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
                 <div className="px-1 mb-3 flex items-center gap-2">
                   <Cpu size={16} className="text-[var(--color-growth-green)]" />
                   <h3 className="text-sm font-bold text-[var(--text-main)]">Hardware Specifications</h3>
@@ -351,7 +527,7 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
               </div>
 
               {/* ── Software & Network ── */}
-              <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
+              <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
                 <div className="px-1 mb-3 flex items-center gap-2">
                   <MonitorSmartphone size={16} className="text-[var(--color-growth-green)]" />
                   <h3 className="text-sm font-bold text-[var(--text-main)]">Software & Network</h3>
@@ -411,7 +587,7 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
           )}
 
           {/* ── Status & Condition ── */}
-          <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
+          <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
             <div className="px-1 mb-3 flex items-center gap-2">
               <ClipboardList size={16} className="text-[var(--color-growth-green)]" />
               <h3 className="text-sm font-bold text-[var(--text-main)]">Status & Condition</h3>
@@ -462,6 +638,106 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
             </div>
           </div>
 
+          {/* ── Asset Image ── */}
+          <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
+            <div className="px-1 mb-3 flex items-center gap-2">
+              <ImagePlus size={16} className="text-[var(--color-growth-green)]" />
+              <h3 className="text-sm font-bold text-[var(--text-main)]">Asset Image</h3>
+            </div>
+
+            <div className="px-2">
+              {imagePreview ? (
+                /* ── Preview card ── */
+                <div className="relative group rounded-xl overflow-hidden border border-[var(--border-color)]/40 bg-[var(--surface-hover)]/20">
+                  <img
+                    src={imagePreview}
+                    alt="Asset preview"
+                    className="w-full h-72 object-contain bg-[var(--surface-hover)]/10"
+                    onError={(e) => {
+                      // If existing server image fails, fall back to drop zone
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                      clearImage();
+                    }}
+                  />
+                  {/* Overlay on hover */}
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex items-center gap-1.5 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold rounded-full hover:bg-white/20 transition-all"
+                    >
+                      <UploadCloud size={14} />
+                      Replace
+                    </button>
+                    <button
+                      type="button"
+                      onClick={clearImage}
+                      className="flex items-center gap-1.5 px-4 py-2 bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-300 text-xs font-semibold rounded-full hover:bg-red-500/30 transition-all"
+                    >
+                      <X size={14} />
+                      Remove
+                    </button>
+                  </div>
+                  {/* File name / source badge */}
+                  <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/60 to-transparent">
+                    <p className="text-white text-[10px] font-medium truncate">
+                      {imageFile ? imageFile.name : "Current image"}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                /* ── Drop zone ── */
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`
+                    relative flex flex-col items-center justify-center gap-3 rounded-xl
+                    border border-dashed cursor-pointer transition-all duration-200
+                    py-16 px-6 select-none
+                    ${isDragging
+                      ? "border-[var(--color-growth-green)] bg-[var(--color-growth-green)]/5 scale-[1.01]"
+                      : "border-[var(--border-color)]/50 dark:border-[var(--text-muted)]/30 bg-[var(--surface-hover)]/10 hover:border-[var(--color-growth-green)]/60 hover:bg-[var(--color-growth-green)]/5"
+                    }
+                  `}
+                >
+                  {/* Animated icon */}
+                  <div className={`
+                    w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-200
+                    ${isDragging
+                      ? "bg-[var(--color-growth-green)]/20 text-[var(--color-growth-green)] scale-110"
+                      : "bg-[var(--surface-hover)] text-[var(--text-muted)]"
+                    }
+                  `}>
+                    <UploadCloud size={26} strokeWidth={1.5} className={isDragging ? "animate-bounce" : ""} />
+                  </div>
+
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-[var(--text-main)]">
+                      Drop your image here, or{" "}
+                      <span className="text-[var(--color-growth-green)] underline underline-offset-2 cursor-pointer">
+                        browse
+                      </span>
+                    </p>
+                    <p className="text-[11px] text-[var(--text-muted)] mt-1">
+                      Supports: JPG, JPEG2000, PNG · Max 5 MB · One image only
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/jp2"
+                className="hidden"
+                onChange={handleFileInput}
+              />
+            </div>
+          </div>
+
           {errorMsg && <Message variant="error">{errorMsg}</Message>}
           {successMsg && <Message variant="success">{successMsg}</Message>}
 
@@ -484,6 +760,15 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
             </Button>
           </div>
         </form>
+
+        {pendingCropImage && (
+          <ImageCropper
+            image={pendingCropImage}
+            onCropComplete={handleCropComplete}
+            onCancel={() => setPendingCropImage(null)}
+            aspect={4 / 3}
+          />
+        )}
       </div>
     </Modal>
   );

@@ -110,10 +110,10 @@ export default function Header() {
                         <img
                           src={getSafeImageUrl(user.image)}
                           alt="User avatar"
-                          className="w-9 h-9 rounded-full object-cover"
+                          className="w-10 h-10 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="w-9 h-9 rounded-full bg-[var(--surface-hover)] flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-[var(--surface-hover)] flex items-center justify-center">
                           <User size={18} className="text-[var(--text-muted)]" />
                         </div>
                       )}

@@ -18,9 +18,9 @@
     --color-aqua-50: #80DCD9;
     --color-aqua-15: #E0F2EF;
 
-    /* ✨ Typography Scale */
-    --text-xs: 0.75rem;
-    --text-sm: 0.875rem;
+    /* ✨ Typography Scale - Increased for clarity */
+    --text-xs: 0.8125rem; /* 13px instead of 12px */
+    --text-sm: 0.9375rem; /* 15px instead of 14px */
     --text-base: 1rem;
     --text-lg: 1.125rem;
     --text-xl: 1.25rem;
@@ -40,10 +40,10 @@
     --bg: #f9fafb;
     --surface: #ffffff;
     --surface-hover: #f3f4f6;
-    --border-color: #e5e7eb;
-    --text-main: var(--color-charcoal);
-    --text-muted: #6b7280;
-    --btn-primary-text: var(--color-charcoal);
+    --border-color: #d1d5db; /* Darkened from e5e7eb */
+    --text-main: #111827; /* Darkened from charcoal */
+    --text-muted: #374151; /* Darkened from 6b7280 (High Contrast) */
+    --btn-primary-text: #000000;
     /* dark text on bright green- Button tokens */
     --btn-primary-shadow: rgba(184, 211, 50, 0.25);
   }
@@ -51,16 +51,17 @@
   /* 🌙 Dark Mode – via .dark class on <html> */
   .dark {
     --color-growth-green: var(--color-dark-growth-green);
-    --bg: #111111;
-    --surface: #181c21;
-    --surface-hover: #1f2329;
-    --border-color: #2b2b2b;
+    --bg: #0a0a0a;
+    --surface: #14171c;
+    --surface-hover: #1b2026;
+    --border-color: #333333; /* Hardened from 2b2b2b */
     --text-main: #ffffff;
-    --text-muted: #9ca3af;
+    --text-muted: #d1d5db; /* Brightened from 9ca3af (High Contrast) */
     --btn-primary-text: #000000;
     /* slightly deeper charcoal for contrast on lime - Button tokens*/
     --btn-primary-shadow: rgba(209, 236, 81, 0.20);
   }
+
 
   body {
     background-color: var(--bg);

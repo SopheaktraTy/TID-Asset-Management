@@ -20,6 +20,8 @@ import org.springframework.lang.NonNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.tid.asset_management_bridge.common.service.FileStorageService;
+
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -27,15 +29,18 @@ public class UserServiceImpl implements UserService {
     private final CustomPermissionRepository customPermissionRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final FileStorageService fileStorageService;
 
     public UserServiceImpl(UserRepository userRepository,
             CustomPermissionRepository customPermissionRepository,
             UserMapper userMapper,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            FileStorageService fileStorageService) {
         this.userRepository = userRepository;
         this.customPermissionRepository = customPermissionRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
+        this.fileStorageService = fileStorageService;
     }
 
     @Override
@@ -107,6 +112,11 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(@NonNull Long id) {
         User user = java.util.Objects.requireNonNull(userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id)));
+                
+        if (user.getImage() != null && !user.getImage().isBlank()) {
+            fileStorageService.deleteFile(user.getImage());
+        }
+        
         userRepository.delete(user);
     }
 
