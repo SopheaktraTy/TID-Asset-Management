@@ -43,18 +43,17 @@ export function ColumnGridDropdown({
         (lastWidth < 768 && width >= 768) || (lastWidth < 1024 && width >= 1024)) {
 
         const next = new Set(hiddenColumns);
+        const timeKeys = ["created_at", "updated_at", "createdAt", "updatedAt"];
+
         if (width < 768) {
           next.add("department");
-          next.add("created_at");
-          next.add("updated_at");
+          timeKeys.forEach(k => next.add(k));
         } else if (width < 1024) {
-          next.add("created_at");
-          next.add("updated_at");
+          timeKeys.forEach(k => next.add(k));
           next.delete("department");
         } else {
           next.delete("department");
-          next.delete("created_at");
-          next.delete("updated_at");
+          timeKeys.forEach(k => next.delete(k));
         }
         onSetHiddenColumns(next);
       }
@@ -145,7 +144,7 @@ export function ColumnGridDropdown({
                     aria-selected={isVisible}
                     onClick={() => onToggleColumn(col.key)}
                     className="flex items-center gap-2 px-3 py-2 text-xs cursor-pointer select-none
-                      text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors duration-100 rounded-lg mx-1"
+                      text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors duration-100 rounded-lg mx-1 my-0.5"
                   >
                     <div
                       className={`flex items-center justify-center w-4 h-4 rounded border shrink-0 transition-colors duration-100 ${isVisible
@@ -161,7 +160,7 @@ export function ColumnGridDropdown({
                         />
                       )}
                     </div>
-                    <span>{col.label}</span>
+                    <span className="truncate">{col.label}</span>
                   </li>
                 );
               })}

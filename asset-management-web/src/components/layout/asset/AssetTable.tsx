@@ -6,6 +6,7 @@ import { getSafeImageUrl } from "../../../utils/image";
 
 // ── Column picker options exported for toolbar ────────────────────────────────
 export const ASSET_TABLE_COLUMN_OPTIONS = [
+  { key: "image", label: "Image" },
   { key: "asset", label: "Asset" },
   { key: "deviceType", label: "Type" },
   { key: "status", label: "Status" },
@@ -48,6 +49,7 @@ function buildSpecsLabel(asset: AssetDto): string {
   if (asset.cpu) parts.push(asset.cpu);
   if (asset.ramGb) parts.push(`${asset.ramGb}GB RAM`);
   if (asset.storageSizeGb) parts.push(`${asset.storageSizeGb}GB`);
+  if (asset.screenSizeInch) parts.push(`${asset.screenSizeInch}"`);
   return parts.join(" · ") || "–";
 }
 
@@ -77,41 +79,40 @@ export default function AssetTable({
 }: AssetTableProps) {
   const columns: ColumnDef<AssetDto>[] = [
     {
-      key: "asset",
-      header: "Asset",
-      sortable: true,
+      key: "image",
+      header: "Image",
+      sortable: false,
       cell: (asset) => (
-        <div className="flex items-center gap-3 min-w-0 py-1">
-          {/* Thumbnail or fallback icon */}
-          <div className="w-12 h-12 rounded-lg bg-[var(--surface-hover)] flex items-center justify-center shrink-0 overflow-hidden border border-[var(--border-color)] shadow-sm">
+        <div className="flex items-center justify-center py-1.5">
+          <div className={`rounded-lg bg-[var(--surface-hover)] flex items-center justify-center shrink-0 overflow-hidden border border-[var(--border-color)] shadow-sm ${asset.image ? "w-25" : "w-25 h-18"
+            }`}>
             {asset.image ? (
               <img
                 src={getSafeImageUrl(asset.image)}
                 alt={asset.deviceName}
                 className="w-full h-full object-cover"
                 style={{ imageRendering: "-webkit-optimize-contrast" }}
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).style.display = "none";
-                  (e.currentTarget.nextElementSibling as HTMLElement | null)?.style.setProperty("display", "flex");
-                }}
+                loading="lazy"
               />
-
-            ) : null}
-            <div
-              className="w-full h-full flex items-center justify-center"
-              style={{ display: asset.image ? "none" : "flex" }}
-            >
-              <HardDrive size={20} className="text-[var(--text-muted)]" />
-            </div>
+            ) : (
+              <HardDrive size={18} className="text-[var(--text-muted)]" />
+            )}
           </div>
-          <div className="min-w-0 flex flex-col leading-tight">
-            <p className="text-sm font-bold text-[var(--text-main)] truncate">
-              {asset.deviceName}
-            </p>
-            <p className="text-xs text-[var(--text-muted)] truncate mt-0.5 font-mono">
-              {asset.assetTag}
-            </p>
-          </div>
+        </div>
+      ),
+    },
+    {
+      key: "asset",
+      header: "Asset",
+      sortable: true,
+      cell: (asset) => (
+        <div className="flex flex-col leading-tight py-1">
+          <p className="text-sm font-bold text-[var(--text-main)] truncate">
+            {asset.deviceName}
+          </p>
+          <p className="text-xs text-[var(--text-muted)] truncate mt-0.5 font-mono">
+            {asset.assetTag}
+          </p>
         </div>
       ),
     },

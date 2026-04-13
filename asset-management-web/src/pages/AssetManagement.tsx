@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { HardDrive, ChevronRight as ArrowRight } from "lucide-react";
 import Header from "../components/layout/Header";
 import AssetToolbar from "../components/layout/asset/AssetToolbar";
@@ -8,6 +9,7 @@ import Pagination from "../components/ui/Pagination";
 import { useAssetManagement } from "../hooks/useAssetManagement";
 
 export default function AssetManagementPage() {
+  const navigate = useNavigate();
   const {
     assets,
     setAssets,
@@ -78,7 +80,7 @@ export default function AssetManagementPage() {
             sortDir={sortDir}
             hiddenCols={hiddenCols}
             onSort={handleSort}
-            onRowClick={(asset) => setEditAsset(asset)}
+            onRowClick={(asset) => navigate(`/asset-detail/${asset.id}`)}
             menuClassName="bg-[var(--bg)]"
           />
 
