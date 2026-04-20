@@ -240,7 +240,7 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: AddAssetMo
             </div>
           </div>
 
-          {(deviceType === "LAPTOP" || deviceType === "DESKTOP") && (
+          {deviceType && (
             <>
               {/* ── Hardware Specifications ── */}
               <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
@@ -273,30 +273,35 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: AddAssetMo
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">CPU</label>
-                    <Controller
-                      name="cpu"
-                      control={control}
-                      render={({ field }) => (
-                        <SuggestionInput
-                          {...field}
-                          suggestions={CPU_SUGGESTIONS}
-                          placeholder="e.g. i7 Gen 11 / M2"
-                          className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                  {(deviceType === "LAPTOP" || deviceType === "DESKTOP") && (
+                    <>
+                      <div>
+                        <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">CPU</label>
+                        <Controller
+                          name="cpu"
+                          control={control}
+                          render={({ field }) => (
+                            <SuggestionInput
+                              {...field}
+                              suggestions={CPU_SUGGESTIONS}
+                              placeholder="e.g. i7 Gen 11 / M2"
+                              className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                            />
+                          )}
                         />
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">RAM (GB)</label>
-                    <Input
-                      type="number"
-                      placeholder="e.g. 16"
-                      className="bg-[var(--bg)] border-[var(--border-color)]/50"
-                      {...register("ramGb")}
-                    />
-                  </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">RAM (GB)</label>
+                        <Input
+                          type="number"
+                          placeholder="e.g. 16"
+                          className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                          {...register("ramGb")}
+                        />
+                      </div>
+                    </>
+                  )}
+
                   <div>
                     <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Screen (Inch)</label>
                     <Input
@@ -308,107 +313,112 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: AddAssetMo
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Disk Type</label>
-                    <Controller
-                      name="diskType"
-                      control={control}
-                      render={({ field }) => (
-                        <SuggestionInput
-                          {...field}
-                          suggestions={DISK_TYPE_SUGGESTIONS}
-                          placeholder="e.g. SSD / HDD"
-                          className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                  {(deviceType === "LAPTOP" || deviceType === "DESKTOP") && (
+                    <>
+                      <div>
+                        <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Disk Type</label>
+                        <Controller
+                          name="diskType"
+                          control={control}
+                          render={({ field }) => (
+                            <SuggestionInput
+                              {...field}
+                              suggestions={DISK_TYPE_SUGGESTIONS}
+                              placeholder="e.g. SSD / HDD"
+                              className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                            />
+                          )}
                         />
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Storage (GB)</label>
-                    <Input
-                      type="number"
-                      placeholder="e.g. 512"
-                      className="bg-[var(--bg)] border-[var(--border-color)]/50"
-                      {...register("storageSizeGb")}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Disk Model</label>
-                    <Controller
-                      name="diskModel"
-                      control={control}
-                      render={({ field }) => (
-                        <SuggestionInput
-                          {...field}
-                          suggestions={DISK_MODEL_SUGGESTIONS}
-                          placeholder="e.g. Samsung NVMe"
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Storage (GB)</label>
+                        <Input
+                          type="number"
+                          placeholder="e.g. 512"
                           className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                          {...register("storageSizeGb")}
                         />
-                      )}
-                    />
-                  </div>
+                      </div>
+                      <div className="md:col-span-3">
+                        <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Disk Model</label>
+                        <Controller
+                          name="diskModel"
+                          control={control}
+                          render={({ field }) => (
+                            <SuggestionInput
+                              {...field}
+                              suggestions={DISK_MODEL_SUGGESTIONS}
+                              placeholder="e.g. Samsung NVMe"
+                              className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                            />
+                          )}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
               {/* ── Software & Network ── */}
-              <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
-                <div className="px-1 mb-3 flex items-center gap-2">
-                  <MonitorSmartphone size={16} className="text-[var(--color-growth-green)]" />
-                  <h3 className="text-sm font-bold text-[var(--text-main)]">Software & Network</h3>
-                </div>
-                <div className="px-[10px] space-y-2">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Operating System</label>
-                      <Controller
-                        name="operatingSystem"
-                        control={control}
-                        render={({ field }) => (
-                          <SuggestionInput
-                            {...field}
-                            suggestions={OS_SUGGESTIONS}
-                            placeholder="e.g. Windows 11 / macOS"
-                            className="bg-[var(--bg)] border-[var(--border-color)]/50"
-                          />
-                        )}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">OS Version</label>
-                      <Controller
-                        name="osVersion"
-                        control={control}
-                        render={({ field }) => (
-                          <SuggestionInput
-                            {...field}
-                            suggestions={OS_VERSION_SUGGESTIONS}
-                            placeholder="e.g. 23H2, Sonoma 14.2"
-                            className="bg-[var(--bg)] border-[var(--border-color)]/50"
-                          />
-                        )}
-                      />
-                    </div>
+              {(deviceType === "LAPTOP" || deviceType === "DESKTOP") && (
+                <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
+                  <div className="px-1 mb-3 flex items-center gap-2">
+                    <MonitorSmartphone size={16} className="text-[var(--color-growth-green)]" />
+                    <h3 className="text-sm font-bold text-[var(--text-main)]">Software & Network</h3>
                   </div>
-                  <div>
-                    <Controller
-                      name="domainJoined"
-                      control={control}
-                      render={({ field }) => (
-                        <ToggleSwitch
-                          label="Domain Joined"
-                          description="Connect device to corporate network Active Directory domain."
-                          checked={!!field.value}
-                          onChange={field.onChange}
-                          size="sm"
-                          className="!py-2"
+                  <div className="px-[10px] space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Operating System</label>
+                        <Controller
+                          name="operatingSystem"
+                          control={control}
+                          render={({ field }) => (
+                            <SuggestionInput
+                              {...field}
+                              suggestions={OS_SUGGESTIONS}
+                              placeholder="e.g. Windows 11 / macOS"
+                              className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                            />
+                          )}
                         />
-                      )}
-                    />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">OS Version</label>
+                        <Controller
+                          name="osVersion"
+                          control={control}
+                          render={({ field }) => (
+                            <SuggestionInput
+                              {...field}
+                              suggestions={OS_VERSION_SUGGESTIONS}
+                              placeholder="e.g. 23H2, Sonoma 14.2"
+                              className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                            />
+                          )}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Controller
+                        name="domainJoined"
+                        control={control}
+                        render={({ field }) => (
+                          <ToggleSwitch
+                            label="Domain Joined"
+                            description="Connect device to corporate network Active Directory domain."
+                            checked={!!field.value}
+                            onChange={field.onChange}
+                            size="sm"
+                            className="!py-2"
+                          />
+                        )}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </>
-          )}
+              )}
+
 
           {/* ── Status & Condition ── */}
           <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
@@ -555,7 +565,11 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: AddAssetMo
             </div>
           </div>
 
+            </>
+          )}
+
           {errorMsg && <Message variant="error">{errorMsg}</Message>}
+
           {successMsg && <Message variant="success">{successMsg}</Message>}
 
           <div className="pt-2 flex items-center justify-end gap-3 translate-y-1">

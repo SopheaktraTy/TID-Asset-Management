@@ -99,10 +99,9 @@ const DropdownList = React.forwardRef<HTMLDivElement, DropdownListProps>(
               ref={panelRef}
               className={`
                 fixed z-[9999] mt-1
-                min-w-[160px] w-max
+                min-w-[160px] w-max max-h-60 overflow-y-auto scrollbar-hide
                 border border-[var(--border-color)] rounded-xl
                 shadow-lg shadow-black/10
-                overflow-hidden
                 transition-opacity duration-150
                 ${panelClassName || "bg-[var(--surface)]"}
                 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}

@@ -197,11 +197,11 @@ export function Table<T>({
                         <Portal>
                           <div
                             ref={menuRef}
-                            className={`fixed z-[9999] mt-2 w-38 border border-[var(--border-color)] rounded-lg shadow-xl text-[var(--text-main)] py-1 font-normal normal-case tracking-normal overflow-hidden cursor-default transition-opacity duration-150 ${menuClassName || "bg-[var(--surface)]"}`}
+                            className={`fixed z-[9999] mt-2 border border-[var(--border-color)] rounded-lg shadow-xl text-[var(--text-main)] py-1 font-normal normal-case tracking-normal overflow-hidden cursor-default transition-opacity duration-150 ${menuClassName || "bg-[var(--surface)]"}`}
                             style={{
                               top: `${menuCoords.top}px`,
                               left: `${menuCoords.left}px`,
-                              minWidth: "148px",
+                              minWidth: "180px",
                             }}
                             onClick={(e) => e.stopPropagation()}
                           >
@@ -212,7 +212,7 @@ export function Table<T>({
                                     e.stopPropagation();
                                     toggleSort(col.key, "asc");
                                   }}
-                                  className="flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors duration-100"
+                                  className="flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors duration-100 whitespace-nowrap"
                                 >
                                   <ArrowUp size={13} className="text-[var(--text-muted)] shrink-0" />
                                   Sort Ascending
@@ -222,7 +222,7 @@ export function Table<T>({
                                     e.stopPropagation();
                                     toggleSort(col.key, "desc");
                                   }}
-                                  className="flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors duration-100"
+                                  className="flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors duration-100 whitespace-nowrap"
                                 >
                                   <ArrowDown size={13} className="text-[var(--text-muted)] shrink-0" />
                                   Sort Descending
@@ -237,7 +237,7 @@ export function Table<T>({
                                 if (!isFirst) moveColumn(col.key, "left");
                               }}
                               disabled={isFirst}
-                              className={`flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs transition-colors duration-100 ${isFirst
+                              className={`flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs transition-colors duration-100 whitespace-nowrap ${isFirst
                                 ? "text-[var(--text-muted)] opacity-40 cursor-not-allowed"
                                 : "text-[var(--text-main)] hover:bg-[var(--surface-hover)] cursor-pointer"
                                 }`}
@@ -251,7 +251,7 @@ export function Table<T>({
                                 if (!isLast) moveColumn(col.key, "right");
                               }}
                               disabled={isLast}
-                              className={`flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs transition-colors duration-100 ${isLast
+                              className={`flex items-center w-[calc(100%-8px)] mx-1 rounded-lg gap-2 px-3 py-2 text-xs transition-colors duration-100 whitespace-nowrap ${isLast
                                 ? "text-[var(--text-muted)] opacity-40 cursor-not-allowed"
                                 : "text-[var(--text-main)] hover:bg-[var(--surface-hover)] cursor-pointer"
                                 }`}

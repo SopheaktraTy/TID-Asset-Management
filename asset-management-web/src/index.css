@@ -79,15 +79,29 @@
    ✨ Utilities: Scrollbars & UI Polish
    ────────────────────────────────────────────────────────────────────────── */
 
+/* ✨ Custom Slim Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-  display: none;
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 .custom-scrollbar {
-  -ms-overflow-style: none;
-  /* IE and Edge */
-  scrollbar-width: none;
-  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
 }
 
 /* 🔒 Hide default browser eyes */
@@ -95,6 +109,15 @@ input::-ms-reveal,
 input::-ms-clear,
 input::-webkit-contacts-auto-fill-button {
   display: none !important;
+}
+
+/* 🙈 Scrollbar Hide utility */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 /* ?? Custom Unit Scale extensions */
 .w-50 { width: 12.5rem; }

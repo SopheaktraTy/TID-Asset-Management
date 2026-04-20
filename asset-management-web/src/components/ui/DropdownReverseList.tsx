@@ -52,10 +52,9 @@ const DropdownReverseList = React.forwardRef<HTMLDivElement, DropdownListProps>(
         <div
           className={`
             absolute z-50 bottom-full mb-1 left-0
-            min-w-[160px] w-max
+            min-w-[160px] w-max max-h-60 overflow-y-auto scrollbar-hide
             border border-[var(--border-color)] rounded-xl
             shadow-lg shadow-black/10
-            overflow-hidden
             transition-all duration-150 origin-bottom
             ${panelClassName || "bg-[var(--surface)]"}
             ${open ? "opacity-100 scale-y-100 pointer-events-auto" : "opacity-0 scale-y-95 pointer-events-none"}

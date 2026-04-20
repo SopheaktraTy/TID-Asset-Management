@@ -76,6 +76,7 @@ export default function AssetDetailsPage() {
           asset={asset}
           onEdit={() => setIsEditModalOpen(true)}
           onDelete={() => setIsDeleteModalOpen(true)}
+          onAssetUpdate={handleUpdateSuccess}
           isDeleting={isDeleting}
         />
 

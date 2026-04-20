@@ -45,43 +45,43 @@ const STATUS_OPTIONS: { label: string; value: string }[] = [
 ];
 
 const STATUS_STYLES: Record<string, { ring: string; pill: string; shadow: string }> = {
-  AVAILABLE: { 
-    ring: "ring-[#10b981]/30", 
+  AVAILABLE: {
+    ring: "ring-[#10b981]/30",
     pill: "bg-[#10b981]/15 text-[#10b981] border-[#10b981]/20",
     shadow: "shadow-[#10b981]/10"
   },
-  IN_USE: { 
-    ring: "ring-[#3b82f6]/30", 
+  IN_USE: {
+    ring: "ring-[#3b82f6]/30",
     pill: "bg-[#3b82f6]/15 text-[#3b82f6] border-[#3b82f6]/20",
     shadow: "shadow-[#3b82f6]/10"
   },
-  DAMAGED: { 
-    ring: "ring-red-500/30", 
+  DAMAGED: {
+    ring: "ring-red-500/30",
     pill: "bg-red-500/15 text-red-500 border-red-500/20",
     shadow: "shadow-red-500/10"
   },
-  LOST: { 
-    ring: "ring-red-600/40", 
+  LOST: {
+    ring: "ring-red-600/40",
     pill: "bg-red-600/15 text-red-600 border-red-600/20",
     shadow: "shadow-red-600/10"
   },
-  MALFUNCTION: { 
-    ring: "ring-orange-500/30", 
+  MALFUNCTION: {
+    ring: "ring-orange-500/30",
     pill: "bg-orange-500/15 text-orange-500 border-orange-500/20",
     shadow: "shadow-orange-500/10"
   },
-  MAINTENANCE: { 
-    ring: "ring-purple-500/30", 
+  MAINTENANCE: {
+    ring: "ring-purple-500/30",
     pill: "bg-purple-500/15 text-purple-500 border-purple-500/20",
     shadow: "shadow-purple-500/10"
   },
-  UNDER_REPAIR: { 
-    ring: "ring-amber-500/30", 
+  UNDER_REPAIR: {
+    ring: "ring-amber-500/30",
     pill: "bg-amber-500/15 text-amber-500 border-amber-500/20",
     shadow: "shadow-amber-500/10"
   },
-  OTHER: { 
-    ring: "ring-[var(--border-color)]/30", 
+  OTHER: {
+    ring: "ring-[var(--border-color)]/30",
     pill: "bg-[var(--text-muted)]/15 text-[var(--text-muted)] border-[var(--text-muted)]/20",
     shadow: "shadow-transparent"
   }
@@ -285,7 +285,7 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
 
         {/* Asset Summary Card - Full Height Visual Style */}
         {/* Asset Summary Card - Minimalist Style */}
-        <div className="relative flex gap-0 rounded-[1.5rem] bg-[var(--surface-hover)]/40 border border-dashed border-[var(--border-color)] dark:border-[var(--text-muted)]/30 shadow-sm mb-6 transition-all duration-500 overflow-hidden group/summary">
+        <div className="relative flex gap-0 min-h-[120px] rounded-[1rem] bg-[var(--surface-hover)]/40 border border-dashed border-[var(--border-color)] dark:border-[var(--text-muted)]/30 shadow-sm mb-6 transition-all duration-500 overflow-hidden group/summary">
           <div className="w-40 self-stretch bg-[var(--surface-hover)]/20 flex items-center justify-center shrink-0 p-2.5 relative rounded-l-[1.5rem] overflow-hidden">
             <div className={`w-full h-full rounded-xl overflow-hidden shadow-sm relative transition-all duration-700 ring-1
                 ${(STATUS_STYLES[asset.status] || STATUS_STYLES.OTHER).ring} 
@@ -335,17 +335,21 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
                   {asset.deviceType.replace('_', ' ')}
                 </span>
                 {/* Quick Specs - Visible on Hover for Laptops/Desktops */}
-                {(asset.deviceType === 'LAPTOP' || asset.deviceType === 'DESKTOP') && (
+                {(asset.deviceType === 'LAPTOP' || asset.deviceType === 'DESKTOP' || asset.deviceType === 'PORTABLE_MONITOR' || asset.deviceType === 'STAND_MONITOR') && (
                   <div className="mt-2.5 flex items-center gap-3.5 opacity-0 group-hover/summary:opacity-100 transition-all duration-500 transform translate-y-2 group-hover/summary:translate-y-0">
-                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--surface-hover)] shadow-sm border border-[var(--border-color)]/20">
-                      <Cpu size={10} className="text-[var(--color-growth-green)]" />
-                      <span className="text-[10px] font-black text-[var(--text-main)] uppercase tracking-tight">{asset.ramGb || '?'} GB</span>
-                    </div>
+                    {(asset.deviceType === 'LAPTOP' || asset.deviceType === 'DESKTOP') && (
+                      <>
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--surface-hover)] shadow-sm border border-[var(--border-color)]/20">
+                          <Cpu size={10} className="text-[var(--color-growth-green)]" />
+                          <span className="text-[10px] font-black text-[var(--text-main)] uppercase tracking-tight">{asset.ramGb || '?'} GB</span>
+                        </div>
 
-                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--surface-hover)] shadow-sm border border-[var(--border-color)]/20">
-                      <HardDrive size={10} className="text-[var(--color-growth-green)]" />
-                      <span className="text-[10px] font-black text-[var(--text-main)] uppercase tracking-tight">{asset.storageSizeGb || '?'} GB</span>
-                    </div>
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--surface-hover)] shadow-sm border border-[var(--border-color)]/20">
+                          <HardDrive size={10} className="text-[var(--color-growth-green)]" />
+                          <span className="text-[10px] font-black text-[var(--text-main)] uppercase tracking-tight">{asset.storageSizeGb || '?'} GB</span>
+                        </div>
+                      </>
+                    )}
 
                     <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--surface-hover)] shadow-sm border border-[var(--border-color)]/20">
                       <Monitor size={10} className="text-[var(--color-growth-green)]" />
@@ -353,6 +357,7 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
                     </div>
                   </div>
                 )}
+
               </div>
             </div>
           </div>
@@ -416,7 +421,7 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
             </div>
           </div>
 
-          {(deviceType === "LAPTOP" || deviceType === "DESKTOP") && (
+          {deviceType && (
             <>
               {/* ── Hardware Specifications ── */}
               <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
@@ -449,30 +454,35 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">CPU</label>
-                    <Controller
-                      name="cpu"
-                      control={control}
-                      render={({ field }) => (
-                        <SuggestionInput
-                          {...field}
-                          suggestions={CPU_SUGGESTIONS}
-                          placeholder="e.g. i7 Gen 11 / M2"
-                          className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                  {(deviceType === "LAPTOP" || deviceType === "DESKTOP") && (
+                    <>
+                      <div>
+                        <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">CPU</label>
+                        <Controller
+                          name="cpu"
+                          control={control}
+                          render={({ field }) => (
+                            <SuggestionInput
+                              {...field}
+                              suggestions={CPU_SUGGESTIONS}
+                              placeholder="e.g. i7 Gen 11 / M2"
+                              className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                            />
+                          )}
                         />
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">RAM (GB)</label>
-                    <Input
-                      type="number"
-                      placeholder="e.g. 16"
-                      className="bg-[var(--bg)] border-[var(--border-color)]/50"
-                      {...register("ramGb")}
-                    />
-                  </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">RAM (GB)</label>
+                        <Input
+                          type="number"
+                          placeholder="e.g. 16"
+                          className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                          {...register("ramGb")}
+                        />
+                      </div>
+                    </>
+                  )}
+
                   <div>
                     <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Screen (Inch)</label>
                     <Input
@@ -484,81 +494,148 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Disk Type</label>
-                    <Controller
-                      name="diskType"
-                      control={control}
-                      render={({ field }) => (
-                        <SuggestionInput
-                          {...field}
-                          suggestions={DISK_TYPE_SUGGESTIONS}
-                          placeholder="e.g. SSD / HDD"
-                          className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                  {(deviceType === "LAPTOP" || deviceType === "DESKTOP") && (
+                    <>
+                      <div>
+                        <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Disk Type</label>
+                        <Controller
+                          name="diskType"
+                          control={control}
+                          render={({ field }) => (
+                            <SuggestionInput
+                              {...field}
+                              suggestions={DISK_TYPE_SUGGESTIONS}
+                              placeholder="e.g. SSD / HDD"
+                              className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                            />
+                          )}
                         />
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Storage (GB)</label>
-                    <Input
-                      type="number"
-                      placeholder="e.g. 512"
-                      className="bg-[var(--bg)] border-[var(--border-color)]/50"
-                      {...register("storageSizeGb")}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Disk Model</label>
-                    <Controller
-                      name="diskModel"
-                      control={control}
-                      render={({ field }) => (
-                        <SuggestionInput
-                          {...field}
-                          suggestions={DISK_MODEL_SUGGESTIONS}
-                          placeholder="e.g. Samsung NVMe"
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Storage (GB)</label>
+                        <Input
+                          type="number"
+                          placeholder="e.g. 512"
                           className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                          {...register("storageSizeGb")}
                         />
-                      )}
-                    />
-                  </div>
+                      </div>
+                      <div className="md:col-span-3">
+                        <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Disk Model</label>
+                        <Controller
+                          name="diskModel"
+                          control={control}
+                          render={({ field }) => (
+                            <SuggestionInput
+                              {...field}
+                              suggestions={DISK_MODEL_SUGGESTIONS}
+                              placeholder="e.g. Samsung NVMe"
+                              className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                            />
+                          )}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
               {/* ── Software & Network ── */}
-              <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
-                <div className="px-1 mb-3 flex items-center gap-2">
-                  <MonitorSmartphone size={16} className="text-[var(--color-growth-green)]" />
-                  <h3 className="text-sm font-bold text-[var(--text-main)]">Software & Network</h3>
-                </div>
-                <div className="px-[10px] space-y-2">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {(deviceType === "LAPTOP" || deviceType === "DESKTOP") && (
+                <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
+                  <div className="px-1 mb-3 flex items-center gap-2">
+                    <MonitorSmartphone size={16} className="text-[var(--color-growth-green)]" />
+                    <h3 className="text-sm font-bold text-[var(--text-main)]">Software & Network</h3>
+                  </div>
+                  <div className="px-[10px] space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Operating System</label>
+                        <Controller
+                          name="operatingSystem"
+                          control={control}
+                          render={({ field }) => (
+                            <SuggestionInput
+                              {...field}
+                              suggestions={OS_SUGGESTIONS}
+                              placeholder="e.g. Windows 11 / macOS"
+                              className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                            />
+                          )}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">OS Version</label>
+                        <Controller
+                          name="osVersion"
+                          control={control}
+                          render={({ field }) => (
+                            <SuggestionInput
+                              {...field}
+                              suggestions={OS_VERSION_SUGGESTIONS}
+                              placeholder="e.g. 23H2, Sonoma 14.2"
+                              className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                            />
+                          )}
+                        />
+                      </div>
+                    </div>
                     <div>
-                      <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Operating System</label>
                       <Controller
-                        name="operatingSystem"
+                        name="domainJoined"
                         control={control}
                         render={({ field }) => (
-                          <SuggestionInput
-                            {...field}
-                            suggestions={OS_SUGGESTIONS}
-                            placeholder="e.g. Windows 11 / macOS"
-                            className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                          <ToggleSwitch
+                            label="Domain Joined"
+                            description="Connect device to corporate network Active Directory domain."
+                            checked={!!field.value}
+                            onChange={field.onChange}
+                            size="sm"
+                            className="!py-2"
                           />
                         )}
                       />
                     </div>
+                  </div>
+                </div>
+              )}
+
+
+              {/* ── Status & Condition ── */}
+              <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
+                <div className="px-1 mb-3 flex items-center gap-2">
+                  <ClipboardList size={16} className="text-[var(--color-growth-green)]" />
+                  <h3 className="text-sm font-bold text-[var(--text-main)]">Status & Condition</h3>
+                </div>
+                <div className="px-[10px] space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">OS Version</label>
+                      <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Status</label>
                       <Controller
-                        name="osVersion"
+                        name="status"
+                        control={control}
+                        render={({ field }) => (
+                          <DropdownReverseList
+                            options={STATUS_OPTIONS}
+                            value={field.value ?? "AVAILABLE"}
+                            onChange={field.onChange}
+                            className="w-full"
+                            panelClassName="bg-[var(--bg)]"
+                          />
+                        )}
+                      />
+                      {errors.status && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.status.message}</p>}
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Condition</label>
+                      <Controller
+                        name="condition"
                         control={control}
                         render={({ field }) => (
                           <SuggestionInput
                             {...field}
-                            suggestions={OS_VERSION_SUGGESTIONS}
-                            placeholder="e.g. 23H2, Sonoma 14.2"
+                            suggestions={CONDITION_SUGGESTIONS}
+                            placeholder="e.g. Excellent / Good"
                             className="bg-[var(--bg)] border-[var(--border-color)]/50"
                           />
                         )}
@@ -566,179 +643,121 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
                     </div>
                   </div>
                   <div>
-                    <Controller
-                      name="domainJoined"
-                      control={control}
-                      render={({ field }) => (
-                        <ToggleSwitch
-                          label="Domain Joined"
-                          description="Connect device to corporate network Active Directory domain."
-                          checked={!!field.value}
-                          onChange={field.onChange}
-                          size="sm"
-                          className="!py-2"
-                        />
-                      )}
+                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Issue Description (If any)</label>
+                    <textarea
+                      {...register("issueDescription")}
+                      className="w-full px-3 py-2 bg-[var(--bg)] border border-[var(--border-color)]/50 rounded-lg focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-2 focus:ring-[var(--color-growth-green)]/20 text-[11px] text-[var(--text-main)] placeholder:text-[var(--text-muted)] placeholder:text-[11px] transition-all duration-200 min-h-[80px] resize-none"
+                      placeholder="Describe physical or technical issues here..."
                     />
                   </div>
                 </div>
               </div>
-            </>
-          )}
 
-          {/* ── Status & Condition ── */}
-          <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
-            <div className="px-1 mb-3 flex items-center gap-2">
-              <ClipboardList size={16} className="text-[var(--color-growth-green)]" />
-              <h3 className="text-sm font-bold text-[var(--text-main)]">Status & Condition</h3>
-            </div>
-            <div className="px-[10px] space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Status</label>
-                  <Controller
-                    name="status"
-                    control={control}
-                    render={({ field }) => (
-                      <DropdownReverseList
-                        options={STATUS_OPTIONS}
-                        value={field.value ?? "AVAILABLE"}
-                        onChange={field.onChange}
-                        className="w-full"
-                        panelClassName="bg-[var(--bg)]"
-                      />
-                    )}
-                  />
-                  {errors.status && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.status.message}</p>}
+              {/* ── Asset Image ── */}
+              <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
+                <div className="px-1 mb-3 flex items-center gap-2">
+                  <ImagePlus size={16} className="text-[var(--color-growth-green)]" />
+                  <h3 className="text-sm font-bold text-[var(--text-main)]">Asset Image</h3>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Condition</label>
-                  <Controller
-                    name="condition"
-                    control={control}
-                    render={({ field }) => (
-                      <SuggestionInput
-                        {...field}
-                        suggestions={CONDITION_SUGGESTIONS}
-                        placeholder="e.g. Excellent / Good"
-                        className="bg-[var(--bg)] border-[var(--border-color)]/50"
+
+                <div className="px-2">
+                  {imagePreview ? (
+                    /* ── Preview card ── */
+                    <div className="relative group rounded-xl overflow-hidden border border-[var(--border-color)]/40 bg-[var(--surface-hover)]/20">
+                      <img
+                        src={imagePreview}
+                        alt="Asset preview"
+                        className="w-full h-72 object-contain bg-[var(--surface-hover)]/10"
+                        onError={(e) => {
+                          // If existing server image fails, fall back to drop zone
+                          (e.currentTarget as HTMLImageElement).style.display = "none";
+                          clearImage();
+                        }}
                       />
-                    )}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Issue Description (If any)</label>
-                <textarea
-                  {...register("issueDescription")}
-                  className="w-full px-3 py-2 bg-[var(--bg)] border border-[var(--border-color)]/50 rounded-lg focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-2 focus:ring-[var(--color-growth-green)]/20 text-[11px] text-[var(--text-main)] placeholder:text-[var(--text-muted)] placeholder:text-[11px] transition-all duration-200 min-h-[80px] resize-none"
-                  placeholder="Describe physical or technical issues here..."
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* ── Asset Image ── */}
-          <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
-            <div className="px-1 mb-3 flex items-center gap-2">
-              <ImagePlus size={16} className="text-[var(--color-growth-green)]" />
-              <h3 className="text-sm font-bold text-[var(--text-main)]">Asset Image</h3>
-            </div>
-
-            <div className="px-2">
-              {imagePreview ? (
-                /* ── Preview card ── */
-                <div className="relative group rounded-xl overflow-hidden border border-[var(--border-color)]/40 bg-[var(--surface-hover)]/20">
-                  <img
-                    src={imagePreview}
-                    alt="Asset preview"
-                    className="w-full h-72 object-contain bg-[var(--surface-hover)]/10"
-                    onError={(e) => {
-                      // If existing server image fails, fall back to drop zone
-                      (e.currentTarget as HTMLImageElement).style.display = "none";
-                      clearImage();
-                    }}
-                  />
-                  {/* Overlay on hover */}
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                    <button
-                      type="button"
+                      {/* Overlay on hover */}
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="flex items-center gap-1.5 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold rounded-full hover:bg-white/20 transition-all"
+                        >
+                          <UploadCloud size={14} />
+                          Replace
+                        </button>
+                        <button
+                          type="button"
+                          onClick={clearImage}
+                          className="flex items-center gap-1.5 px-4 py-2 bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-300 text-xs font-semibold rounded-full hover:bg-red-500/30 transition-all"
+                        >
+                          <X size={14} />
+                          Remove
+                        </button>
+                      </div>
+                      {/* File name / source badge */}
+                      <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/60 to-transparent">
+                        <p className="text-white text-[10px] font-medium truncate">
+                          {imageFile ? imageFile.name : "Current image"}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    /* ── Drop zone ── */
+                    <div
+                      onDrop={handleDrop}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
                       onClick={() => fileInputRef.current?.click()}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold rounded-full hover:bg-white/20 transition-all"
-                    >
-                      <UploadCloud size={14} />
-                      Replace
-                    </button>
-                    <button
-                      type="button"
-                      onClick={clearImage}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-300 text-xs font-semibold rounded-full hover:bg-red-500/30 transition-all"
-                    >
-                      <X size={14} />
-                      Remove
-                    </button>
-                  </div>
-                  {/* File name / source badge */}
-                  <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/60 to-transparent">
-                    <p className="text-white text-[10px] font-medium truncate">
-                      {imageFile ? imageFile.name : "Current image"}
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                /* ── Drop zone ── */
-                <div
-                  onDrop={handleDrop}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`
+                      className={`
                     relative flex flex-col items-center justify-center gap-3 rounded-xl
                     border border-dashed cursor-pointer transition-all duration-200
                     py-16 px-6 select-none
                     ${isDragging
-                      ? "border-[var(--color-growth-green)] bg-[var(--color-growth-green)]/5 scale-[1.01]"
-                      : "border-[var(--border-color)]/50 dark:border-[var(--text-muted)]/30 bg-[var(--surface-hover)]/10 hover:border-[var(--color-growth-green)]/60 hover:bg-[var(--color-growth-green)]/5"
-                    }
+                          ? "border-[var(--color-growth-green)] bg-[var(--color-growth-green)]/5 scale-[1.01]"
+                          : "border-[var(--border-color)]/50 dark:border-[var(--text-muted)]/30 bg-[var(--surface-hover)]/10 hover:border-[var(--color-growth-green)]/60 hover:bg-[var(--color-growth-green)]/5"
+                        }
                   `}
-                >
-                  {/* Animated icon */}
-                  <div className={`
+                    >
+                      {/* Animated icon */}
+                      <div className={`
                     w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-200
                     ${isDragging
-                      ? "bg-[var(--color-growth-green)]/20 text-[var(--color-growth-green)] scale-110"
-                      : "bg-[var(--surface-hover)] text-[var(--text-muted)]"
-                    }
+                          ? "bg-[var(--color-growth-green)]/20 text-[var(--color-growth-green)] scale-110"
+                          : "bg-[var(--surface-hover)] text-[var(--text-muted)]"
+                        }
                   `}>
-                    <UploadCloud size={26} strokeWidth={1.5} className={isDragging ? "animate-bounce" : ""} />
-                  </div>
+                        <UploadCloud size={26} strokeWidth={1.5} className={isDragging ? "animate-bounce" : ""} />
+                      </div>
 
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-[var(--text-main)]">
-                      Drop your image here, or{" "}
-                      <span className="text-[var(--color-growth-green)] underline underline-offset-2 cursor-pointer">
-                        browse
-                      </span>
-                    </p>
-                    <p className="text-[11px] text-[var(--text-muted)] mt-1">
-                      Supports: JPG, JPEG2000, PNG · Max 5 MB · One image only
-                    </p>
-                  </div>
+                      <div className="text-center">
+                        <p className="text-sm font-semibold text-[var(--text-main)]">
+                          Drop your image here, or{" "}
+                          <span className="text-[var(--color-growth-green)] underline underline-offset-2 cursor-pointer">
+                            browse
+                          </span>
+                        </p>
+                        <p className="text-[11px] text-[var(--text-muted)] mt-1">
+                          Supports: JPG, JPEG2000, PNG · Max 5 MB · One image only
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Hidden file input */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/jp2"
+                    className="hidden"
+                    onChange={handleFileInput}
+                  />
                 </div>
-              )}
+              </div>
 
-              {/* Hidden file input */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/jpg,image/png,image/jp2"
-                className="hidden"
-                onChange={handleFileInput}
-              />
-            </div>
-          </div>
+            </>
+          )}
 
           {errorMsg && <Message variant="error">{errorMsg}</Message>}
+
           {successMsg && <Message variant="success">{successMsg}</Message>}
 
           <div className="pt-2 flex items-center justify-end gap-3 translate-y-1">
