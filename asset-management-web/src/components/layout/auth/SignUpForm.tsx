@@ -29,6 +29,28 @@ const DEPARTMENT_OPTIONS = [
     { value: "TECHNOLOGY_INNOVATION_DEVELOPMENT", label: "Technology Innovation and Development" },
 ];
 
+const JOB_TITLE_OPTIONS = [
+    { value: "", label: "Select a job title..." },
+    { value: "ASSISTANT_MANAGER", label: "Assistant Manager" },
+    { value: "ASSOCIATE", label: "Associate" },
+    { value: "ASSOCIATE_DIRECTOR", label: "Associate Director" },
+    { value: "CONSULTANT", label: "Consultant" },
+    { value: "DIRECTOR", label: "Director" },
+    { value: "EXECUTIVE", label: "Executive" },
+    { value: "EXECUTIVE_ASSISTANT", label: "Executive Assistant" },
+    { value: "INTERN", label: "Intern" },
+    { value: "MANAGER", label: "Manager" },
+    { value: "PERSONAL_ASSISTANT_TO_MANAGING_PARTNER", label: "Personal Assistant to Managing Partner" },
+    { value: "RECEPTIONIST", label: "Receptionist" },
+    { value: "SENIOR_ADMIN_EXECUTIVE", label: "Senior Admin Executive" },
+    { value: "SENIOR_ASSOCIATE", label: "Senior Associate" },
+    { value: "SENIOR_CONSULTANT", label: "Senior Consultant" },
+    { value: "SENIOR_EXECUTIVE", label: "Senior Executive" },
+    { value: "SENIOR_IT_EXECUTIVE", label: "Senior IT Executive" },
+    { value: "SENIOR_MANAGER", label: "Senior Manager" },
+    { value: "SUPERVISOR", label: "Supervisor" },
+];
+
 export const SignUpForm = () => {
     const [showPassword, setShowPassword] = useState(false);
     const signUpMutation = useSignUp();
@@ -203,6 +225,31 @@ export const SignUpForm = () => {
                     />
                     {errors.department && (
                         <p className="mt-1 text-[0.75rem] text-red-500">{errors.department.message}</p>
+                    )}
+                </div>
+
+                {/* Job Title */}
+                <div className="flex flex-col">
+                    <label className="text-[0.82rem] font-semibold mb-1.5 text-[color:var(--text-main)]" htmlFor="jobTitle">
+                        Job Title
+                    </label>
+                    <Controller
+                        name="jobTitle"
+                        control={control}
+                        defaultValue=""
+                        render={({ field }) => (
+                            <DropdownReverseList
+                                options={JOB_TITLE_OPTIONS}
+                                value={field.value}
+                                onChange={field.onChange}
+                                placeholder="Select a job title..."
+                                className="w-full"
+                                triggerClassName="text-sm focus:ring-2 focus:ring-[var(--color-growth-green)]/20"
+                            />
+                        )}
+                    />
+                    {errors.jobTitle && (
+                        <p className="mt-1 text-[0.75rem] text-red-500">{errors.jobTitle.message}</p>
                     )}
                 </div>
 

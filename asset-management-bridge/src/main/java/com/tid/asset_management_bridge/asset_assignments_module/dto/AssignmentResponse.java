@@ -1,9 +1,9 @@
 package com.tid.asset_management_bridge.asset_assignments_module.dto;
 
 
-import com.tid.asset_management_bridge.asset_assignments_module.entity.DepartmentEnum;
-import com.tid.asset_management_bridge.asset_assignments_module.entity.JobTitleEnum;
 import java.time.LocalDate;
+import com.tid.asset_management_bridge.employee_management_module.dto.EmployeeResponse;
+import com.tid.asset_management_bridge.user_management_module.dto.UserResponse;
 
 public class AssignmentResponse {
 
@@ -11,16 +11,14 @@ public class AssignmentResponse {
     private Long assetId;
     private String assetTag;
     private String deviceName;
-    private String assignedTo;
-    private DepartmentEnum department;
-    private JobTitleEnum jobTitle;
+    private EmployeeResponse employee;
     private String assignedBy;
-    private Long assignedByUserId;
+    private UserResponse assignedByUser;
     private LocalDate assignedDate;
     private LocalDate returnedDate;
     private String returnCondition;
     private String confirmReturnBy;
-    private Long confirmReturnByUserId;
+    private UserResponse confirmReturnByUser;
 
     public Long getId() {
         return id;
@@ -54,28 +52,12 @@ public class AssignmentResponse {
         this.deviceName = deviceName;
     }
 
-    public String getAssignedTo() {
-        return assignedTo;
+    public EmployeeResponse getEmployee() {
+        return employee;
     }
 
-    public void setAssignedTo(String assignedTo) {
-        this.assignedTo = assignedTo;
-    }
-
-    public DepartmentEnum getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(DepartmentEnum department) {
-        this.department = department;
-    }
-
-    public JobTitleEnum getJobTitle() {
-        return jobTitle;
-    }
-
-    public void setJobTitle(JobTitleEnum jobTitle) {
-        this.jobTitle = jobTitle;
+    public void setEmployee(EmployeeResponse employee) {
+        this.employee = employee;
     }
 
     public String getAssignedBy() {
@@ -118,20 +100,20 @@ public class AssignmentResponse {
         this.confirmReturnBy = confirmReturnBy;
     }
 
-    public Long getAssignedByUserId() {
-        return assignedByUserId;
+    public UserResponse getAssignedByUser() {
+        return assignedByUser;
     }
 
-    public void setAssignedByUserId(Long assignedByUserId) {
-        this.assignedByUserId = assignedByUserId;
+    public void setAssignedByUser(UserResponse assignedByUser) {
+        this.assignedByUser = assignedByUser;
     }
 
-    public Long getConfirmReturnByUserId() {
-        return confirmReturnByUserId;
+    public UserResponse getConfirmReturnByUser() {
+        return confirmReturnByUser;
     }
 
-    public void setConfirmReturnByUserId(Long confirmReturnByUserId) {
-        this.confirmReturnByUserId = confirmReturnByUserId;
+    public void setConfirmReturnByUser(UserResponse confirmReturnByUser) {
+        this.confirmReturnByUser = confirmReturnByUser;
     }
 
 }

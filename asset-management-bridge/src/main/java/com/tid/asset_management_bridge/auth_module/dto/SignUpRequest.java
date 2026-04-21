@@ -1,6 +1,7 @@
 package com.tid.asset_management_bridge.auth_module.dto;
 
 import com.tid.asset_management_bridge.auth_module.entity.DepartmentEnum;
+import com.tid.asset_management_bridge.auth_module.entity.JobTitleEnum;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,6 +22,9 @@ public class SignUpRequest {
 
     @NotNull(message = "Department is required")
     private DepartmentEnum department;
+
+    @NotNull(message = "Job Title is required")
+    private JobTitleEnum jobTitle;
 
     public String getUsername() {
         return username;
@@ -52,5 +56,13 @@ public class SignUpRequest {
 
     public void setDepartment(DepartmentEnum department) {
         this.department = department;
+    }
+
+    public JobTitleEnum getJobTitle() {
+        return jobTitle;
+    }
+
+    public void setJobTitle(JobTitleEnum jobTitle) {
+        this.jobTitle = jobTitle;
     }
 }

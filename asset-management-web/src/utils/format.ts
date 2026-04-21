@@ -14,13 +14,23 @@ export function toPascalCase(str: string | null | undefined): string {
  * Formats an ISO date string to a human-readable format.
  * Example: "2023-10-27T..." -> "Oct 27, 2023"
  */
-export function formatDate(iso: string | null | undefined): string {
+export function formatDate(
+  iso: string | null | undefined,
+  includeTime: boolean = false
+): string {
   if (!iso) return "–";
-  return new Date(iso).toLocaleDateString("en-US", {
+  const options: Intl.DateTimeFormatOptions = {
     month: "short",
     day: "numeric",
     year: "numeric",
-  });
+  };
+
+  if (includeTime) {
+    options.hour = "numeric";
+    options.minute = "2-digit";
+  }
+
+  return new Date(iso).toLocaleDateString("en-US", options);
 }
 
 /**
@@ -28,14 +38,7 @@ export function formatDate(iso: string | null | undefined): string {
  * Example: "2023-10-27T10:30:00Z" -> "Oct 27, 2023, 10:30 AM"
  */
 export function formatDateTime(iso: string | null | undefined): string {
-  if (!iso) return "–";
-  return new Date(iso).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  return formatDate(iso, true);
 }
 
 /**

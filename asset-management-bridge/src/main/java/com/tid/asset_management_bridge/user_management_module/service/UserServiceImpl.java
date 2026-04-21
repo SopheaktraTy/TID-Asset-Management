@@ -57,6 +57,7 @@ public class UserServiceImpl implements UserService {
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setRole(request.getRole());
+        user.setJobTitle(request.getJobTitle());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setStatus(UserStatusEnum.ACTIVE);
 
@@ -173,6 +174,10 @@ public class UserServiceImpl implements UserService {
 
         if (request.getDepartment() != null) {
             user.setDepartment(request.getDepartment());
+        }
+
+        if (request.getJobTitle() != null) {
+            user.setJobTitle(request.getJobTitle());
         }
 
         if (request.getStatus() != null) {

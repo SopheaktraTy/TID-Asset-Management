@@ -14,6 +14,7 @@ export interface UserDto {
   email: string;
   image: string | null;
   role: string;
+  jobTitle?: string;
   status: UserStatus;
   department?: string;
   updated_at?: string;
@@ -49,6 +50,7 @@ export const createUserSchema = z.object({
   email: z.string().email("Invalid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   role: z.string().min(1, "Role is required"),
+  jobTitle: z.string().min(1, "Job Title is required"),
   department: z.string().optional(),
   permissions: z.record(z.string(), z.any()).optional(),
 });
@@ -61,6 +63,7 @@ export const editUserSchema = z.object({
   role: z.string().min(1, "Role is required"),
   status: z.enum(["ACTIVE", "INACTIVE", "SUSPENDED"]),
   image: z.string().optional().or(z.literal("")),
+  jobTitle: z.string().optional(),
   department: z.string().optional(),
   // z.any() per-value: Controller may produce undefined for uninitialised fields;
   // the service layer filters out non-array values before sending to the backend.

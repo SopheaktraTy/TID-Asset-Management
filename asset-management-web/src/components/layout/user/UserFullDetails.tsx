@@ -99,6 +99,11 @@ export const UserFullDetails: React.FC<UserFullDetailsProps> = ({
           </div>
 
           <div className="grid grid-cols-[150px_1fr] items-center">
+            <span className="text-[var(--text-muted)]">Job Title:</span>
+            <span className="text-[var(--text-main)] font-medium">{toPascalCase(user.jobTitle)}</span>
+          </div>
+
+          <div className="grid grid-cols-[150px_1fr] items-center">
             <span className="text-[var(--text-muted)]">Created At:</span>
             <span className="text-[var(--text-main)] font-medium">{formatDateTime(user.created_at || (user as any).createdAt)}</span>
           </div>

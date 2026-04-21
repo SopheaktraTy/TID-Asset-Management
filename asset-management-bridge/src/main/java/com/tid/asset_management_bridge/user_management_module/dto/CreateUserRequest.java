@@ -1,6 +1,7 @@
 package com.tid.asset_management_bridge.user_management_module.dto;
 
 import com.tid.asset_management_bridge.auth_module.entity.RoleEnum;
+import com.tid.asset_management_bridge.auth_module.entity.JobTitleEnum;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,6 +22,9 @@ public class CreateUserRequest {
 
     @NotNull(message = "Role is required")
     private RoleEnum role;
+
+    @NotNull(message = "Job Title is required")
+    private JobTitleEnum jobTitle;
 
     public String getUsername() {
         return username;
@@ -52,6 +56,14 @@ public class CreateUserRequest {
 
     public void setRole(RoleEnum role) {
         this.role = role;
+    }
+
+    public JobTitleEnum getJobTitle() {
+        return jobTitle;
+    }
+
+    public void setJobTitle(JobTitleEnum jobTitle) {
+        this.jobTitle = jobTitle;
     }
 
     private java.util.Map<com.tid.asset_management_bridge.auth_module.entity.ModuleEnum, java.util.List<com.tid.asset_management_bridge.auth_module.entity.PermissionEnum>> permissions;

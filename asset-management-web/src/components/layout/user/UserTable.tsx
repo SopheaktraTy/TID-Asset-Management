@@ -13,6 +13,7 @@ export const USER_TABLE_COLUMN_OPTIONS = [
   { key: "username", label: "User" },
   { key: "status", label: "Status" },
   { key: "role", label: "Role" },
+  { key: "jobTitle", label: "Job Title" },
   { key: "department", label: "Department" },
   { key: "created_at", label: "Joined" },
   { key: "updated_at", label: "Updated At" },
@@ -101,6 +102,14 @@ export default function UserTable({
         <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-[#1f1f1f] text-gray-300 uppercase tracking-tight border border-[#2b2b2b]">
           {user?.role?.replace('_', ' ')}
         </span>
+      ),
+    },
+    {
+      key: "jobTitle",
+      header: "Job Title",
+      sortable: true,
+      cell: (user) => (
+        <span className="text-[var(--text-main)] italic text-xs">{toPascalCase(user?.jobTitle)}</span>
       ),
     },
     {

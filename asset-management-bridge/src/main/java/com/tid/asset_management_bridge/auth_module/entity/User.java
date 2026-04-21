@@ -30,6 +30,10 @@ public class User {
     private DepartmentEnum department;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "job_title")
+    private JobTitleEnum jobTitle;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private RoleEnum role;
 
@@ -103,6 +107,14 @@ public class User {
 
     public void setDepartment(DepartmentEnum department) {
         this.department = department;
+    }
+
+    public JobTitleEnum getJobTitle() {
+        return jobTitle;
+    }
+
+    public void setJobTitle(JobTitleEnum jobTitle) {
+        this.jobTitle = jobTitle;
     }
 
     public RoleEnum getRole() {

@@ -2,6 +2,7 @@ package com.tid.asset_management_bridge.user_management_module.dto;
 
 import com.tid.asset_management_bridge.auth_module.entity.RoleEnum;
 import com.tid.asset_management_bridge.auth_module.entity.DepartmentEnum;
+import com.tid.asset_management_bridge.auth_module.entity.JobTitleEnum;
 import com.tid.asset_management_bridge.auth_module.entity.ModuleEnum;
 import com.tid.asset_management_bridge.auth_module.entity.PermissionEnum;
 
@@ -16,6 +17,7 @@ public class UserResponse {
     private String image;
     private RoleEnum role;
     private DepartmentEnum department;
+    private JobTitleEnum jobTitle;
     private com.tid.asset_management_bridge.auth_module.entity.UserStatusEnum status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -67,6 +69,14 @@ public class UserResponse {
 
     public void setDepartment(DepartmentEnum department) {
         this.department = department;
+    }
+
+    public JobTitleEnum getJobTitle() {
+        return jobTitle;
+    }
+
+    public void setJobTitle(JobTitleEnum jobTitle) {
+        this.jobTitle = jobTitle;
     }
 
     public com.tid.asset_management_bridge.auth_module.entity.UserStatusEnum getStatus() {

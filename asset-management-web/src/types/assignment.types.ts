@@ -14,43 +14,47 @@ export const DepartmentEnumValues = [
 export type DepartmentType = (typeof DepartmentEnumValues)[number];
 
 export const JobTitleEnumValues = [
-    "ASSISTANT_MANAGER",
-    "ASSOCIATE",
-    "ASSOCIATE_DIRECTOR",
-    "CONSULTANT",
-    "DIRECTOR",
-    "EXECUTIVE",
-    "EXECUTIVE_ASSISTANT",
-    "INTERN",
-    "MANAGER",
-    "PERSONAL_ASSISTANT_TO_MANAGING_PARTNER",
-    "RECEPTIONIST",
-    "SENIOR_ADMIN_EXECUTIVE",
-    "SENIOR_ASSOCIATE",
-    "SENIOR_CONSULTANT",
-    "SENIOR_EXECUTIVE",
-    "SENIOR_IT_EXECUTIVE",
     "SENIOR_MANAGER",
     "SUPERVISOR",
+    "SENIOR_ADMIN_EXECUTIVE",
+    "ASSISTANT_MANAGER",
+    "DIRECTOR",
+    "MANAGER",
+    "SENIOR_ASSOCIATE",
+    "ASSOCIATE",
+    "ASSOCIATE_DIRECTOR",
+    "PERSONAL_ASSISTANT_TO_MANAGING_PARTNER",
+    "IT_EXECUTIVE",
+    "ADMIN_EXECUTIVE",
+    "IT_SENIOR_ASSOCIATE",
+    "RECEPTIONIST",
+    "DRIVER",
+    "INTERN",
 ] as const;
 
 export type JobTitleType = (typeof JobTitleEnumValues)[number];
+
+export interface EmployeeDto {
+    id: number;
+    username: string;
+    department: string;
+    jobTitle: string;
+    image?: string;
+}
 
 export interface AssignmentResponse {
     id: number;
     assetId: number;
     assetTag: string;
     deviceName: string;
-    assignedTo: string;
-    department: DepartmentType;
-    jobTitle: JobTitleType;
+    employee: EmployeeDto;
     assignedBy: string;
-    assignedByUserId: number;
+    assignedByUser: any;
     assignedDate: string; // ISO Date string
     returnedDate?: string | null;
     returnCondition?: string | null;
     confirmReturnBy?: string | null;
-    confirmReturnByUserId?: number | null;
+    confirmReturnByUser?: any;
 }
 
 export const assignAssetSchema = z.object({

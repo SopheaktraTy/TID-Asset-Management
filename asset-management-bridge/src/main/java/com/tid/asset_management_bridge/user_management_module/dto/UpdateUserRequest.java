@@ -4,6 +4,7 @@ import com.tid.asset_management_bridge.auth_module.entity.ModuleEnum;
 import com.tid.asset_management_bridge.auth_module.entity.PermissionEnum;
 import com.tid.asset_management_bridge.auth_module.entity.RoleEnum;
 import com.tid.asset_management_bridge.auth_module.entity.DepartmentEnum;
+import com.tid.asset_management_bridge.auth_module.entity.JobTitleEnum;
 import jakarta.validation.constraints.Email;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,8 @@ public class UpdateUserRequest {
     private RoleEnum role;
     
     private DepartmentEnum department;
+    
+    private JobTitleEnum jobTitle;
     
     private com.tid.asset_management_bridge.auth_module.entity.UserStatusEnum status;
     
@@ -33,6 +36,9 @@ public class UpdateUserRequest {
 
     public DepartmentEnum getDepartment() { return department; }
     public void setDepartment(DepartmentEnum department) { this.department = department; }
+
+    public JobTitleEnum getJobTitle() { return jobTitle; }
+    public void setJobTitle(JobTitleEnum jobTitle) { this.jobTitle = jobTitle; }
 
     public com.tid.asset_management_bridge.auth_module.entity.UserStatusEnum getStatus() { return status; }
     public void setStatus(com.tid.asset_management_bridge.auth_module.entity.UserStatusEnum status) { this.status = status; }

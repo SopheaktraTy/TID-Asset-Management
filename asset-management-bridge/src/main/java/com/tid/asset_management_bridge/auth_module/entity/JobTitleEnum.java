@@ -1,4 +1,4 @@
-package com.tid.asset_management_bridge.asset_assignments_module.entity;
+package com.tid.asset_management_bridge.auth_module.entity;
 
 public enum JobTitleEnum {
     ASSISTANT_MANAGER("Assistant Manager"),

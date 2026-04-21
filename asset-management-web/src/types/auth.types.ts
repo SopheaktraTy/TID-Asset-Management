@@ -13,6 +13,7 @@ export const signUpSchema = z.object({
   username: z.string().min(1, "Username is required"),
   email: z.string().min(1, "Email is required").email("Invalid email format"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  jobTitle: z.string().min(1, "Job Title is required"),
   department: z.string().min(1, "Department is required"),
 });
 
@@ -54,6 +55,7 @@ export interface ProfileResponse {
   email: string;
   image: string | null;
   role: RoleEnum;
+  jobTitle?: string | null;
   department: string | null;
   isActive: boolean;
   permissions: Record<ModuleEnum, PermissionEnum[]>;

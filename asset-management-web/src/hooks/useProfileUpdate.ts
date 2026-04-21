@@ -12,6 +12,7 @@ export function useProfileUpdate({ onClose }: UseProfileUpdateOptions) {
 
   const [editedName, setEditedName] = useState("");
   const [editedDept, setEditedDept] = useState("");
+  const [editedJobTitle, setEditedJobTitle] = useState("");
   const [isEditing, setIsEditing] = useState(false);
 
   const [tempImage, setTempImage] = useState<string | null>(null);
@@ -34,6 +35,7 @@ export function useProfileUpdate({ onClose }: UseProfileUpdateOptions) {
     if (user) {
       setEditedName(user.username);
       setEditedDept((user as any).department || "");
+      setEditedJobTitle((user as any).jobTitle || "");
       setTempImage(user.image || null);
       setSelectedFile(null);
       setIsImageDeleted(false);
@@ -79,6 +81,7 @@ export function useProfileUpdate({ onClose }: UseProfileUpdateOptions) {
       const formData = new FormData();
       formData.append("username", editedName);
       formData.append("department", editedDept);
+      formData.append("jobTitle", editedJobTitle);
       formData.append("removeImage", String(isImageDeleted));
 
       if (newPassword) {
@@ -114,6 +117,8 @@ export function useProfileUpdate({ onClose }: UseProfileUpdateOptions) {
     setEditedName,
     editedDept,
     setEditedDept,
+    editedJobTitle,
+    setEditedJobTitle,
     isEditing,
     setIsEditing,
     tempImage,

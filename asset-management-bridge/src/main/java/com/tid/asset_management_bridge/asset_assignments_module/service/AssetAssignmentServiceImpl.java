@@ -10,6 +10,8 @@ import com.tid.asset_management_bridge.asset_assignments_module.repository.Asset
 import com.tid.asset_management_bridge.asset_module.entity.Asset;
 import com.tid.asset_management_bridge.asset_module.entity.AssetStatusEnum;
 import com.tid.asset_management_bridge.asset_module.repository.AssetRepository;
+import com.tid.asset_management_bridge.employee_management_module.repository.EmployeeRepository;
+import com.tid.asset_management_bridge.employee_management_module.entity.Employee;
 import com.tid.asset_management_bridge.common.exception.ConflictException;
 import com.tid.asset_management_bridge.common.exception.ResourceNotFoundException;
 import org.springframework.lang.NonNull;
@@ -27,15 +29,18 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
     private final AssetRepository assetRepository;
     private final AssetAssignmentMapper assignmentMapper;
     private final com.tid.asset_management_bridge.auth_module.repository.UserRepository userRepository;
+    private final EmployeeRepository employeeRepository;
 
     public AssetAssignmentServiceImpl(AssetAssignmentRepository assignmentRepository,
             AssetRepository assetRepository,
             AssetAssignmentMapper assignmentMapper,
-            com.tid.asset_management_bridge.auth_module.repository.UserRepository userRepository) {
+            com.tid.asset_management_bridge.auth_module.repository.UserRepository userRepository,
+            EmployeeRepository employeeRepository) {
         this.assignmentRepository = assignmentRepository;
         this.assetRepository = assetRepository;
         this.assignmentMapper = assignmentMapper;
         this.userRepository = userRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     @Override
@@ -67,12 +72,16 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
             asset.setPreviousUsed(currentLatestUsed);
         }
 
-        asset.setLatestUsed(request.getAssignedTo());
+        asset.setLatestUsed(request.getEmployeeName());
         asset.setStatus(AssetStatusEnum.IN_USE);
         assetRepository.save(asset);
 
+        Employee employee = employeeRepository.findByUsername(request.getEmployeeName())
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with name: " + request.getEmployeeName()));
+
         AssetAssignment assignment = assignmentMapper.toEntity(request);
         assignment.setAsset(asset);
+        assignment.setEmployee(employee);
         assignment.setAssignedBy(org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName());
         
         Long userId = getAuthenticatedUserId();
@@ -158,14 +167,10 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
             }
         }
 
-        if (request.getAssignedTo() != null) {
-            assignment.setAssignedTo(request.getAssignedTo());
-        }
-        if (request.getDepartment() != null) {
-            assignment.setDepartment(request.getDepartment());
-        }
-        if (request.getJobTitle() != null) {
-            assignment.setJobTitle(request.getJobTitle());
+        if (request.getEmployeeName() != null) {
+            Employee employee = employeeRepository.findByUsername(request.getEmployeeName())
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+            assignment.setEmployee(employee);
         }
         if (request.getAssignedBy() != null) {
             assignment.setAssignedBy(request.getAssignedBy());
@@ -206,7 +211,7 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
         } else {
             // Already-returned assignment: check if asset fields still point to this assignee
             // and restore them from the assignment's own previousUsed / history chain.
-            String assignedTo = assignment.getAssignedTo();
+            String assignedTo = assignment.getEmployee() != null ? assignment.getEmployee().getUsername() : null;
             boolean assetChanged = false;
 
             if (assignedTo != null && assignedTo.equals(asset.getLatestUsed())) {
@@ -218,7 +223,7 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
                 String restoredPreviousUsed = assignmentRepository
                         .findFirstByAssetIdAndReturnedDateIsNotNullAndIdNotOrderByReturnedDateDesc(
                                 asset.getId(), assignmentId)
-                        .map(AssetAssignment::getAssignedTo)
+                        .map(a -> a.getEmployee() != null ? a.getEmployee().getUsername() : null)
                         .orElse(null);
                 asset.setPreviousUsed(restoredPreviousUsed);
                 assetChanged = true;
@@ -228,7 +233,7 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
                 String restoredPreviousUsed = assignmentRepository
                         .findFirstByAssetIdAndReturnedDateIsNotNullAndIdNotOrderByReturnedDateDesc(
                                 asset.getId(), assignmentId)
-                        .map(AssetAssignment::getAssignedTo)
+                        .map(a -> a.getEmployee() != null ? a.getEmployee().getUsername() : null)
                         .orElse(null);
                 asset.setPreviousUsed(restoredPreviousUsed);
                 assetChanged = true;

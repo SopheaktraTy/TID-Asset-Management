@@ -17,16 +17,9 @@ public class AssetAssignment {
     @JoinColumn(name = "asset_id", nullable = false)
     private Asset asset;
 
-    @Column(name = "assigned_to", nullable = false)
-    private String assignedTo;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "department")
-    private DepartmentEnum department;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "job_title")
-    private JobTitleEnum jobTitle;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employee_id", nullable = false)
+    private com.tid.asset_management_bridge.employee_management_module.entity.Employee employee;
 
     @Column(name = "assigned_by")
     private String assignedBy;
@@ -91,28 +84,12 @@ public class AssetAssignment {
         this.asset = asset;
     }
 
-    public String getAssignedTo() {
-        return assignedTo;
+    public com.tid.asset_management_bridge.employee_management_module.entity.Employee getEmployee() {
+        return employee;
     }
 
-    public void setAssignedTo(String assignedTo) {
-        this.assignedTo = assignedTo;
-    }
-
-    public DepartmentEnum getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(DepartmentEnum department) {
-        this.department = department;
-    }
-
-    public JobTitleEnum getJobTitle() {
-        return jobTitle;
-    }
-
-    public void setJobTitle(JobTitleEnum jobTitle) {
-        this.jobTitle = jobTitle;
+    public void setEmployee(com.tid.asset_management_bridge.employee_management_module.entity.Employee employee) {
+        this.employee = employee;
     }
 
     public String getAssignedBy() {

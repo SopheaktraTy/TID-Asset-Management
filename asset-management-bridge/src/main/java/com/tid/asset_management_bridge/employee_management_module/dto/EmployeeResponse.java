@@ -1,19 +1,15 @@
-package com.tid.asset_management_bridge.auth_module.dto;
+package com.tid.asset_management_bridge.employee_management_module.dto;
 
-import com.tid.asset_management_bridge.auth_module.entity.RoleEnum;
 import com.tid.asset_management_bridge.auth_module.entity.DepartmentEnum;
 import com.tid.asset_management_bridge.auth_module.entity.JobTitleEnum;
 import java.time.LocalDateTime;
 
-public class ProfileResponse {
+public class EmployeeResponse {
     private Long id;
     private String username;
-    private String email;
-    private String image;
-    private RoleEnum role;
     private DepartmentEnum department;
     private JobTitleEnum jobTitle;
-    private Boolean isActive;
+    private String image;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -33,30 +29,6 @@ public class ProfileResponse {
         this.username = username;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public RoleEnum getRole() {
-        return role;
-    }
-
-    public void setRole(RoleEnum role) {
-        this.role = role;
-    }
-
     public DepartmentEnum getDepartment() {
         return department;
     }
@@ -73,12 +45,12 @@ public class ProfileResponse {
         this.jobTitle = jobTitle;
     }
 
-    public Boolean getIsActive() {
-        return isActive;
+    public String getImage() {
+        return image;
     }
 
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public LocalDateTime getCreatedAt() {

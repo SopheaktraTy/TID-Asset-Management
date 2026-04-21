@@ -10,13 +10,14 @@
 -- Regenerate: https://bcrypt-generator.com → password "btc@001", rounds = 12
 -- ===========================================================
 
-INSERT INTO users (image, username, email, password_hash, department, role, created_at, updated_at, status)
+INSERT INTO users (image, username, email, password_hash, department, job_title, role, created_at, updated_at, status)
 VALUES (
     NULL,
     'btc',
     'superadmin@bakertilly.com',
     '$2a$12$uUA8C/omncQsjLtVY9tv3eF5W8vI9.RRmH6meOtcx1v1KzqFfQsWi',  -- btc@001
-    'TECHNOLOGY_INNOVATION_DEVELOPMENT',                                 
+    'TECHNOLOGY_INNOVATION_DEVELOPMENT',
+    'EXECUTIVE',                                 
     'SUPER_ADMIN',
     NOW(),
     NOW(),

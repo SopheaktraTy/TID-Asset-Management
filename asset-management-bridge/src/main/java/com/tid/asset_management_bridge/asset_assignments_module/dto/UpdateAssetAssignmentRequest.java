@@ -1,42 +1,21 @@
 package com.tid.asset_management_bridge.asset_assignments_module.dto;
 
-import com.tid.asset_management_bridge.asset_assignments_module.entity.DepartmentEnum;
-import com.tid.asset_management_bridge.asset_assignments_module.entity.JobTitleEnum;
-
 import java.time.LocalDate;
 
 public class UpdateAssetAssignmentRequest {
 
-    private String assignedTo;
-    private DepartmentEnum department;
-    private JobTitleEnum jobTitle;
+    private String employeeName;
     private String assignedBy;
     private LocalDate assignedDate;
     private LocalDate returnedDate;
     private String returnCondition;
 
-    public String getAssignedTo() {
-        return assignedTo;
+    public String getEmployeeName() {
+        return employeeName;
     }
 
-    public void setAssignedTo(String assignedTo) {
-        this.assignedTo = assignedTo;
-    }
-
-    public DepartmentEnum getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(DepartmentEnum department) {
-        this.department = department;
-    }
-
-    public JobTitleEnum getJobTitle() {
-        return jobTitle;
-    }
-
-    public void setJobTitle(JobTitleEnum jobTitle) {
-        this.jobTitle = jobTitle;
+    public void setEmployeeName(String employeeName) {
+        this.employeeName = employeeName;
     }
 
     public String getAssignedBy() {
@@ -46,7 +25,6 @@ public class UpdateAssetAssignmentRequest {
     public void setAssignedBy(String assignedBy) {
         this.assignedBy = assignedBy;
     }
-
 
     public LocalDate getAssignedDate() {
         return assignedDate;

@@ -187,6 +187,7 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(request.getEmail());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setDepartment(request.getDepartment());
+        user.setJobTitle(request.getJobTitle());
         user.setRole(com.tid.asset_management_bridge.auth_module.entity.RoleEnum.ADMIN);
         // New users need approval from SUPER_ADMIN, so default status is INACTIVE
         user.setStatus(com.tid.asset_management_bridge.auth_module.entity.UserStatusEnum.INACTIVE);
@@ -214,7 +215,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public ProfileResponse updateProfile(@NonNull Long userId, String username, String department, org.springframework.web.multipart.MultipartFile imageFile, boolean removeImage, String currentPassword, String newPassword) {
+    public ProfileResponse updateProfile(@NonNull Long userId, String username, String department, String jobTitle, org.springframework.web.multipart.MultipartFile imageFile, boolean removeImage, String currentPassword, String newPassword) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -227,6 +228,14 @@ public class AuthServiceImpl implements AuthService {
         if (department != null && !department.isBlank()) {
             try {
                 user.setDepartment(com.tid.asset_management_bridge.auth_module.entity.DepartmentEnum.valueOf(department));
+            } catch (IllegalArgumentException e) {
+                // Keep old value or log error if invalid
+            }
+        }
+        
+        if (jobTitle != null && !jobTitle.isBlank()) {
+            try {
+                user.setJobTitle(com.tid.asset_management_bridge.auth_module.entity.JobTitleEnum.valueOf(jobTitle));
             } catch (IllegalArgumentException e) {
                 // Keep old value or log error if invalid
             }

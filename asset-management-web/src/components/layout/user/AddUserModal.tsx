@@ -27,6 +27,28 @@ import { useTheme } from "../../../hooks/useTheme";
 import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Growth Symbol Charcoal.png";
 import logoWhite from "../../../assets/Logo_Bakertilly/Baker Tilly Growth Symbol White.png";
 
+const JOB_TITLE_OPTIONS = [
+  { label: "— None —", value: "" },
+  { label: "Assistant Manager", value: "ASSISTANT_MANAGER" },
+  { label: "Associate", value: "ASSOCIATE" },
+  { label: "Associate Director", value: "ASSOCIATE_DIRECTOR" },
+  { label: "Consultant", value: "CONSULTANT" },
+  { label: "Director", value: "DIRECTOR" },
+  { label: "Executive", value: "EXECUTIVE" },
+  { label: "Executive Assistant", value: "EXECUTIVE_ASSISTANT" },
+  { label: "Intern", value: "INTERN" },
+  { label: "Manager", value: "MANAGER" },
+  { label: "Personal Assistant to Managing Partner", value: "PERSONAL_ASSISTANT_TO_MANAGING_PARTNER" },
+  { label: "Receptionist", value: "RECEPTIONIST" },
+  { label: "Senior Admin Executive", value: "SENIOR_ADMIN_EXECUTIVE" },
+  { label: "Senior Associate", value: "SENIOR_ASSOCIATE" },
+  { label: "Senior Consultant", value: "SENIOR_CONSULTANT" },
+  { label: "Senior Executive", value: "SENIOR_EXECUTIVE" },
+  { label: "Senior IT Executive", value: "SENIOR_IT_EXECUTIVE" },
+  { label: "Senior Manager", value: "SENIOR_MANAGER" },
+  { label: "Supervisor", value: "SUPERVISOR" },
+];
+
 
 const MODULE_INFO = [
   { id: "ASSET", label: "Asset Management", description: "Allow users to view, create, edit and delete assets." },
@@ -71,6 +93,7 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
       email: "",
       password: "",
       role: "ADMIN",
+      jobTitle: "",
       department: "",
       permissions: {},
     },
@@ -182,34 +205,54 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Department</label>
-                <Controller
-                  name="department"
-                  control={control}
-                  render={({ field }) => (
-                    <DropdownReverseList
-                      options={[
-                        { label: "— None —", value: "" },
-                        { label: "Office Admin", value: "OFFICE_ADMIN" },
-                        { label: "Tax & Accounting Advisory", value: "TAX_ACCOUNTING_ADVISORY" },
-                        { label: "Legal & Corporate Advisory", value: "LEGAL_CORPORATE_ADVISORY" },
-                        { label: "Audit & Assurance", value: "AUDIT_ASSURANCE" },
-                        { label: "Practice Development & Management", value: "PRACTICE_DEVELOPMENT_MANAGEMENT" },
-                        { label: "Client & Operation Management", value: "CLIENT_OPERATION_MANAGEMENT" },
-                        { label: "Finance & Human Resource", value: "FINANCE_HUMAN_RESOURCE" },
-                        { label: "Technology Innovation and Development", value: "TECHNOLOGY_INNOVATION_DEVELOPMENT" },
-                      ]}
-                      value={field.value ?? ""}
-                      onChange={field.onChange}
-                      className="w-full"
-                      triggerClassName="bg-[var(--bg)]"
-                      panelClassName="bg-[var(--bg)]"
-                    />
-                  )}
-                />
-                {errors.department && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.department.message}</p>}
-                {errors.department && <p className="mt-1 text-sm text-red-500 ml-1">{errors.department.message}</p>}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Department</label>
+                  <Controller
+                    name="department"
+                    control={control}
+                    render={({ field }) => (
+                      <DropdownReverseList
+                        options={[
+                          { label: "— None —", value: "" },
+                          { label: "Office Admin", value: "OFFICE_ADMIN" },
+                          { label: "Tax & Accounting Advisory", value: "TAX_ACCOUNTING_ADVISORY" },
+                          { label: "Legal & Corporate Advisory", value: "LEGAL_CORPORATE_ADVISORY" },
+                          { label: "Audit & Assurance", value: "AUDIT_ASSURANCE" },
+                          { label: "Practice Development & Management", value: "PRACTICE_DEVELOPMENT_MANAGEMENT" },
+                          { label: "Client & Operation Management", value: "CLIENT_OPERATION_MANAGEMENT" },
+                          { label: "Finance & Human Resource", value: "FINANCE_HUMAN_RESOURCE" },
+                          { label: "Technology Innovation and Development", value: "TECHNOLOGY_INNOVATION_DEVELOPMENT" },
+                        ]}
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                        className="w-full"
+                        triggerClassName="bg-[var(--bg)]"
+                        panelClassName="bg-[var(--bg)]"
+                      />
+                    )}
+                  />
+                  {errors.department && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.department.message}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Job Title</label>
+                  <Controller
+                    name="jobTitle"
+                    control={control}
+                    render={({ field }) => (
+                      <DropdownReverseList
+                        options={JOB_TITLE_OPTIONS}
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                        className="w-full"
+                        triggerClassName="bg-[var(--bg)]"
+                        panelClassName="bg-[var(--bg)]"
+                      />
+                    )}
+                  />
+                  {errors.jobTitle && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.jobTitle.message}</p>}
+                </div>
               </div>
             </div>
           </div>

@@ -24,6 +24,27 @@ const DEPARTMENTS: DropdownOption[] = [
   { value: "TECHNOLOGY_INNOVATION_DEVELOPMENT", label: "Technology Innovation and Development" },
 ];
 
+const JOB_TITLE_OPTIONS: DropdownOption[] = [
+  { label: "Assistant Manager", value: "ASSISTANT_MANAGER" },
+  { label: "Associate", value: "ASSOCIATE" },
+  { label: "Associate Director", value: "ASSOCIATE_DIRECTOR" },
+  { label: "Consultant", value: "CONSULTANT" },
+  { label: "Director", value: "DIRECTOR" },
+  { label: "Executive", value: "EXECUTIVE" },
+  { label: "Executive Assistant", value: "EXECUTIVE_ASSISTANT" },
+  { label: "Intern", value: "INTERN" },
+  { label: "Manager", value: "MANAGER" },
+  { label: "Personal Assistant to Managing Partner", value: "PERSONAL_ASSISTANT_TO_MANAGING_PARTNER" },
+  { label: "Receptionist", value: "RECEPTIONIST" },
+  { label: "Senior Admin Executive", value: "SENIOR_ADMIN_EXECUTIVE" },
+  { label: "Senior Associate", value: "SENIOR_ASSOCIATE" },
+  { label: "Senior Consultant", value: "SENIOR_CONSULTANT" },
+  { label: "Senior Executive", value: "SENIOR_EXECUTIVE" },
+  { label: "Senior IT Executive", value: "SENIOR_IT_EXECUTIVE" },
+  { label: "Senior Manager", value: "SENIOR_MANAGER" },
+  { label: "Supervisor", value: "SUPERVISOR" },
+];
+
 interface ProfileWithViewAndEditModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -38,6 +59,8 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
     setEditedName,
     editedDept,
     setEditedDept,
+    editedJobTitle,
+    setEditedJobTitle,
     isEditing,
     setIsEditing,
     tempImage,
@@ -84,10 +107,12 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
       if (isEditing) {
         const inNameRow = nameRowRef.current && nameRowRef.current.contains(target);
         const inDeptRow = deptRowRef.current && deptRowRef.current.contains(target);
+        const inJobRow = document.getElementById('job-title-row')?.contains(target);
 
-        if (!inNameRow && !inDeptRow) {
+        if (!inNameRow && !inDeptRow && !inJobRow) {
           setEditedName(user.username);
           setEditedDept((user as any).department || "");
+          if (setEditedJobTitle) setEditedJobTitle((user as any).jobTitle || "");
           setIsEditing(false);
         }
       }
@@ -241,6 +266,41 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
                       onClick={() => setIsEditing(true)}
                     >
                       {DEPARTMENTS.find(d => d.value === (user as any).department)?.label || (user as any).department || "Not specified"}
+                    </span>
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="p-1.5 opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-[var(--color-growth-green)] transition-all"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Job Title Row */}
+            <div id="job-title-row" className="py-1.5 grid grid-cols-[120px_1fr] items-center group">
+              <label className="text-xs font-bold text-[var(--text-main)]">Job Title</label>
+              <div className="flex items-center justify-between gap-4 min-h-[36px]">
+                {isEditing ? (
+                  <div className="w-full">
+                    <DropdownReverseList
+                      options={JOB_TITLE_OPTIONS}
+                      value={editedJobTitle || ""}
+                      onChange={(val) => setEditedJobTitle && setEditedJobTitle(val)}
+                      placeholder="Select job title..."
+                      className="w-full font-semibold"
+                      panelClassName="bg-[var(--bg)]"
+                      triggerClassName="border-[var(--color-growth-green)]/50 focus:border-[var(--color-growth-green)]"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between w-full">
+                    <span
+                      className="text-[11px] font-medium text-[var(--text-main)] cursor-pointer hover:text-[var(--color-growth-green)] transition-colors"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      {JOB_TITLE_OPTIONS.find(j => j.value === (user as any).jobTitle)?.label || (user as any).jobTitle || "Not specified"}
                     </span>
                     <button
                       onClick={() => setIsEditing(true)}
