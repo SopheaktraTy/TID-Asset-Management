@@ -1,4 +1,3 @@
-import { useRef, useState, useCallback } from "react";
 import { Loader2, Tag, Cpu, ClipboardList, MonitorSmartphone, ImagePlus, X, UploadCloud } from "lucide-react";
 import { Controller } from "react-hook-form";
 
@@ -26,7 +25,7 @@ import type { CreateAssetFormValues, AssetDto } from "../../../types/asset.types
 import { createAssetSchema } from "../../../types/asset.types";
 import { createAssetApi } from "../../../services/asset.service";
 import { useTheme } from "../../../hooks/useTheme";
-import { optimizeImage } from "../../../utils/image";
+import { useImageUpload } from "../../../hooks/useImageUpload";
 
 
 // Baker Tilly logo assets
@@ -54,53 +53,6 @@ interface AddAssetModalProps {
 export default function AddAssetModal({ isOpen, onClose, onSuccess }: AddAssetModalProps) {
   const { theme } = useTheme();
 
-  // ── Image state ──────────────────────────────────────────────────────────────
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [pendingCropImage, setPendingCropImage] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleImageFile = (file: File) => {
-    if (!file.type.startsWith("image/")) return;
-    setPendingCropImage(URL.createObjectURL(file));
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  const handleCropComplete = useCallback((croppedBlob: Blob) => {
-    const localUrl = URL.createObjectURL(croppedBlob);
-    if (imagePreview) URL.revokeObjectURL(imagePreview);
-    setImageFile(croppedBlob as File);
-    setImagePreview(localUrl);
-    setPendingCropImage(null);
-  }, [imagePreview]);
-
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleImageFile(file);
-  };
-
-  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) handleImageFile(file);
-  }, []);
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => setIsDragging(false);
-
-  const clearImage = () => {
-    if (imagePreview) URL.revokeObjectURL(imagePreview);
-    setImageFile(null);
-    setImagePreview(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-  // ─────────────────────────────────────────────────────────────────────────────
 
   const {
     register,
@@ -134,25 +86,28 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: AddAssetMo
       condition: "",
       issueDescription: "",
     },
-    onSubmit: async (data) => {
-      let finalImage: File | Blob | null = imageFile;
-      if (imageFile) {
-        try {
-          // Optimize to 1024px max, 0.9 quality
-          finalImage = await optimizeImage(imageFile, 1024, 1024, 0.9);
-        } catch (err) {
-          console.error("Image optimization failed, uploading original:", err);
-        }
-      }
-      return createAssetApi(data, finalImage as File);
-    },
+    onSubmit: (data) => createAssetApi(data, selectedFile as File),
     onSuccess,
     onClose,
     successMessage: "Asset created successfully!",
   });
 
+  const {
+    tempImage: imagePreview,
+    selectedFile,
+    pendingCropImage,
+    setPendingCropImage,
+    fileInputRef,
+    handleImageUpload,
+    handleCropComplete,
+    handleRemoveImage,
+    resetImage,
+    isDragging,
+    dragProps,
+  } = useImageUpload({ aspect: 4 / 3 });
+
   const handleClose = () => {
-    clearImage();
+    resetImage();
     baseHandleClose();
   };
 
@@ -500,7 +455,7 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: AddAssetMo
                     </button>
                     <button
                       type="button"
-                      onClick={clearImage}
+                      onClick={handleRemoveImage}
                       className="flex items-center gap-1.5 px-4 py-2 bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-300 text-xs font-semibold rounded-full hover:bg-red-500/30 transition-all"
                     >
                       <X size={14} />
@@ -509,15 +464,15 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: AddAssetMo
                   </div>
                   {/* File name badge */}
                   <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/60 to-transparent">
-                    <p className="text-white text-[10px] font-medium truncate">{imageFile?.name}</p>
+                    <p className="text-white text-[10px] font-medium truncate">
+                      {selectedFile instanceof File ? selectedFile.name : "Optimized Selection"}
+                    </p>
                   </div>
                 </div>
               ) : (
                 /* ── Drop zone ── */
                 <div
-                  onDrop={handleDrop}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
+                  {...dragProps}
                   onClick={() => fileInputRef.current?.click()}
                   className={`
                     relative flex flex-col items-center justify-center gap-3 rounded-xl
@@ -555,13 +510,13 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: AddAssetMo
               )}
 
               {/* Hidden file input */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/jpg,image/png,image/jp2"
-                className="hidden"
-                onChange={handleFileInput}
-              />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/jp2"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
             </div>
           </div>
 

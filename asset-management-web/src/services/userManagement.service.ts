@@ -10,6 +10,25 @@ import type {
 
 const BASE = "/api/users";
 
+/** Build a FormData payload for the "JSON + File" pattern. */
+function buildFormData(data: Record<string, unknown>, imageFile?: File | Blob | null): FormData {
+  const fd = new FormData();
+
+  // Create a JSON Blob for the user data part
+  const jsonBlob = new Blob([JSON.stringify(data)], { type: "application/json" });
+  fd.append("user", jsonBlob);
+
+  if (imageFile) {
+    if (!(imageFile instanceof File)) {
+      fd.append("imageFile", imageFile, "profile-image.jpg");
+    } else {
+      fd.append("imageFile", imageFile);
+    }
+  }
+
+  return fd;
+}
+
 /** Deduplicate permission arrays from the backend response.
  *  Existing bad data in the DB (duplicates) is cleaned before entering form state,
  *  preventing the form from re-submitting stale duplicates on the next save. */
@@ -83,12 +102,13 @@ export const getUserByIdApi = async (id: number): Promise<UserDto> => {
   return response.data.data;
 };
 
-export const createUserApi = async (data: CreateUserFormValues): Promise<UserDto> => {
-  const response = await api.post<ApiResponse<UserDto>>(BASE, data);
+export const createUserApi = async (data: CreateUserFormValues, imageFile?: File | Blob | null): Promise<UserDto> => {
+  const fd = buildFormData(data as any, imageFile);
+  const response = await api.post<ApiResponse<UserDto>>(BASE, fd);
   return response.data.data;
 };
 
-export const updateUserApi = async (id: number, data: EditUserFormValues): Promise<UserDto> => {
+export const updateUserApi = async (id: number, data: EditUserFormValues, imageFile?: File | Blob | null, removeImage?: boolean): Promise<UserDto> => {
   const { status, password, permissions, department, ...rest } = data;
   const payload: Record<string, unknown> = {
     ...rest,
@@ -102,21 +122,22 @@ export const updateUserApi = async (id: number, data: EditUserFormValues): Promi
   if (department && department.trim() !== "") {
     payload.department = department;
   }
-  // Always send permissions so the backend can apply the exact state the user chose.
-  // An empty {} means "clear all permissions". Filter undefined/non-array values
-  // and deduplicate each list before sending.
+  
   const cleanPerms = Object.fromEntries(
     Object.entries(permissions ?? {})
       .filter(([, v]) => Array.isArray(v))
       .map(([k, v]) => [k, [...new Set(v as string[])].filter(Boolean)])
       .filter(([, v]) => (v as string[]).length > 0)
   ) as Record<string, string[]>;
-  // Always include the key so the backend knows permissions were intentionally submitted
+  
   payload.permissions = cleanPerms;
-  const response = await api.patch<ApiResponse<any>>(`${BASE}/${id}`, payload);
+
+  const fd = buildFormData(payload, imageFile);
+  if (removeImage) fd.append("removeImage", String(removeImage));
+
+  const response = await api.patch<ApiResponse<any>>(`${BASE}/${id}`, fd);
   const raw = response.data.data;
-  // Normalize response: dedupe permissions in case old
-  // duplicate rows still exist in the DB from earlier saves.
+  
   return {
     ...raw,
     permissions: dedupePermissions(raw.permissions),

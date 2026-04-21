@@ -8,6 +8,7 @@ import {
   Moon,
   HardDrive,
   Users,
+  Contact,
 } from "lucide-react";
 import { useTheme } from "../../hooks/useTheme";
 import { ProfileWithViewAndEditModal } from "./user/ProfileWithViewAndEditModal";
@@ -71,6 +72,20 @@ export default function Header() {
           >
             <Users size={14} />
             <span>Users</span>
+          </NavLink>
+
+          <NavLink
+            to="/employee-management"
+            className={({ isActive }) =>
+              `flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                isActive
+                  ? "bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)]"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]"
+              }`
+            }
+          >
+            <Contact size={14} />
+            <span>Employees</span>
           </NavLink>
         </nav>
 

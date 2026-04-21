@@ -73,16 +73,16 @@ export default function ResetPasswordModal({
     <Modal isOpen={isOpen} onClose={handleClose} maxWidth="max-w-[400px]">
       <div className="flex flex-col gap-2">
         {/* Header - Logo & Title */}
-        <div className="w-full flex flex-col items-center mb-6 pt-2">
+        <div className="w-full flex items-center justify-center mb-6 pt-2">
           <img
             src={theme === "dark" ? logoWhite : logoCharcoal}
             alt="Logo"
-            className="h-10 w-auto object-contain mb-6"
+            className="h-14 w-auto object-contain"
           />
-          <div className="text-center">
-            <h3 className="text-xl font-black tracking-tighter text-[var(--text-main)] leading-none text-center">Reset Password</h3>
-            <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mt-2 text-center opacity-70">
-              Security Protocol
+          <div className="flex flex-col text-left">
+            <h3 className="text-xl mt-2 font-bold tracking-tight text-[var(--text-main)] leading-none">Reset Password</h3>
+            <p className="text-[13px] text-[var(--text-muted)] opacity-80 lowercase font-medium">
+              security protocol
             </p>
           </div>
         </div>
@@ -156,12 +156,12 @@ export default function ResetPasswordModal({
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2 border-none mt-4">
+            <div className="flex items-center justify-end gap-3 pt-2 mt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleClose}
-                className="flex-1 max-w-[120px] h-10 border-[var(--border-color)]/30 text-[var(--text-main)] hover:bg-[var(--surface-hover)] rounded-full text-sm font-bold"
+                className="bg-transparent border-[var(--border-color)] text-[var(--text-main)] hover:bg-[var(--surface-hover)] rounded-full px-8 h-10 text-sm font-bold transition-all border-opacity-30"
               >
                 Cancel
               </Button>
@@ -169,7 +169,7 @@ export default function ResetPasswordModal({
                 type="submit"
                 variant="primary"
                 disabled={loading}
-                className="flex-1 min-w-[160px] h-10 bg-orange-500 text-white border-0 shadow-lg shadow-orange-500/20 rounded-full transform active:scale-95 transition-all flex items-center justify-center gap-2 text-sm font-bold"
+                className="w-auto min-w-[160px] h-10 gap-2 px-8 py-2 text-sm font-bold bg-orange-500 text-white border-0 transition-all rounded-full shadow-[0_2px_8px_rgba(249,115,22,0.2)] hover:shadow-[0_4px_14px_rgba(249,115,22,0.3)] hover:brightness-110 transform active:scale-95 flex items-center justify-center"
               >
                 {loading ? <Loader2 size={16} className="animate-spin" /> : "Reset Password"}
               </Button>

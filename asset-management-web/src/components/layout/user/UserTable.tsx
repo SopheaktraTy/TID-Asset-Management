@@ -109,7 +109,7 @@ export default function UserTable({
       header: "Job Title",
       sortable: true,
       cell: (user) => (
-        <span className="text-[var(--text-main)] italic text-xs">{toPascalCase(user?.jobTitle)}</span>
+        <span className="text-[var(--text-main)] text-xs">{toPascalCase(user?.jobTitle)}</span>
       ),
     },
     {

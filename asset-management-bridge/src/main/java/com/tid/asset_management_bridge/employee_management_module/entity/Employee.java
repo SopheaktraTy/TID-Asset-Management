@@ -24,7 +24,7 @@ public class Employee {
     @Column(name = "job_title")
     private JobTitleEnum jobTitle;
 
-    @Column(name = "image")
+    @Column(name = "image", columnDefinition = "TEXT")
     private String image;
 
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { useAuthStore } from "../store/authStore";
 import { updateProfileApi } from "../services/user.service";
-import { revokeLocalPreviewUrl, optimizeImage } from "../utils/image";
+import { useImageUpload } from "./useImageUpload";
 
 interface UseProfileUpdateOptions {
   onClose: () => void;
@@ -15,18 +15,27 @@ export function useProfileUpdate({ onClose }: UseProfileUpdateOptions) {
   const [editedJobTitle, setEditedJobTitle] = useState("");
   const [isEditing, setIsEditing] = useState(false);
 
-  const [tempImage, setTempImage] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | Blob | null>(null);
-  const [isImageDeleted, setIsImageDeleted] = useState(false);
-  const [pendingCropImage, setPendingCropImage] = useState<string | null>(null);
-
   const [isUpdating, setIsUpdating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const {
+    tempImage,
+    selectedFile,
+    isImageDeleted,
+    pendingCropImage,
+    setPendingCropImage,
+    fileInputRef,
+    handleImageUpload,
+    handleCropComplete,
+    handleRemoveImage,
+    resetImage,
+  } = useImageUpload({
+    initialImage: user?.image || null,
+  });
+
   const nameRowRef = useRef<HTMLDivElement>(null);
   const deptRowRef = useRef<HTMLDivElement>(null);
   const footerRef = useRef<HTMLDivElement>(null);
@@ -36,41 +45,15 @@ export function useProfileUpdate({ onClose }: UseProfileUpdateOptions) {
       setEditedName(user.username);
       setEditedDept((user as any).department || "");
       setEditedJobTitle((user as any).jobTitle || "");
-      setTempImage(user.image || null);
-      setSelectedFile(null);
-      setIsImageDeleted(false);
+      resetImage(user.image || null);
       setIsEditing(false);
       setErrorMsg(null);
       setSuccessMsg(null);
       setCurrentPassword("");
       setNewPassword("");
     }
-  }, [user]);
+  }, [user, resetImage]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (!file.type.startsWith("image/")) return;
-      setPendingCropImage(URL.createObjectURL(file));
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  };
-
-  const handleCropComplete = useCallback((croppedBlob: Blob) => {
-    const localUrl = URL.createObjectURL(croppedBlob);
-    revokeLocalPreviewUrl(tempImage);
-    setTempImage(localUrl);
-    setSelectedFile(croppedBlob);
-    setIsImageDeleted(false);
-    setPendingCropImage(null);
-  }, [tempImage]);
-
-  const handleRemoveImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setTempImage(null);
-    setSelectedFile(null);
-    setIsImageDeleted(true);
-  };
 
   const handleUpdateProfile = async () => {
     if (!user || !token) return;
@@ -90,8 +73,7 @@ export function useProfileUpdate({ onClose }: UseProfileUpdateOptions) {
       }
 
       if (selectedFile) {
-        const optimizedBlob = await optimizeImage(selectedFile, 800, 800, 0.8);
-        formData.append("image", optimizedBlob, "profile.jpg");
+        formData.append("image", selectedFile, "profile.jpg");
       }
 
       const data = await updateProfileApi(formData);

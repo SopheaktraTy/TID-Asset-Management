@@ -107,7 +107,7 @@ export default function UserToolbar({
         className="!w-auto gap-1.5 px-4 py-2 text-xs"
       >
         <Plus size={15} />
-        Add user
+        Add User
       </Button>
     </div>
   );

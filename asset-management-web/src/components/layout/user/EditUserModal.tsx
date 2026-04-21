@@ -14,6 +14,7 @@ import { DropdownList } from "../../ui/DropdownList";
 import { DropdownReverseList } from "../../ui/DropdownReverseList";
 import { ToggleSwitch } from "../../ui/ToggleSwitch";
 import { Controller } from "react-hook-form";
+import { Camera, X } from "lucide-react";
 
 import { useUserForm } from "../../../hooks/useUserForm";
 import type { EditUserFormValues, UserDto } from "../../../types/user.types";
@@ -21,6 +22,8 @@ import { editUserSchema } from "../../../types/user.types";
 import { updateUserApi } from "../../../services/userManagement.service";
 import { useTheme } from "../../../hooks/useTheme";
 import { getSafeImageUrl } from "../../../utils/image";
+import { useImageUpload } from "../../../hooks/useImageUpload";
+import { ImageCropper } from "../../ui/ImageCropper";
 
 // Baker Tilly logo assets
 import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Growth Symbol Charcoal.png";
@@ -61,6 +64,7 @@ const MODULE_INFO = [
   { id: "ASSIGNMENT", label: "Asset Assignment", description: "Control how assets are assigned and tracked." },
   { id: "ISSUE", label: "Issue Tracking", description: "Manage asset maintenance and issue reports." },
   { id: "PROCUREMENT", label: "Procurement", description: "Handle asset purchase requests and vendor info." },
+  { id: "EMPLOYEE", label: "Employee Directory", description: "Manage team member profiles and directory data." },
 ] as const;
 
 const PERMISSIONS_LIST = [
@@ -84,7 +88,7 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
     errorMsg,
     successMsg,
     handleClose,
-    handleSubmit,
+    handleSubmit: formHandleSubmit,
   } = useUserForm<EditUserFormValues>({
     schema: editUserSchema,
     defaultValues: {
@@ -96,11 +100,32 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
       jobTitle: "",
       permissions: {},
     },
-    onSubmit: (data) => updateUserApi(user!.id, data),
+    onSubmit: (data) => updateUserApi(user!.id, data, selectedFile, isImageDeleted),
     onSuccess: onUpdated,
     onClose,
     successMessage: "User updated successfully!",
   });
+
+  const {
+    tempImage,
+    selectedFile,
+    isImageDeleted,
+    pendingCropImage,
+    setPendingCropImage,
+    fileInputRef,
+    handleImageUpload,
+    handleCropComplete,
+    handleRemoveImage,
+    resetImage,
+    isDragging,
+    dragProps,
+  } = useImageUpload({
+    initialImage: user?.image || null,
+  });
+
+  const handleSubmit = (e?: React.BaseSyntheticEvent) => {
+    formHandleSubmit(e);
+  };
 
   const currentRole = watch("role");
 
@@ -117,8 +142,9 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
         jobTitle: user.jobTitle || "",
         permissions: user.permissions || {},
       });
+      resetImage(user.image || null);
     }
-  }, [user, isOpen, reset]);
+  }, [user, isOpen, reset, resetImage]);
 
   if (!isOpen || !user) return null;
 
@@ -126,7 +152,7 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      maxWidth="max-w-[500px]"
+      maxWidth="max-w-[520px]"
     >
       <div className="flex flex-col gap-2">
 
@@ -148,12 +174,35 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
         {/* Horizontal Info Card with Dashed Border - User Summary */}
         <div className="flex items-center gap-5 px-4 py-4 border border-dashed border-[var(--border-color)] dark:border-[var(--text-muted)]/30 rounded-xl bg-[var(--surface-hover)]/30 shadow-sm dark:shadow-none mb-1 transition-all">
           <div className="flex shrink-0">
-            <div className="w-14 h-14 rounded-full border border-[var(--border-color)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-main)] font-bold text-lg overflow-hidden ring-4 ring-[var(--surface-hover)]/50">
-              {user.image ? (
-                <img src={getSafeImageUrl(user.image)} alt={user.username} className="w-full h-full object-cover" />
-              ) : (
-                user.username?.slice(0, 2).toUpperCase()
+             <div className="relative group">
+               <div
+                {...dragProps}
+                onClick={() => fileInputRef.current?.click()}
+                className={`w-16 h-16 rounded-full border border-[var(--border-color)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-main)] font-bold text-lg overflow-hidden ring-4 cursor-pointer transition-all ${
+                  isDragging 
+                    ? "ring-[var(--color-growth-green)] scale-110 shadow-lg" 
+                    : "ring-[var(--surface-hover)]/50"
+                }`}
+              >
+                {tempImage ? (
+                  <img src={getSafeImageUrl(tempImage)} alt={user.username} className="w-full h-full object-cover" />
+                ) : (
+                  user.username?.slice(0, 2).toUpperCase()
+                )}
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                   <Camera size={16} className="text-white" />
+                </div>
+              </div>
+              {tempImage && (
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="absolute -top-1 -left-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md hover:bg-red-600 transition-colors z-10"
+                >
+                  <X size={12} />
+                </button>
               )}
+              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
             </div>
           </div>
 
@@ -351,24 +400,30 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
                               {isEnabled && (
                                 <div className="flex flex-col gap-1 pb-4 pr-2 pl-6 animate-in slide-in-from-top-2 fade-in duration-300">
                                   <div className="flex flex-col">
-                                    {PERMISSIONS_LIST.map((perm) => (
-                                      <ToggleSwitch
-                                        key={perm.id}
-                                        label={perm.label}
-                                        description={perm.description}
-                                        size="sm"
-                                        reverse={true}
-                                        checked={(field.value || []).includes(perm.id as any)}
-                                        onChange={(checked) => {
-                                          const current = field.value || [];
-                                          const next = checked
-                                            ? [...current, perm.id]
-                                            : current.filter((p: string) => p !== perm.id);
-                                          field.onChange(next);
-                                        }}
-                                        className="!py-2 border-b border-[var(--border-color)]/20 last:border-0 !justify-start gap-4"
-                                      />
-                                    ))}
+                                    {PERMISSIONS_LIST.map((perm) => {
+                                      const hasOtherPermissions = (field.value || []).some((p: string) => p !== "READ");
+                                      const isReadLocked = perm.id === "READ" && hasOtherPermissions;
+
+                                      return (
+                                        <ToggleSwitch
+                                          key={perm.id}
+                                          label={perm.label}
+                                          description={perm.description}
+                                          size="sm"
+                                          reverse={true}
+                                          checked={isReadLocked ? true : (field.value || []).includes(perm.id as any)}
+                                          disabled={isReadLocked}
+                                          onChange={(checked) => {
+                                            const current = field.value || [];
+                                            const next = checked
+                                              ? [...current, perm.id]
+                                              : current.filter((p: string) => p !== perm.id);
+                                            field.onChange(next);
+                                          }}
+                                          className="!py-2 border-b border-[var(--border-color)]/20 last:border-0 !justify-start gap-4"
+                                        />
+                                      );
+                                    })}
                                   </div>
                                 </div>
                               )}
@@ -405,6 +460,15 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
           </div>
         </form>
       </div>
+      {pendingCropImage && (
+        <ImageCropper
+          image={pendingCropImage}
+          onCropComplete={handleCropComplete}
+          onCancel={() => setPendingCropImage(null)}
+          circular={true}
+          aspect={1}
+        />
+      )}
     </Modal>
   );
 }

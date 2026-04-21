@@ -9,6 +9,7 @@ interface ToggleSwitchProps {
   size?: "sm" | "md";
   activeColor?: string;
   reverse?: boolean; // New: Put toggle first
+  disabled?: boolean;
 }
 
 export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
@@ -20,11 +21,20 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   size = "md",
   activeColor = "#10b981", // Bright emerald
   reverse = false,
+  disabled = false,
 }) => {
   const isSm = size === "sm";
 
   return (
-    <div className={`flex items-center gap-4 ${isSm ? "py-1" : "py-3"} ${reverse ? "flex-row-reverse justify-end" : "justify-between"} ${className}`}>
+    <div 
+      className={`
+        flex items-center gap-4 
+        ${isSm ? "py-1" : "py-3"} 
+        ${reverse ? "flex-row-reverse justify-end" : "justify-between"} 
+        ${disabled ? "opacity-50 cursor-not-allowed" : ""}
+        ${className}
+      `}
+    >
       {label && (
         <div className="flex flex-col gap-0.5 min-w-0 flex-1">
           <span className={`${isSm ? "text-[13px]" : "text-sm"} text-[var(--text-main)] font-bold truncate leading-tight`}>
@@ -41,14 +51,16 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
         type="button"
         role="switch"
         aria-checked={checked}
-        tabIndex={0}
+        tabIndex={disabled ? -1 : 0}
+        disabled={disabled}
         onClick={(e) => {
           e.stopPropagation();
-          onChange(!checked);
+          if (!disabled) onChange(!checked);
         }}
         className={`relative inline-flex shrink-0 items-center rounded-full transition-all duration-300 ease-in-out focus:outline-none ring-offset-2 ring-offset-[#111]
           ${isSm ? "h-4 w-7" : "h-5 w-9"}
           ${checked ? "" : "bg-[#424242]"}
+          ${disabled ? "cursor-not-allowed" : "cursor-pointer"}
         `}
         style={checked ? { backgroundColor: activeColor } : {}}
       >

@@ -16,12 +16,16 @@ import { DropdownList } from "../../ui/DropdownList";
 import { DropdownReverseList } from "../../ui/DropdownReverseList";
 import { ToggleSwitch } from "../../ui/ToggleSwitch";
 import { Controller } from "react-hook-form";
+import { Camera, X } from "lucide-react";
 
 import { useUserForm } from "../../../hooks/useUserForm";
 import type { CreateUserFormValues, UserDto } from "../../../types/user.types";
 import { createUserSchema } from "../../../types/user.types";
 import { createUserApi } from "../../../services/userManagement.service";
 import { useTheme } from "../../../hooks/useTheme";
+import { useImageUpload } from "../../../hooks/useImageUpload";
+import { ImageCropper } from "../../ui/ImageCropper";
+import { getSafeImageUrl } from "../../../utils/image";
 
 // Baker Tilly logo assets
 import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Growth Symbol Charcoal.png";
@@ -55,6 +59,7 @@ const MODULE_INFO = [
   { id: "ASSIGNMENT", label: "Asset Assignment", description: "Control how assets are assigned and tracked." },
   { id: "ISSUE", label: "Issue Tracking", description: "Manage asset maintenance and issue reports." },
   { id: "PROCUREMENT", label: "Procurement", description: "Handle asset purchase requests and vendor info." },
+  { id: "EMPLOYEE", label: "Employee Directory", description: "Manage team member profiles and directory data." },
 ] as const;
 
 const PERMISSIONS_LIST = [
@@ -97,11 +102,31 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
       department: "",
       permissions: {},
     },
-    onSubmit: createUserApi,
+    onSubmit: (data) => createUserApi(data, selectedFile),
     onSuccess,
     onClose,
     successMessage: "User created successfully!",
   });
+
+  const {
+    tempImage,
+    selectedFile,
+    pendingCropImage,
+    setPendingCropImage,
+    fileInputRef,
+    handleImageUpload,
+    handleCropComplete,
+    handleRemoveImage,
+    resetImage,
+    isDragging,
+    dragProps,
+  } = useImageUpload();
+
+  const handleCloseWrapped = () => {
+    resetImage();
+    handleClose();
+  };
+
 
   const currentRole = watch("role");
 
@@ -110,8 +135,8 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
   return (
     <Modal
       isOpen={isOpen}
-      onClose={handleClose}
-      maxWidth="max-w-[500px]"
+      onClose={handleCloseWrapped}
+      maxWidth="max-w-[520px]"
     >
       <div className="flex flex-col gap-2">
         {/* Header - Logo & Title */}
@@ -135,9 +160,43 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
         <form onSubmit={handleSubmit} className="space-y-3 text-left">
           {/* ── Basic Information ── */}
           <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
-            <div className="px-1 mb-3 flex items-center gap-2">
-              <Fingerprint size={16} className="text-[var(--color-growth-green)]" />
-              <h3 className="text-sm font-bold text-[var(--text-main)]">Basic Information</h3>
+            <div className="px-1 mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Fingerprint size={16} className="text-[var(--color-growth-green)]" />
+                <h3 className="text-sm font-bold text-[var(--text-main)]">Basic Information</h3>
+              </div>
+
+              {/* Avatar Selector */}
+              <div className="relative group">
+                <div
+                  {...dragProps}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`w-12 h-12 rounded-full border border-[var(--border-color)] flex items-center justify-center bg-[var(--bg)] text-[var(--text-main)] font-bold text-sm overflow-hidden ring-4 cursor-pointer transition-all ${
+                    isDragging 
+                      ? "ring-[var(--color-growth-green)] scale-110" 
+                      : "ring-[var(--surface-hover)]/30"
+                  }`}
+                >
+                  {tempImage ? (
+                    <img src={getSafeImageUrl(tempImage)} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <UserIcon size={20} className="text-[var(--text-muted)]" />
+                  )}
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Camera size={14} className="text-white" />
+                  </div>
+                </div>
+                {tempImage && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="absolute -top-0.5 -left-0.5 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md hover:bg-red-600 transition-colors z-10"
+                  >
+                    <X size={10} />
+                  </button>
+                )}
+                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
+              </div>
             </div>
             <div className="px-[10px] space-y-4">
               <div>
@@ -302,24 +361,30 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
                               {isEnabled && (
                                 <div className="flex flex-col gap-1 pb-4 pr-2 pl-6 animate-in slide-in-from-top-2 fade-in duration-300">
                                   <div className="flex flex-col">
-                                    {PERMISSIONS_LIST.map((perm) => (
-                                      <ToggleSwitch
-                                        key={perm.id}
-                                        label={perm.label}
-                                        description={perm.description}
-                                        size="sm"
-                                        reverse={true}
-                                        checked={(field.value || []).includes(perm.id as any)}
-                                        onChange={(checked) => {
-                                          const current = field.value || [];
-                                          const next = checked
-                                            ? [...current, perm.id]
-                                            : current.filter((p: string) => p !== perm.id);
-                                          field.onChange(next);
-                                        }}
-                                        className="!py-2 border-b border-[var(--border-color)]/20 last:border-0 !justify-start gap-4"
-                                      />
-                                    ))}
+                                    {PERMISSIONS_LIST.map((perm) => {
+                                      const hasOtherPermissions = (field.value || []).some((p: string) => p !== "READ");
+                                      const isReadLocked = perm.id === "READ" && hasOtherPermissions;
+                                      
+                                      return (
+                                        <ToggleSwitch
+                                          key={perm.id}
+                                          label={perm.label}
+                                          description={perm.description}
+                                          size="sm"
+                                          reverse={true}
+                                          checked={isReadLocked ? true : (field.value || []).includes(perm.id as any)}
+                                          disabled={isReadLocked}
+                                          onChange={(checked) => {
+                                            const current = field.value || [];
+                                            const next = checked
+                                              ? [...current, perm.id]
+                                              : current.filter((p: string) => p !== perm.id);
+                                            field.onChange(next);
+                                          }}
+                                          className="!py-2 border-b border-[var(--border-color)]/20 last:border-0 !justify-start gap-4"
+                                        />
+                                      );
+                                    })}
                                   </div>
                                 </div>
                               )}
@@ -357,6 +422,15 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
           </div>
         </form>
       </div>
+      {pendingCropImage && (
+        <ImageCropper
+          image={pendingCropImage}
+          onCropComplete={handleCropComplete}
+          onCancel={() => setPendingCropImage(null)}
+          circular={true}
+          aspect={1}
+        />
+      )}
     </Modal>
   );
 }

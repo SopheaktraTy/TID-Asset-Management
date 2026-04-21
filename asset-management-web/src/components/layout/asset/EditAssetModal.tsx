@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect } from "react";
 import { Loader2, Cpu, Tag, ClipboardList, Laptop, Monitor, MonitorSmartphone, MonitorPlay, ImagePlus, X, UploadCloud, HardDrive } from "lucide-react";
 import { Controller } from "react-hook-form";
 
@@ -26,7 +26,7 @@ import type { EditAssetFormValues, AssetDto } from "../../../types/asset.types";
 import { editAssetSchema } from "../../../types/asset.types";
 import { updateAssetApi } from "../../../services/asset.service";
 import { useTheme } from "../../../hooks/useTheme";
-import { getSafeImageUrl, optimizeImage } from "../../../utils/image";
+import { useImageUpload } from "../../../hooks/useImageUpload";
 
 // Baker Tilly logo assets
 import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Growth Symbol Charcoal.png";
@@ -97,70 +97,6 @@ interface EditAssetModalProps {
 export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: EditAssetModalProps) {
   const { theme } = useTheme();
 
-  // ── Image state ──────────────────────────────────────────────────────────────
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageRemoved, setImageRemoved] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [pendingCropImage, setPendingCropImage] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  /** Seed the preview from the existing asset image whenever the modal opens */
-  useEffect(() => {
-    if (isOpen && asset?.image) {
-      setImagePreview(getSafeImageUrl(asset.image));
-      setImageFile(null);
-      setImageRemoved(false);
-    } else if (!isOpen) {
-      setImageFile(null);
-      setImagePreview(null);
-      setImageRemoved(false);
-    }
-  }, [isOpen, asset]);
-
-  const handleImageFile = (file: File) => {
-    if (!file.type.startsWith("image/")) return;
-    setPendingCropImage(URL.createObjectURL(file));
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  const handleCropComplete = useCallback((croppedBlob: Blob) => {
-    const localUrl = URL.createObjectURL(croppedBlob);
-    if (imagePreview?.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
-    setImagePreview(localUrl);
-    setImageFile(croppedBlob as File);
-    setImageRemoved(false);
-    setPendingCropImage(null);
-  }, [imagePreview]);
-
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleImageFile(file);
-  };
-
-  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) handleImageFile(file);
-  }, []);
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => setIsDragging(false);
-
-  const clearImage = () => {
-    // Only revoke blob URLs (not server URLs)
-    if (imagePreview?.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
-    setImageFile(null);
-    setImagePreview(null);
-    setImageRemoved(true);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-  // ─────────────────────────────────────────────────────────────────────────────
 
   const {
     register,
@@ -195,25 +131,29 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
       condition: "",
       issueDescription: "",
     },
-    onSubmit: async (data) => {
-      let finalImage: File | Blob | null = imageFile;
-      if (imageFile) {
-        try {
-          // Optimize to 1024px max, 0.9 quality
-          finalImage = await optimizeImage(imageFile, 1024, 1024, 0.9);
-        } catch (err) {
-          console.error("Image optimization failed, uploading original:", err);
-        }
-      }
-      return updateAssetApi(asset!.id, data, finalImage as File, imageRemoved);
-    },
+    onSubmit: (data) => updateAssetApi(asset!.id, data, selectedFile as File, imageRemoved),
     onSuccess: onUpdated,
     onClose,
     successMessage: "Asset updated successfully!",
   });
 
+  const {
+    tempImage: imagePreview,
+    selectedFile,
+    isImageDeleted: imageRemoved,
+    pendingCropImage,
+    setPendingCropImage,
+    fileInputRef,
+    handleImageUpload,
+    handleCropComplete,
+    handleRemoveImage,
+    resetImage,
+    isDragging,
+    dragProps,
+  } = useImageUpload({ aspect: 4 / 3, initialImage: asset?.image });
+
   const handleClose = () => {
-    clearImage();
+    resetImage(asset?.image);
     baseHandleClose();
   };
 
@@ -241,8 +181,9 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
         condition: asset.condition ?? "",
         issueDescription: asset.issueDescription ?? "",
       });
+      resetImage(asset.image);
     }
-  }, [asset, isOpen, reset]);
+  }, [asset, isOpen, reset, resetImage]);
 
   if (!isOpen || !asset) return null;
 
@@ -668,10 +609,9 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
                         src={imagePreview}
                         alt="Asset preview"
                         className="w-full h-72 object-contain bg-[var(--surface-hover)]/10"
-                        onError={(e) => {
+                        onError={() => {
                           // If existing server image fails, fall back to drop zone
-                          (e.currentTarget as HTMLImageElement).style.display = "none";
-                          clearImage();
+                          handleRemoveImage();
                         }}
                       />
                       {/* Overlay on hover */}
@@ -686,7 +626,7 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
                         </button>
                         <button
                           type="button"
-                          onClick={clearImage}
+                          onClick={handleRemoveImage}
                           className="flex items-center gap-1.5 px-4 py-2 bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-300 text-xs font-semibold rounded-full hover:bg-red-500/30 transition-all"
                         >
                           <X size={14} />
@@ -696,16 +636,14 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
                       {/* File name / source badge */}
                       <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/60 to-transparent">
                         <p className="text-white text-[10px] font-medium truncate">
-                          {imageFile ? imageFile.name : "Current image"}
+                          {selectedFile instanceof File ? selectedFile.name : selectedFile ? "Optimized image" : "Current image"}
                         </p>
                       </div>
                     </div>
                   ) : (
                     /* ── Drop zone ── */
                     <div
-                      onDrop={handleDrop}
-                      onDragOver={handleDragOver}
-                      onDragLeave={handleDragLeave}
+                      {...dragProps}
                       onClick={() => fileInputRef.current?.click()}
                       className={`
                     relative flex flex-col items-center justify-center gap-3 rounded-xl
@@ -748,7 +686,7 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
                     type="file"
                     accept="image/jpeg,image/jpg,image/png,image/jp2"
                     className="hidden"
-                    onChange={handleFileInput}
+                    onChange={handleImageUpload}
                   />
                 </div>
               </div>

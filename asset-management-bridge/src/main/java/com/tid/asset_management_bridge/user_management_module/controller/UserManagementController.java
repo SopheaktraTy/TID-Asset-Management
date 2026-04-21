@@ -25,12 +25,13 @@ public class UserManagementController {
         this.userService = userService;
     }
 
-    @PostMapping
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PostMapping(consumes = {"multipart/form-data"})
+    @PreAuthorize("hasAnyAuthority('CREATE_USER', 'ROLE_SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<UserResponse>> createUser(
-            @Valid @RequestBody @NonNull CreateUserRequest request) {
+            @RequestPart("user") @Valid @NonNull CreateUserRequest request,
+            @RequestPart(value = "imageFile", required = false) org.springframework.web.multipart.MultipartFile imageFile) {
         return ResponseEntity.status(201)
-                .body(new ApiResponse<>(201, "User created successfully", userService.createUser(request)));
+                .body(new ApiResponse<>(201, "User created successfully", userService.createUser(request, imageFile)));
     }
 
     @GetMapping
@@ -64,17 +65,19 @@ public class UserManagementController {
 
 
 
-    @PatchMapping("/{id}")
+    @PatchMapping(value = "/{id}", consumes = {"multipart/form-data"})
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<UserResponse>> updateUser(@PathVariable @NonNull Long id,
-            @Valid @RequestBody @NonNull com.tid.asset_management_bridge.user_management_module.dto.UpdateUserRequest request) {
+            @RequestPart("user") @Valid @NonNull com.tid.asset_management_bridge.user_management_module.dto.UpdateUserRequest request,
+            @RequestParam(value = "removeImage", defaultValue = "false") boolean removeImage,
+            @RequestPart(value = "imageFile", required = false) org.springframework.web.multipart.MultipartFile imageFile) {
         Long currentUserId = getAuthenticatedUserId();
         if (currentUserId.equals(id)) {
             throw new com.tid.asset_management_bridge.common.exception.ConflictException(
                     "You cannot update your own profile through this endpoint.");
         }
 
-        UserResponse updatedUser = userService.updateUser(id, request);
+        UserResponse updatedUser = userService.updateUser(id, request, imageFile, removeImage);
         return ResponseEntity.ok(new ApiResponse<>(200, "User profile updated successfully", updatedUser));
     }
 

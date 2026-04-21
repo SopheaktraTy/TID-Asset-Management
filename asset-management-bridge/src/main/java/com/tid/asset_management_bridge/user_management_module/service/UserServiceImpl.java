@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponse createUser(@NonNull CreateUserRequest request) {
+    public UserResponse createUser(@NonNull CreateUserRequest request, org.springframework.web.multipart.MultipartFile imageFile) {
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new ConflictException("Username is already taken");
         }
@@ -60,6 +60,14 @@ public class UserServiceImpl implements UserService {
         user.setJobTitle(request.getJobTitle());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setStatus(UserStatusEnum.ACTIVE);
+
+        // Handle Image Upload
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String path = fileStorageService.storeFile(imageFile, "profiles");
+            if (path != null) {
+                user.setImage("/uploads/" + path);
+            }
+        }
 
         User savedUser = userRepository.save(user);
 
@@ -150,7 +158,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponse updateUser(@NonNull Long id,
-            @NonNull com.tid.asset_management_bridge.user_management_module.dto.UpdateUserRequest request) {
+            @NonNull com.tid.asset_management_bridge.user_management_module.dto.UpdateUserRequest request,
+            org.springframework.web.multipart.MultipartFile imageFile,
+            boolean removeImage) {
         User user = java.util.Objects.requireNonNull(userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id)));
 
@@ -183,6 +193,24 @@ public class UserServiceImpl implements UserService {
         if (request.getStatus() != null) {
             user.setStatus(request.getStatus());
         }
+
+        // Handle Image Update
+        String oldImage = user.getImage();
+        if (removeImage && oldImage != null) {
+            fileStorageService.deleteFile(oldImage);
+            user.setImage(null);
+        }
+
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String path = fileStorageService.storeFile(imageFile, "profiles");
+            if (path != null) {
+                if (oldImage != null) {
+                    fileStorageService.deleteFile(oldImage);
+                }
+                user.setImage("/uploads/" + path);
+            }
+        }
+
         // Permissions: the frontend always sends this field.
         // Empty {} = "clear all permissions". Non-empty = replace with exact set.
         // SUPER_ADMIN users have inherent all-access, so skip silently.

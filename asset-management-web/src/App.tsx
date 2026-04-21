@@ -9,6 +9,7 @@ import UserManagement from "./pages/UserManagement";
 import UserDetailsPage from "./pages/UserDetails";
 import AssetManagement from "./pages/AssetManagement";
 import AssetDetailsPage from "./pages/AssetDetails";
+import EmployeeManagement from "./pages/EmployeeManagement";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/layout/ProtectedRoute";
 import LoadingScreen from "./components/ui/LoadingScreen";
@@ -40,6 +41,7 @@ function AppRoutes() {
         <Route path="/user-detail/:id" element={<UserDetailsPage />} />
         <Route path="/assets-management" element={<AssetManagement />} />
         <Route path="/asset-detail/:id" element={<AssetDetailsPage />} />
+        <Route path="/employee-management" element={<EmployeeManagement />} />
       </Route>
 
       {/* Default route */}

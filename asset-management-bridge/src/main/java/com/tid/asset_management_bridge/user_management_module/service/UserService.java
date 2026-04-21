@@ -2,6 +2,7 @@ package com.tid.asset_management_bridge.user_management_module.service;
 
 import com.tid.asset_management_bridge.user_management_module.dto.UserResponse;
 import org.springframework.lang.NonNull;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 import com.tid.asset_management_bridge.user_management_module.dto.CreateUserRequest;
@@ -9,7 +10,7 @@ import com.tid.asset_management_bridge.user_management_module.dto.CreateUserRequ
 import com.tid.asset_management_bridge.user_management_module.dto.UpdateUserRequest;
 
 public interface UserService {
-    UserResponse createUser(@NonNull CreateUserRequest request);
+    UserResponse createUser(@NonNull CreateUserRequest request, MultipartFile imageFile);
 
     List<UserResponse> getAllUsers();
 
@@ -17,7 +18,7 @@ public interface UserService {
 
     void deleteUser(@NonNull Long id);
 
-    UserResponse updateUser(@NonNull Long id, @NonNull UpdateUserRequest request);
+    UserResponse updateUser(@NonNull Long id, @NonNull UpdateUserRequest request, MultipartFile imageFile, boolean removeImage);
 
     void forceResetPassword(@NonNull Long id, @NonNull String newPassword);
 }
