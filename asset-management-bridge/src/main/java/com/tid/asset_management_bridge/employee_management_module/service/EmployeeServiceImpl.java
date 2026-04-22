@@ -35,6 +35,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         this.fileStorageService = fileStorageService;
     }
 
+    @SuppressWarnings("null")
+    private Employee saveEmployee(Employee employee) {
+        return employeeRepository.save(employee);
+    }
+
+
     @Override
     @Transactional(readOnly = true)
     public List<EmployeeResponse> getAllEmployees() {
@@ -69,7 +75,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         // ─────────────────────────────────────────────────────────────────────────
         
         Employee employee = Objects.requireNonNull(employeeMapper.toEntity(request));
-        return employeeMapper.toResponse(Objects.requireNonNull(employeeRepository.save(employee)));
+        return employeeMapper.toResponse(Objects.requireNonNull(saveEmployee(employee)));
     }
 
     @Override
@@ -108,61 +114,16 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
         // ─────────────────────────────────────────────────────────────────────────
 
-        employeeMapper.updateEntityFromRequest(request, employee);
+        employeeMapper.partialUpdate(request, employee);
 
         // Ensure image is set to null if request.getImage() == "" and we removed it
         if (removeImage && !(imageFile != null && !imageFile.isEmpty())) {
             employee.setImage(null);
         }
 
-        return employeeMapper.toResponse(Objects.requireNonNull(employeeRepository.save(employee)));
+        return employeeMapper.toResponse(Objects.requireNonNull(saveEmployee(employee)));
     }
 
-    @Override
-    @Transactional
-    public EmployeeResponse patchEmployee(@NonNull Long id, @NonNull UpdateEmployeeRequest request, MultipartFile imageFile, boolean removeImage) {
-        Employee employee = Objects.requireNonNull(employeeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id " + id)));
-
-        // Handle optional username change
-        if (request.getUsername() != null && !request.getUsername().equals(employee.getUsername())) {
-            if (employeeRepository.findByUsername(request.getUsername()).isPresent()) {
-                throw new ConflictException("Employee with username '" + request.getUsername() + "' already exists");
-            }
-            employee.setUsername(request.getUsername());
-        }
-
-        // Capture old image path for cleanup
-        String oldImage = employee.getImage();
-
-        // 🗑️ Handle explicit removal
-        if (removeImage && oldImage != null) {
-            fileStorageService.deleteFile(oldImage);
-            employee.setImage(null);
-            request.setImage("");
-        }
-
-        // ── Replace/Upload image file ──────────────────────────────────────────
-        if (imageFile != null && !imageFile.isEmpty()) {
-            String imagePath = fileStorageService.storeFile(imageFile, EMPLOYEE_IMAGE_SUBDIR);
-            if (imagePath != null) {
-                if (oldImage != null) {
-                    fileStorageService.deleteFile(oldImage);
-                }
-                request.setImage("/uploads/" + imagePath.replace("\\", "/"));
-            }
-        }
-        // ─────────────────────────────────────────────────────────────────────────
-
-        employeeMapper.patchEntityFromRequest(request, employee);
-
-        // Ensure image is set to null if request.getImage() == "" and we removed it
-        if (removeImage && !(imageFile != null && !imageFile.isEmpty())) {
-            employee.setImage(null);
-        }
-
-        return employeeMapper.toResponse(Objects.requireNonNull(employeeRepository.save(employee)));
-    }
 
     @Override
     @Transactional

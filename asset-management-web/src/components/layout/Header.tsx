@@ -49,10 +49,9 @@ export default function Header() {
           <NavLink
             to="/assets-management"
             className={({ isActive }) =>
-              `flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                isActive
-                  ? "bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)]"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]"
+              `flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${isActive
+                ? "bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)]"
+                : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]"
               }`
             }
           >
@@ -63,10 +62,9 @@ export default function Header() {
           <NavLink
             to="/users-management"
             className={({ isActive }) =>
-              `flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                isActive
-                  ? "bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)]"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]"
+              `flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${isActive
+                ? "bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)]"
+                : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]"
               }`
             }
           >
@@ -77,10 +75,9 @@ export default function Header() {
           <NavLink
             to="/employee-management"
             className={({ isActive }) =>
-              `flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                isActive
-                  ? "bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)]"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]"
+              `flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${isActive
+                ? "bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)]"
+                : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]"
               }`
             }
           >
@@ -135,7 +132,7 @@ export default function Header() {
                     </div>
                     <div className="truncate flex flex-col justify-center">
                       <div className="flex items-center gap-2 mb-0.5">
-                        <p className="text-[13px] font-bold text-[var(--text-main)] truncate leading-none">
+                        <p className="text-xs font-bold text-[var(--text-main)] truncate leading-none">
                           {user?.username || "Guest User"}
                         </p>
                         {user?.role && (
@@ -194,9 +191,9 @@ export default function Header() {
           </div>
         </div>
       </header>
-      <ProfileWithViewAndEditModal 
-        isOpen={isProfileModalOpen} 
-        onClose={() => setIsProfileModalOpen(false)} 
+      <ProfileWithViewAndEditModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
       />
     </>
   );

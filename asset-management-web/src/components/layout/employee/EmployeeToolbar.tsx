@@ -2,6 +2,7 @@ import { Search, Plus } from "lucide-react";
 import { Button } from "../../ui/Button";
 import { ColumnGridDropdown } from "../../ui/ColumnGridDropdown";
 
+
 interface EmployeeToolbarProps {
   search: string;
   onSearchChange: (val: string) => void;
@@ -45,7 +46,7 @@ export default function EmployeeToolbar({
 
       <div className="flex-1" />
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1">
         <ColumnGridDropdown
           columns={columnOptions}
           hiddenColumns={hiddenCols}
@@ -53,16 +54,16 @@ export default function EmployeeToolbar({
           onSetHiddenColumns={onSetHiddenCols}
           panelClassName="bg-[var(--bg)]"
         />
-        
-        <Button
-          onClick={onAddClick}
-          variant="primary"
-          className="!w-auto h-auto gap-1.5 px-4 py-2 text-xs font-bold bg-[var(--color-growth-green)] text-[var(--btn-primary-text)] border-0"
-        >
-          <Plus size={15} />
-          Add Employee
-        </Button>
       </div>
+        
+      <Button
+        onClick={onAddClick}
+        variant="primary"
+        className="!w-auto h-auto gap-1.5 px-4 py-2 text-xs font-bold"
+      >
+        <Plus size={15} />
+        Add Employee
+      </Button>
     </div>
   );
 }

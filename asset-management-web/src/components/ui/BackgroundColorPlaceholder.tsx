@@ -1,14 +1,14 @@
 import * as React from "react";
 
 export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {}
+  extends React.InputHTMLAttributes<HTMLInputElement> { }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className = "", ...props }, ref) => {
     return (
       <input
         ref={ref}
-        className={`w-full px-3 py-2 bg-[var(--bg)] border border-[var(--border-color)] rounded-lg focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-2 focus:ring-[var(--color-growth-green)]/20 text-sm text-[var(--text-main)] placeholder:text-[var(--text-muted)] placeholder:text-[11px] transition-all duration-200 ${className}`}
+        className={`w-full px-3 py-2 bg-[var(--bg)] border border-[var(--border-color)] rounded-lg focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-2 focus:ring-[var(--color-growth-green)]/20 hover:border-[var(--color-growth-green)]/30 hover:ring-4 hover:ring-[var(--color-growth-green)]/5 text-sm text-[var(--text-main)] placeholder:text-[var(--text-muted)] placeholder:text-[12px] transition-all duration-200 ${className}`}
         {...props}
       />
     );

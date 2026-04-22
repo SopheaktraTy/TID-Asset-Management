@@ -179,19 +179,26 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
                     <UserIcon size={48} className="text-[var(--text-muted)]" />
                   </div>
                 )}
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[1px]">
-                  <Camera size={24} className="text-white" />
-                </div>
+                {!tempImage && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[1px]">
+                    <Camera size={24} className="text-white" />
+                  </div>
+                )}
               </div>
-              <div className="absolute bottom-1 right-1 w-8 h-8 bg-[var(--color-growth-green)] border-2 border-[var(--surface)] rounded-full flex items-center justify-center text-white shadow-md z-10 pointer-events-none">
+              <div className="absolute bottom-1 right-1 w-8 h-8 bg-[var(--color-growth-green)] border-2 border-[var(--surface)] rounded-full flex items-center justify-center text-white shadow-md z-40 pointer-events-none">
                 <Pencil size={14} />
               </div>
               {tempImage && (
                 <button
-                  onClick={handleRemoveImage}
-                  className="absolute top-1 left-1 w-7 h-7 bg-[var(--surface)] border border-[var(--border-color)] rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-red-500 shadow-sm transition-colors z-20"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveImage();
+                  }}
+                  className="absolute inset-0 bg-red-400/30 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-30 backdrop-blur-[1.5px] scale-95 group-hover:scale-100"
+                  title="Remove image"
                 >
-                  <X size={16} />
+                  <X size={15} strokeWidth={3} className="drop-shadow-lg" />
                 </button>
               )}
               <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
@@ -218,7 +225,7 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
                       value={editedName}
                       onChange={(e) => setEditedName(e.target.value)}
                       placeholder="Enter username"
-                      className="w-full bg-[var(--surface-hover)] border border-[var(--color-growth-green)]/50 rounded-lg px-3 py-1.5 text-[11px] font-semibold text-[var(--text-main)] outline-none focus:ring-2 focus:ring-[var(--color-growth-green)]/10 focus:border-[var(--color-growth-green)]/50 transition-all"
+                      className="w-full bg-[var(--surface-hover)] border border-[var(--color-growth-green)]/50 rounded-lg px-3 py-1.5 text-[11px] font-semibold text-[var(--text-main)] outline-none focus:ring-2 focus:ring-[var(--color-growth-green)]/10 focus:border-[var(--color-growth-green)]/50 hover:ring-4 hover:ring-[var(--color-growth-green)]/5 transition-all"
                     />
                     <div className="absolute right-2 p-1 text-[var(--color-growth-green)] opacity-50">
                       <Pencil size={12} />
@@ -256,7 +263,7 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
                       placeholder="Select department..."
                       className="w-full font-semibold"
                       panelClassName="bg-[var(--bg)]"
-                      triggerClassName="border-[var(--color-growth-green)]/50 focus:border-[var(--color-growth-green)]"
+                      triggerClassName="bg-[var(--surface-hover)] border-[var(--color-growth-green)]/50 focus:border-[var(--color-growth-green)]"
                     />
                   </div>
                 ) : (
@@ -291,7 +298,7 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
                       placeholder="Select job title..."
                       className="w-full font-semibold"
                       panelClassName="bg-[var(--bg)]"
-                      triggerClassName="border-[var(--color-growth-green)]/50 focus:border-[var(--color-growth-green)]"
+                      triggerClassName="bg-[var(--surface-hover)] border-[var(--color-growth-green)]/50 focus:border-[var(--color-growth-green)]"
                     />
                   </div>
                 ) : (
@@ -329,7 +336,7 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     placeholder="Enter current password"
-                    className="w-full bg-[var(--surface-hover)] border border-[var(--border-color)] rounded-lg px-3 py-1.5 pr-10 text-[11px] font-semibold text-[var(--text-main)] outline-none focus:ring-2 focus:ring-[var(--color-growth-green)]/10 focus:border-[var(--color-growth-green)]/50 transition-all placeholder:text-[var(--text-muted)] placeholder:opacity-50"
+                    className="w-full bg-[var(--surface-hover)] border border-[var(--border-color)] rounded-lg px-3 py-1.5 pr-10 text-[11px] font-semibold text-[var(--text-main)] outline-none focus:ring-2 focus:ring-[var(--color-growth-green)]/10 focus:border-[var(--color-growth-green)]/50 hover:ring-4 hover:ring-[var(--color-growth-green)]/5 transition-all placeholder:text-[var(--text-muted)] placeholder:opacity-50"
                   />
                   {currentPassword && (
                     <button
@@ -354,7 +361,7 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Enter new password"
-                    className="w-full bg-[var(--surface-hover)] border border-[var(--border-color)] rounded-lg px-3 py-1.5 pr-10 text-[11px] font-semibold text-[var(--text-main)] outline-none focus:ring-2 focus:ring-[var(--color-growth-green)]/10 focus:border-[var(--color-growth-green)]/50 transition-all placeholder:text-[var(--text-muted)] placeholder:opacity-50"
+                    className="w-full bg-[var(--surface-hover)] border border-[var(--border-color)] rounded-lg px-3 py-1.5 pr-10 text-[11px] font-semibold text-[var(--text-main)] outline-none focus:ring-2 focus:ring-[var(--color-growth-green)]/10 focus:border-[var(--color-growth-green)]/50 hover:ring-4 hover:ring-[var(--color-growth-green)]/5 transition-all placeholder:text-[var(--text-muted)] placeholder:opacity-50"
                   />
                   {newPassword && (
                     <button

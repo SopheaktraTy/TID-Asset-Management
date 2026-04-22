@@ -1,56 +1,93 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { getAllEmployeesApi, deleteEmployeeApi } from "../services/employee.service";
+import { useState, useEffect, useCallback } from "react";
+import { getEmployeesApi, deleteEmployeeApi } from "../services/employee.service";
 import type { EmployeeDto } from "../types/employee.types";
 
 export function useEmployeeManagement() {
   const [employees, setEmployees] = useState<EmployeeDto[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  // Search & Filters
+
+  // Search
   const [search, setSearch] = useState("");
-  
+
   // Pagination
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+
+  const [totalElements, setTotalElements] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   // Column Visibility
   const [hiddenCols, setHiddenCols] = useState<Set<string>>(new Set());
 
+
+  // ── Auto-hide columns based on screen width on mount ──────────────────────
+  useEffect(() => {
+    const width = window.innerWidth;
+    setHiddenCols((prev) => {
+      const next = new Set(prev);
+      if (width < 768) {
+        ["department", "jobTitle", "createdAt"].forEach((k) =>
+          next.add(k)
+        );
+      } else if (width < 1024) {
+        ["createdAt"].forEach((k) => next.add(k));
+      }
+      return next;
+    });
+  }, []);
+
   // Modals
+
   const [addOpen, setAddOpen] = useState(false);
   const [editEmployee, setEditEmployee] = useState<EmployeeDto | null>(null);
   const [deleteEmployee, setDeleteEmployee] = useState<EmployeeDto | null>(null);
 
   const fetchEmployees = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const data = await getAllEmployeesApi();
-      setEmployees(data);
+      const result = await getEmployeesApi({
+        page,
+        size: pageSize,
+        search: search || undefined,
+        sortBy,
+        sortDir,
+      });
+      setEmployees(result.content || []);
+      setTotalElements(result.totalElements || 0);
+      setTotalPages(result.totalPages || 1);
     } catch (err) {
       console.error("Failed to fetch employees", err);
+      setEmployees([]);
+      setTotalElements(0);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, pageSize, search, sortBy, sortDir]);
 
   useEffect(() => {
     fetchEmployees();
   }, [fetchEmployees]);
 
-  const filteredEmployees = useMemo(() => {
-    return employees.filter((emp) =>
-      emp.username.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [employees, search]);
+  const handleSort = (field: string, dir?: "asc" | "desc") => {
+    if (dir) {
+      setSortBy(field);
+      setSortDir(dir);
+    } else if (sortBy === field) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(field);
+      setSortDir("asc");
+    }
+    setPage(0);
+  };
 
-  // Client-side pagination for now (since backend doesn't support it yet)
-  const paginatedEmployees = useMemo(() => {
-    const start = page * pageSize;
-    return filteredEmployees.slice(start, start + pageSize);
-  }, [filteredEmployees, page, pageSize]);
-
-  const totalElements = filteredEmployees.length;
-  const totalPages = Math.ceil(totalElements / pageSize) || 1;
+  const handleSearch = (val: string) => {
+    setSearch(val);
+    setPage(0);
+  };
 
   const handleDelete = async (id: number) => {
     try {
@@ -72,15 +109,18 @@ export function useEmployeeManagement() {
   };
 
   return {
-    employees: paginatedEmployees,
+    employees,
     setEmployees,
     loading,
     search,
-    setSearch: (val: string) => { setSearch(val); setPage(0); },
+    handleSearch,
     page,
     setPage,
     pageSize,
     setPageSize,
+    sortBy,
+    sortDir,
+    handleSort,
     totalElements,
     totalPages,
     hiddenCols,

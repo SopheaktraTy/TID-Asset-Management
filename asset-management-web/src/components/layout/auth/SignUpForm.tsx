@@ -219,7 +219,7 @@ export const SignUpForm = () => {
                                 onChange={field.onChange}
                                 placeholder="Select a department..."
                                 className="w-full"
-                                triggerClassName="text-sm focus:ring-2 focus:ring-[var(--color-growth-green)]/20"
+                                triggerClassName="bg-[var(--surface)] !text-sm min-h-[42px]"
                             />
                         )}
                     />
@@ -244,7 +244,7 @@ export const SignUpForm = () => {
                                 onChange={field.onChange}
                                 placeholder="Select a job title..."
                                 className="w-full"
-                                triggerClassName="text-sm focus:ring-2 focus:ring-[var(--color-growth-green)]/20"
+                                triggerClassName="bg-[var(--surface)] !text-sm min-h-[42px]"
                             />
                         )}
                     />

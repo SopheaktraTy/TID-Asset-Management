@@ -23,7 +23,6 @@ public class CreateUserRequest {
     @NotNull(message = "Role is required")
     private RoleEnum role;
 
-    @NotNull(message = "Job Title is required")
     private JobTitleEnum jobTitle;
 
     public String getUsername() {

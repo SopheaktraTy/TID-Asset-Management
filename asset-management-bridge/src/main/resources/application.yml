@@ -1,4 +1,8 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   application:
     name: asset-management-bridge
 
@@ -44,10 +48,6 @@ springdoc:
 
 server:
   port: 8080
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
 
 jwt:
   secret: hq3qG2Hj4M5vF7bN8kL9sP1hT4xD6rW8yB2cZ5eV9tI1oU3mK6nA8sJ0gR3yF7v # Replace with a strong, completely secure secret

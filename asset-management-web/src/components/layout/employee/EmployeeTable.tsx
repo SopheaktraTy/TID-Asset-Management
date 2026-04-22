@@ -1,11 +1,11 @@
 import { Edit2, Trash2, Users } from "lucide-react";
 import type { EmployeeDto } from "../../../types/employee.types";
 import { Table, type ColumnDef } from "../../ui/Table";
-import { 
-  toPascalCase, 
-  formatDate, 
-  getInitials, 
-  getAvatarColor 
+import {
+  toPascalCase,
+  formatDate,
+  getInitials,
+  getAvatarColor
 } from "../../../utils/format";
 import { getSafeImageUrl } from "../../../utils/image";
 
@@ -19,19 +19,29 @@ export const EMPLOYEE_TABLE_COLUMN_OPTIONS = [
 interface EmployeeTableProps {
   employees: EmployeeDto[];
   loading: boolean;
+  pageSize: number;
+  sortBy: string;
+  sortDir: "asc" | "desc";
+  onSort: (field: string, dir?: "asc" | "desc") => void;
   hiddenCols: Set<string>;
   onEdit: (employee: EmployeeDto) => void;
   onDelete: (employee: EmployeeDto) => void;
   onRowClick?: (employee: EmployeeDto) => void;
+  menuClassName?: string;
 }
 
 export default function EmployeeTable({
   employees,
   loading,
+  pageSize,
+  sortBy,
+  sortDir,
+  onSort,
   hiddenCols,
   onEdit,
   onDelete,
   onRowClick,
+  menuClassName = "",
 }: EmployeeTableProps) {
   const columns: ColumnDef<EmployeeDto>[] = [
     {
@@ -126,8 +136,13 @@ export default function EmployeeTable({
       data={employees}
       columns={visibleColumns}
       loading={loading}
+      pageSize={pageSize}
+      sortBy={sortBy}
+      sortDir={sortDir}
+      onSort={onSort}
       onRowClick={onRowClick}
       emptyMessage={EmptyState}
+      menuClassName={menuClassName}
     />
   );
 }

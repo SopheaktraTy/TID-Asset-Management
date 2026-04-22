@@ -40,10 +40,28 @@ export interface EmployeeDto {
   updatedAt: string;
 }
 
+export interface PagedEmployeeResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}
+
+export interface EmployeeQueryParams {
+  page?: number;
+  size?: number;
+  search?: string;
+  department?: Department | "";
+  jobTitle?: JobTitle | "";
+  sortBy?: string;
+  sortDir?: "asc" | "desc";
+}
+
 export const createEmployeeSchema = z.object({
   username: z.string().min(2, "Name must be at least 2 characters"),
-  department: z.string().min(1, "Department is required"),
-  jobTitle: z.string().min(1, "Job title is required"),
+  department: z.string().optional(),
+  jobTitle: z.string().optional(),
 });
 
 export type CreateEmployeeFormValues = z.infer<typeof createEmployeeSchema>;

@@ -13,11 +13,14 @@ export default function EmployeeManagementPage() {
     setEmployees,
     loading,
     search,
-    setSearch,
+    handleSearch,
     page,
     setPage,
     pageSize,
     setPageSize,
+    sortBy,
+    sortDir,
+    handleSort,
     totalElements,
     totalPages,
     hiddenCols,
@@ -52,7 +55,7 @@ export default function EmployeeManagementPage() {
         <div className="bg-[var(--bg)] rounded-xl border border-[var(--border-color)] shadow-xl overflow-hidden transition-colors duration-300">
           <EmployeeToolbar
             search={search}
-            onSearchChange={setSearch}
+            onSearchChange={handleSearch}
             onAddClick={() => setAddOpen(true)}
             hiddenCols={hiddenCols}
             onToggleColumn={handleToggleColumn}
@@ -63,6 +66,10 @@ export default function EmployeeManagementPage() {
           <EmployeeTable
             employees={employees}
             loading={loading}
+            pageSize={pageSize}
+            sortBy={sortBy}
+            sortDir={sortDir}
+            onSort={handleSort}
             hiddenCols={hiddenCols}
             onEdit={(emp) => setEditEmployee(emp)}
             onDelete={(emp) => {
@@ -70,6 +77,7 @@ export default function EmployeeManagementPage() {
                 handleDelete(emp.id);
               }
             }}
+            menuClassName="bg-[var(--bg)]"
           />
 
           <Pagination

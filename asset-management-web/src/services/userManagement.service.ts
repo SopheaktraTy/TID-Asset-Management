@@ -103,7 +103,17 @@ export const getUserByIdApi = async (id: number): Promise<UserDto> => {
 };
 
 export const createUserApi = async (data: CreateUserFormValues, imageFile?: File | Blob | null): Promise<UserDto> => {
-  const fd = buildFormData(data as any, imageFile);
+  const { jobTitle, department, ...rest } = data;
+  const payload: Record<string, any> = { ...rest };
+  
+  if (jobTitle && jobTitle.trim() !== "") {
+    payload.jobTitle = jobTitle;
+  }
+  if (department && department.trim() !== "") {
+    payload.department = department;
+  }
+
+  const fd = buildFormData(payload, imageFile);
   const response = await api.post<ApiResponse<UserDto>>(BASE, fd);
   return response.data.data;
 };
@@ -121,6 +131,12 @@ export const updateUserApi = async (id: number, data: EditUserFormValues, imageF
   // Only send department if a real value was selected (not empty string "")
   if (department && department.trim() !== "") {
     payload.department = department;
+  }
+  // Only send jobTitle if a real value was selected (not empty string "")
+  if (data.jobTitle && data.jobTitle.trim() !== "") {
+    payload.jobTitle = data.jobTitle;
+  } else {
+    delete payload.jobTitle;
   }
   
   const cleanPerms = Object.fromEntries(

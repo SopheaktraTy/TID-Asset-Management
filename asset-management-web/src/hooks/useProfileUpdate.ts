@@ -77,14 +77,20 @@ export function useProfileUpdate({ onClose }: UseProfileUpdateOptions) {
       }
 
       const data = await updateProfileApi(formData);
-      setAuth(token, { ...user, ...data });
+
+      // If the image URL is the same, we append a timestamp to bypass browser cache
+      const updatedUser = { ...user, ...data };
+      if (updatedUser.image && updatedUser.image === user.image) {
+        updatedUser.image = `${updatedUser.image}${updatedUser.image.includes('?') ? '&' : '?'}t=${Date.now()}`;
+      }
+
+      setAuth(token, updatedUser);
       setSuccessMsg("Profile updated successfully!");
 
       setTimeout(() => {
-        onClose();
         setSuccessMsg(null);
-        window.location.reload();
-      }, 2500);
+        onClose();
+      });
 
     } catch (err: any) {
       setErrorMsg(err.response?.data?.message || "Failed to update profile");

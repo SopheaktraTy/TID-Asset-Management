@@ -20,42 +20,37 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/employees")
 @SecurityRequirement(name = "bearerAuth")
-public class EmployeeManagementController {
+public class EmployeeController {
 
     private final EmployeeService employeeService;
 
-    public EmployeeManagementController(EmployeeService employeeService) {
+    public EmployeeController(EmployeeService employeeService) {
         this.employeeService = employeeService;
     }
 
-    // GET all employees
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('READ_EMPLOYEE', 'ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('READ_EMPLOYEE')")
     public ResponseEntity<ApiResponse<List<EmployeeResponse>>> getAllEmployees() {
         return ResponseEntity.ok(new ApiResponse<>(200, "Employees retrieved successfully", employeeService.getAllEmployees()));
     }
 
-    // GET single employee by ID
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('READ_EMPLOYEE', 'ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('READ_EMPLOYEE')")
     public ResponseEntity<ApiResponse<EmployeeResponse>> getEmployeeById(@PathVariable @NonNull Long id) {
         return ResponseEntity.ok(new ApiResponse<>(200, "Employee retrieved successfully", employeeService.getEmployeeById(id)));
     }
 
-    // POST create new employee
     @PostMapping(consumes = {"multipart/form-data"})
-    @PreAuthorize("hasAnyAuthority('CREATE_EMPLOYEE', 'ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('CREATE_EMPLOYEE')")
     public ResponseEntity<ApiResponse<EmployeeResponse>> createEmployee(
             @RequestPart("employee") @Valid @NonNull CreateEmployeeRequest request,
             @RequestPart(value = "imageFile", required = false) MultipartFile imageFile) {
-        EmployeeResponse created = employeeService.createEmployee(request, imageFile);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponse<>(201, "Employee created successfully", created));
+                .body(new ApiResponse<>(201, "Employee created successfully", employeeService.createEmployee(request, imageFile)));
     }
 
-    // PUT full update
     @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
-    @PreAuthorize("hasAnyAuthority('UPDATE_EMPLOYEE', 'ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('UPDATE_EMPLOYEE')")
     public ResponseEntity<ApiResponse<EmployeeResponse>> updateEmployee(
             @PathVariable @NonNull Long id,
             @RequestPart("employee") @Valid @NonNull UpdateEmployeeRequest request,
@@ -64,20 +59,18 @@ public class EmployeeManagementController {
         return ResponseEntity.ok(new ApiResponse<>(200, "Employee updated successfully", employeeService.updateEmployee(id, request, imageFile, removeImage)));
     }
 
-    // PATCH partial update
     @PatchMapping(value = "/{id}", consumes = {"multipart/form-data"})
-    @PreAuthorize("hasAnyAuthority('UPDATE_EMPLOYEE', 'ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('UPDATE_EMPLOYEE')")
     public ResponseEntity<ApiResponse<EmployeeResponse>> patchEmployee(
             @PathVariable @NonNull Long id,
             @RequestPart("employee") @Valid @NonNull UpdateEmployeeRequest request,
             @RequestParam(value = "removeImage", defaultValue = "false") boolean removeImage,
             @RequestPart(value = "imageFile", required = false) MultipartFile imageFile) {
-        return ResponseEntity.ok(new ApiResponse<>(200, "Employee patched successfully", employeeService.patchEmployee(id, request, imageFile, removeImage)));
+        return ResponseEntity.ok(new ApiResponse<>(200, "Employee patched successfully", employeeService.updateEmployee(id, request, imageFile, removeImage)));
     }
 
-    // DELETE employee
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('DELETE_EMPLOYEE', 'ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('DELETE_EMPLOYEE')")
     public ResponseEntity<ApiResponse<Void>> deleteEmployee(@PathVariable @NonNull Long id) {
         employeeService.deleteEmployee(id);
         return ResponseEntity.ok(new ApiResponse<>(200, "Employee deleted successfully"));

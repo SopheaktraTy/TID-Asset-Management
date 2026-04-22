@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-import { revokeLocalPreviewUrl, optimizeImage } from "../utils/image";
+import { optimizeImage } from "../utils/image";
 
 interface UseImageUploadOptions {
   initialImage?: string | null;
@@ -22,13 +22,23 @@ export function useImageUpload({
   const [selectedFile, setSelectedFile] = useState<File | Blob | null>(null);
   const [isImageDeleted, setIsImageDeleted] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [pendingCropImage, setPendingCropImage] = useState<string | null>(null);
+  const [pendingCropImage, setPendingCropImageState] = useState<string | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const tempImageRef = useRef<string | null>(initialImage);
+  const pendingCropRef = useRef<string | null>(null);
 
   const handleImageFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) return;
-    setPendingCropImage(URL.createObjectURL(file));
+    
+    // Revoke previous pending if any
+    if (pendingCropRef.current) {
+      URL.revokeObjectURL(pendingCropRef.current);
+    }
+    
+    const url = URL.createObjectURL(file);
+    pendingCropRef.current = url;
+    setPendingCropImageState(url);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }, []);
 
@@ -54,22 +64,48 @@ export function useImageUpload({
   };
 
   const handleCropComplete = useCallback(async (croppedBlob: Blob) => {
-    // Optimize the cropped image
-    const optimizedBlob = await optimizeImage(croppedBlob, maxWidth, maxHeight, quality);
-    const localUrl = URL.createObjectURL(optimizedBlob);
-    
-    revokeLocalPreviewUrl(tempImage);
-    setTempImage(localUrl);
-    setSelectedFile(optimizedBlob);
-    setIsImageDeleted(false);
-    setPendingCropImage(null);
-    
-    if (onImageChange) onImageChange(optimizedBlob);
-  }, [tempImage, maxWidth, maxHeight, quality, onImageChange]);
+    try {
+      // Optimize the cropped image
+      const optimizedBlob = await optimizeImage(croppedBlob, maxWidth, maxHeight, quality);
+      const localUrl = URL.createObjectURL(optimizedBlob);
+      
+      // Revoke old preview
+      if (tempImageRef.current && tempImageRef.current.startsWith("blob:")) {
+        URL.revokeObjectURL(tempImageRef.current);
+      }
+      
+      // Revoke pending crop image
+      if (pendingCropRef.current) {
+        URL.revokeObjectURL(pendingCropRef.current);
+        pendingCropRef.current = null;
+      }
+      
+      tempImageRef.current = localUrl;
+      setTempImage(localUrl);
+      setSelectedFile(optimizedBlob);
+      setIsImageDeleted(false);
+      setPendingCropImageState(null);
+      
+      if (onImageChange) onImageChange(optimizedBlob);
+    } catch (error) {
+      console.error("Error processing cropped image:", error);
+      // Clean up even on error
+      setPendingCropImageState(null);
+      if (pendingCropRef.current) {
+        URL.revokeObjectURL(pendingCropRef.current);
+        pendingCropRef.current = null;
+      }
+    }
+  }, [maxWidth, maxHeight, quality, onImageChange]);
 
   const handleRemoveImage = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    revokeLocalPreviewUrl(tempImage);
+    
+    if (tempImageRef.current && tempImageRef.current.startsWith("blob:")) {
+      URL.revokeObjectURL(tempImageRef.current);
+    }
+    
+    tempImageRef.current = null;
     setTempImage(null);
     setSelectedFile(null);
     setIsImageDeleted(true);
@@ -77,19 +113,34 @@ export function useImageUpload({
   };
 
   const resetImage = useCallback((newInitialImage: string | null = null) => {
-    revokeLocalPreviewUrl(tempImage);
+    if (tempImageRef.current && tempImageRef.current.startsWith("blob:")) {
+      URL.revokeObjectURL(tempImageRef.current);
+    }
+    
+    tempImageRef.current = newInitialImage;
     setTempImage(newInitialImage);
     setSelectedFile(null);
     setIsImageDeleted(false);
-    setPendingCropImage(null);
-  }, [tempImage]);
+    
+    if (pendingCropRef.current) {
+      URL.revokeObjectURL(pendingCropRef.current);
+      pendingCropRef.current = null;
+    }
+    setPendingCropImageState(null);
+  }, []);
 
   return {
     tempImage,
     selectedFile,
     isImageDeleted,
     pendingCropImage,
-    setPendingCropImage,
+    setPendingCropImage: useCallback((val: string | null) => {
+      if (val === null && pendingCropRef.current) {
+        URL.revokeObjectURL(pendingCropRef.current);
+        pendingCropRef.current = null;
+      }
+      setPendingCropImageState(val);
+    }, []),
     fileInputRef,
     handleImageUpload,
     handleCropComplete,

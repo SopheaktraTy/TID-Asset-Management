@@ -18,17 +18,7 @@ public interface EmployeeMapper {
     @Mapping(target = "updatedAt", ignore = true)
     Employee toEntity(@NonNull CreateEmployeeRequest request);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "username", ignore = true) // Username change handled manually in service
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    void updateEntityFromRequest(@NonNull UpdateEmployeeRequest request, @MappingTarget @NonNull Employee employee);
-
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "username", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    void patchEntityFromRequest(@NonNull UpdateEmployeeRequest request, @MappingTarget @NonNull Employee employee);
+    void partialUpdate(@NonNull UpdateEmployeeRequest request, @MappingTarget @NonNull Employee employee);
 
     EmployeeResponse toResponse(@NonNull Employee employee);
 }

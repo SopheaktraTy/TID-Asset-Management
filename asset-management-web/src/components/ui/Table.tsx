@@ -197,7 +197,7 @@ export function Table<T>({
                         <Portal>
                           <div
                             ref={menuRef}
-                            className={`fixed z-[9999] mt-2 border border-[var(--border-color)] rounded-lg shadow-xl text-[var(--text-main)] py-1 font-normal normal-case tracking-normal overflow-hidden cursor-default transition-opacity duration-150 ${menuClassName || "bg-[var(--surface)]"}`}
+                            className={`fixed z-[9999] mt-2 border border-[var(--border-color)] rounded-lg shadow-xl text-[var(--text-main)] py-1 font-normal normal-case tracking-normal overflow-hidden cursor-default transition-opacity duration-150 ${menuClassName || "bg-[var(--bg)]"}`}
                             style={{
                               top: `${menuCoords.top}px`,
                               left: `${menuCoords.left}px`,

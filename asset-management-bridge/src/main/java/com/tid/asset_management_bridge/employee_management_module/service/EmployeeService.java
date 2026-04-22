@@ -14,6 +14,5 @@ public interface EmployeeService {
     EmployeeResponse getEmployeeById(@NonNull Long id);
     EmployeeResponse createEmployee(@NonNull CreateEmployeeRequest request, MultipartFile imageFile);
     EmployeeResponse updateEmployee(@NonNull Long id, @NonNull UpdateEmployeeRequest request, MultipartFile imageFile, boolean removeImage);
-    EmployeeResponse patchEmployee(@NonNull Long id, @NonNull UpdateEmployeeRequest request, MultipartFile imageFile, boolean removeImage);
     void deleteEmployee(@NonNull Long id);
 }

@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "../../ui/Button";
+import { Input } from "../../ui/BackgroundColorPlaceholder";
 import { Message } from "../../ui/Message";
 import { Modal } from "../../ui/Modal";
 import { DropdownReverseList } from "../../ui/DropdownReverseList";
@@ -110,149 +111,154 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={handleCloseWrapped} maxWidth="max-w-[520px]">
-      <div className="flex flex-col gap-4">
-        {/* Header - Logo on Right */}
-        <div className="flex items-center justify-between mb-10 w-full px-2">
-          <div className="flex flex-col gap-1">
-            <h3 className="text-lg font-bold tracking-tight text-[var(--text-main)] leading-none">Employee Registration</h3>
-            <p className="text-xs text-[var(--text-muted)] font-medium">Add a new employee to the directory</p>
+    <>
+      <Modal isOpen={isOpen} onClose={handleCloseWrapped} maxWidth="max-w-[520px]">
+        <div className="flex flex-col gap-4">
+          {/* Header - Logo on Right */}
+          <div className="flex items-center justify-between mb-10 w-full px-2">
+            <div className="flex flex-col gap-1">
+              <h3 className="text-lg font-bold tracking-tight text-[var(--text-main)] leading-none">Employee Registration</h3>
+              <p className="text-xs text-[var(--text-muted)] font-medium">Add a new employee to the directory</p>
+            </div>
+            <img src={theme === "dark" ? logoWhite : logoCharcoal} alt="Logo" className="h-7 w-auto object-contain" />
           </div>
-          <img src={theme === "dark" ? logoWhite : logoCharcoal} alt="Logo" className="h-7 w-auto object-contain" />
-        </div>
 
-        {errorMsg && (
-          <div className="mb-4">
-            <Message variant="error">{errorMsg}</Message>
-          </div>
-        )}
+          {errorMsg && (
+            <div className="mb-4">
+              <Message variant="error">{errorMsg}</Message>
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-left">
-          <div className="space-y-6 px-2">
-            {/* Avatar Section - Profile Model Style */}
-            <div className="flex flex-col items-center">
-              <div className="relative group">
-                <div
-                  {...dragProps}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`w-32 h-32 rounded-full border-2 overflow-hidden ring-8 ring-[var(--color-growth-green)]/5 transition-all cursor-pointer relative ${
-                    isDragging ? "border-[var(--color-growth-green)] scale-105" : "border-[var(--color-growth-green)]"
-                  }`}
-                >
-                  {tempImage ? (
-                    <img src={getSafeImageUrl(tempImage)} alt="Preview" className="w-full h-full object-cover shadow-inner" />
-                  ) : (
-                    <div className="w-full h-full rounded-full bg-[var(--surface-hover)] flex items-center justify-center">
-                      <UserIcon size={48} className="text-[var(--text-muted)]" />
-                    </div>
+          <form onSubmit={handleSubmit} className="space-y-4 text-left">
+            <div className="space-y-6 px-2">
+              {/* Avatar Section - Profile Model Style */}
+              <div className="flex flex-col items-center">
+                <div className="relative group">
+                  <div
+                    {...dragProps}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`w-32 h-32 rounded-full border-2 overflow-hidden ring-8 ring-[var(--color-growth-green)]/5 transition-all cursor-pointer relative ${isDragging ? "border-[var(--color-growth-green)] scale-105" : "border-[var(--color-growth-green)]"
+                      }`}
+                  >
+                    {tempImage ? (
+                      <img src={getSafeImageUrl(tempImage)} alt="Preview" className="w-full h-full object-cover shadow-inner" />
+                    ) : (
+                      <div className="w-full h-full rounded-full bg-[var(--bg)] flex items-center justify-center">
+                        <UserIcon size={48} className="text-[var(--text-muted)]" />
+                      </div>
+                    )}
+                    {!tempImage && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[1px]">
+                        <Camera size={24} className="text-white" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="absolute bottom-1 right-1 w-8 h-8 bg-[var(--color-growth-green)] border-2 border-[var(--surface)] rounded-full flex items-center justify-center text-white shadow-md z-40 pointer-events-none">
+                    <Pencil size={14} />
+                  </div>
+                  {tempImage && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveImage();
+                      }}
+                      className="absolute inset-0 bg-red-300/30 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-30 backdrop-blur-[1.5px] scale-95 group-hover:scale-100"
+                      title="Remove image"
+                    >
+                      <X size={15} strokeWidth={3} className="drop-shadow-lg" />
+                    </button>
                   )}
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[1px]">
-                    <Camera size={24} className="text-white" />
+                  <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
+                </div>
+              </div>
+
+              {/* Form Content - Profile Model Grid Style */}
+              <div className="space-y-1">
+                <div className="pt-2">
+                  <h3 className="text-sm font-bold text-[var(--text-main)]">New Employee Information</h3>
+                  <div className="h-px bg-[var(--border-color)] w-full opacity-50 mt-2" />
+                </div>
+
+                {/* Name Row */}
+                <div className="py-2 grid grid-cols-[120px_1fr] items-center gap-4">
+                  <label className="text-xs font-bold text-[var(--text-main)]">Full Name</label>
+                  <div className="w-full relative flex items-center">
+                    <Input
+                      {...register("username")}
+                      placeholder="Enter full name"
+                      className=" h-[36px]"
+                    />
+                    {errors.username && (
+                      <div className="absolute right-2 text-red-500">
+                        <X size={12} />
+                      </div>
+                    )}
                   </div>
                 </div>
-                <div className="absolute bottom-1 right-1 w-8 h-8 bg-[var(--color-growth-green)] border-2 border-[var(--surface)] rounded-full flex items-center justify-center text-white shadow-md z-10 pointer-events-none">
-                  <Pencil size={14} />
-                </div>
-                {tempImage && (
-                  <button
-                    type="button"
-                    onClick={handleRemoveImage}
-                    className="absolute top-1 left-1 w-7 h-7 bg-[var(--surface)] border border-[var(--border-color)] rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-red-500 shadow-sm transition-colors z-20"
-                  >
-                    <X size={16} />
-                  </button>
-                )}
-                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
-              </div>
-            </div>
 
-            {/* Form Content - Profile Model Grid Style */}
-            <div className="space-y-1">
-              <div className="pt-2 mb-2">
-                <h3 className="text-sm font-bold text-[var(--text-main)]">New Employee Information</h3>
-                <div className="h-px bg-[var(--border-color)] w-full opacity-50 mt-2" />
-              </div>
-
-              {/* Name Row */}
-              <div className="py-2 grid grid-cols-[120px_1fr] items-center gap-4">
-                <label className="text-xs font-bold text-[var(--text-main)]">Full Name</label>
-                <div className="w-full relative flex items-center">
-                  <input
-                    {...register("username")}
-                    type="text"
-                    placeholder="Enter full name"
-                    className="w-full bg-[var(--surface-hover)] border border-[var(--color-growth-green)]/20 rounded-lg px-3 py-1.5 text-[11px] font-bold text-[var(--text-main)] outline-none focus:ring-2 focus:ring-[var(--color-growth-green)]/10 focus:border-[var(--color-growth-green)]/50 transition-all h-[36px]"
+                {/* Job Title Row */}
+                <div className="py-2 grid grid-cols-[120px_1fr] items-center gap-4">
+                  <label className="text-xs font-bold text-[var(--text-main)]">Job Title</label>
+                  <Controller
+                    name="jobTitle"
+                    control={control}
+                    render={({ field }) => (
+                      <DropdownReverseList
+                        options={JOB_TITLE_OPTIONS}
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                        className="w-full"
+                        triggerClassName="w-full bg-[var(--bg)] border border-[var(--border-color)]/20 rounded-lg h-[36px] px-3 text-left"
+                        panelClassName="bg-[var(--bg)]"
+                      />
+                    )}
                   />
-                  {errors.username && (
-                    <div className="absolute right-2 text-red-500">
-                      <X size={12} />
-                    </div>
-                  )}
+                </div>
+
+                {/* Department Row */}
+                <div className="py-2 grid grid-cols-[120px_1fr] items-center gap-4">
+                  <label className="text-xs font-bold text-[var(--text-main)]">Department</label>
+                  <Controller
+                    name="department"
+                    control={control}
+                    render={({ field }) => (
+                      <DropdownReverseList
+                        options={DEPARTMENT_OPTIONS}
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                        className="w-full"
+                        triggerClassName="w-full bg-[var(--bg)] border border-[var(--border-color)]/20 rounded-lg h-[36px] px-3 text-left"
+                        panelClassName="bg-[var(--bg)]"
+                      />
+                    )}
+                  />
                 </div>
               </div>
-
-              {/* Department Row */}
-              <div className="py-2 grid grid-cols-[120px_1fr] items-center gap-4">
-                <label className="text-xs font-bold text-[var(--text-main)]">Department</label>
-                <Controller
-                  name="department"
-                  control={control}
-                  render={({ field }) => (
-                    <DropdownReverseList
-                      options={DEPARTMENT_OPTIONS}
-                      value={field.value}
-                      onChange={field.onChange}
-                      className="w-full"
-                      triggerClassName="w-full bg-[var(--surface-hover)] border border-[var(--border-color)]/20 rounded-lg h-[36px] px-3 text-left"
-                      panelClassName="bg-[var(--bg)]"
-                    />
-                  )}
-                />
-              </div>
-
-              {/* Job Title Row */}
-              <div className="py-2 grid grid-cols-[120px_1fr] items-center gap-4">
-                <label className="text-xs font-bold text-[var(--text-main)]">Job Title</label>
-                <Controller
-                   name="jobTitle"
-                  control={control}
-                  render={({ field }) => (
-                    <DropdownReverseList
-                      options={JOB_TITLE_OPTIONS}
-                      value={field.value}
-                      onChange={field.onChange}
-                      className="w-full"
-                      triggerClassName="w-full bg-[var(--surface-hover)] border border-[var(--border-color)]/20 rounded-lg h-[36px] px-3 text-left"
-                      panelClassName="bg-[var(--bg)]"
-                    />
-                  )}
-                />
-              </div>
             </div>
-          </div>
 
-          <div className="flex items-center gap-3 pt-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              className="flex-1 h-10 rounded-full font-bold  text-xs border-[var(--border-color)]/30"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={loading}
-              className="flex-[1.5] h-10 bg-[var(--color-growth-green)] rounded-full font-bold  text-xs gap-2 shadow-lg shadow-[var(--color-growth-green)]/10"
-            >
-              {loading ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
-              Add Employee
-            </Button>
-          </div>
-        </form>
-      </div>
-
+            <div className="flex items-center gap-3 pt-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                className="flex-1 h-10 rounded-full font-bold  text-xs border-[var(--border-color)]/30"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={loading}
+                className="flex-[1.5] h-10 bg-[var(--color-growth-green)] rounded-full font-bold  text-xs gap-2 shadow-lg shadow-[var(--color-growth-green)]/10"
+              >
+                {loading ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
+                Add Employee
+              </Button>
+            </div>
+          </form>
+        </div>
+      </Modal>
       {pendingCropImage && (
         <ImageCropper
           image={pendingCropImage}
@@ -262,7 +268,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
           aspect={1}
         />
       )}
-    </Modal>
+    </>
   );
 }
 

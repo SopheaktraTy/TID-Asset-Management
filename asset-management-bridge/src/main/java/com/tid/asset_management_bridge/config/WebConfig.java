@@ -16,13 +16,13 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(@org.springframework.lang.NonNull ResourceHandlerRegistry registry) {
-        Path uploadPath = Paths.get(uploadDir);
-        String uploadAbsolutePath = uploadPath.toFile().getAbsolutePath();
+        Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+        String uploadResourceLocation = uploadPath.toUri().toString();
 
         // 🔗 URL Path Method: 
         // Map all requests to /uploads/** to the local filesystem directory.
         // This allows the frontend to simply use <img src="http://localhost:8080/uploads/profiles/xyz.png">
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + uploadAbsolutePath + "/");
+                .addResourceLocations(uploadResourceLocation + (uploadResourceLocation.endsWith("/") ? "" : "/"));
     }
 }

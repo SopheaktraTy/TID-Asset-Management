@@ -112,7 +112,7 @@ export default function ResetPasswordModal({
                 <ShieldCheck size={16} className="text-orange-500" />
                 <h3 className="text-sm font-bold text-[var(--text-main)]">Authentication Settings</h3>
               </div>
-              
+
               <div className="px-[10px] space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">New Password</label>
