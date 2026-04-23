@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Camera, X, User as UserIcon, Loader2, Pencil, Eye, EyeOff } from "lucide-react";
+import { Camera, User as UserIcon, Loader2, Pencil, Eye, EyeOff, Trash2 } from "lucide-react";
 import { getSafeImageUrl } from "../../../utils/image";
 import { Modal } from "../../ui/Modal";
 import { Button } from "../../ui/Button";
@@ -185,22 +185,31 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
                   </div>
                 )}
               </div>
-              <div className="absolute bottom-1 right-1 w-8 h-8 bg-[var(--color-growth-green)] border-2 border-[var(--surface)] rounded-full flex items-center justify-center text-white shadow-md z-40 pointer-events-none">
-                <Pencil size={14} />
-              </div>
-              {tempImage && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (tempImage) {
                     handleRemoveImage();
-                  }}
-                  className="absolute inset-0 bg-red-400/30 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-30 backdrop-blur-[1.5px] scale-95 group-hover:scale-100"
-                  title="Remove image"
-                >
-                  <X size={15} strokeWidth={3} className="drop-shadow-lg" />
-                </button>
-              )}
+                  } else {
+                    fileInputRef.current?.click();
+                  }
+                }}
+                className={`absolute bottom-1 right-1 w-8 h-8 border-2 border-[var(--surface)] rounded-full flex items-center justify-center text-white shadow-md z-40 transition-all duration-300 ${tempImage
+                  ? "bg-[var(--color-growth-green)] group-hover:bg-red-500"
+                  : "bg-[var(--color-growth-green)]"
+                  }`}
+                title={tempImage ? "Remove image" : "Upload image"}
+              >
+                {tempImage ? (
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    <Trash2 size={14} className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <Pencil size={14} className="absolute opacity-100 group-hover:opacity-0 transition-opacity duration-300" />
+                  </div>
+                ) : (
+                  <Pencil size={14} />
+                )}
+              </button>
               <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
             </div>
           </div>
@@ -378,11 +387,11 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
           </div>
 
           {/* Action Buttons - Scaled Down */}
-          <div ref={footerRef} className="flex items-center justify-end gap-3 pt-2">
+          <div ref={footerRef} className="flex items-center justify-end gap-3 pt-6">
             <Button
               variant="outline"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-lg text-xs font-semibold"
+              className="w-auto min-w-[100px] h-10 bg-transparent border border-[var(--border-color)] text-[var(--text-main)] hover:bg-[var(--surface-hover)] rounded-full px-6 text-sm font-bold transition-all border-opacity-30"
             >
               Cancel
             </Button>
@@ -390,9 +399,10 @@ export const ProfileWithViewAndEditModal = ({ isOpen, onClose }: ProfileWithView
               variant="primary"
               onClick={handleUpdateProfile}
               disabled={isUpdating}
-              className="px-7 py-2.5 rounded-lg text-xs font-bold shadow-lg shadow-[var(--color-growth-green)]/10"
+              className="w-auto min-w-[140px] h-10 bg-[var(--color-growth-green)] text-black rounded-full px-8 text-sm font-bold shadow-lg shadow-[var(--color-growth-green)]/10 transition-all hover:brightness-105 active:scale-95"
             >
-              {isUpdating ? <Loader2 size={12} className="animate-spin" /> : "Save Changes"}
+              {isUpdating ? <Loader2 size={16} className="animate-spin" /> : null}
+              Save Changes
             </Button>
           </div>
         </div>

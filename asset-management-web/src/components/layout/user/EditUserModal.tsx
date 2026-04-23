@@ -5,6 +5,7 @@ import {
   Fingerprint,
   ShieldCheck,
   Pencil,
+  Trash2,
 } from "lucide-react";
 
 import { Button } from "../../ui/Button";
@@ -15,7 +16,7 @@ import { DropdownList } from "../../ui/DropdownList";
 import { DropdownReverseList } from "../../ui/DropdownReverseList";
 import { ToggleSwitch } from "../../ui/ToggleSwitch";
 import { Controller } from "react-hook-form";
-import { Camera, X } from "lucide-react";
+import { Camera } from "lucide-react";
 
 import { useUserForm } from "../../../hooks/useUserForm";
 import type { EditUserFormValues, UserDto } from "../../../types/user.types";
@@ -235,22 +236,31 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
                     </div>
                   )}
                 </div>
-                <div className="absolute bottom-1 right-1 w-8 h-8 bg-[var(--color-growth-green)] border-2 border-[var(--surface)] rounded-full flex items-center justify-center text-white shadow-md z-40 pointer-events-none">
-                  <Pencil size={14} />
-                </div>
-                {tempImage && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (tempImage) {
                       handleRemoveImage();
-                    }}
-                    className="absolute inset-0 bg-red-400/30 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-30 backdrop-blur-[1.5px] scale-95 group-hover:scale-100"
-                    title="Remove image"
-                  >
-                    <X size={15} strokeWidth={3} className="drop-shadow-lg" />
-                  </button>
-                )}
+                    } else {
+                      fileInputRef.current?.click();
+                    }
+                  }}
+                  className={`absolute bottom-1 right-1 w-8 h-8 border-2 border-[var(--surface)] rounded-full flex items-center justify-center text-white shadow-md z-40 transition-all duration-300 ${tempImage
+                    ? "bg-[var(--color-growth-green)] group-hover:bg-red-500"
+                    : "bg-[var(--color-growth-green)]"
+                    }`}
+                  title={tempImage ? "Remove image" : "Upload image"}
+                >
+                  {tempImage ? (
+                    <div className="relative w-full h-full flex items-center justify-center">
+                      <Trash2 size={14} className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <Pencil size={14} className="absolute opacity-100 group-hover:opacity-0 transition-opacity duration-300" />
+                    </div>
+                  ) : (
+                    <Pencil size={14} />
+                  )}
+                </button>
                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
               </div>
 
@@ -483,9 +493,10 @@ export default function EditUserModal({ isOpen, user, onClose, onUpdated }: Edit
                 type="submit"
                 variant="primary"
                 disabled={loading}
-                className="w-auto min-w-[160px] h-10 gap-2 px-8 py-2 text-sm font-bold bg-[var(--color-growth-green)] text-[var(--btn-primary-text)] border-0 transition-all rounded-full shadow-[0_2px_8px_var(--btn-primary-shadow)] hover:shadow-[0_4px_14px_var(--btn-primary-shadow)] hover:brightness-110 transform active:scale-95"
+                className="w-auto min-w-[160px] h-10 gap-2 px-8 py-2 text-sm font-bold bg-[var(--color-growth-green)] text-black border-0 transition-all rounded-full shadow-[0_2px_8px_var(--btn-primary-shadow)] hover:shadow-[0_4px_14px_var(--btn-primary-shadow)] hover:brightness-110 transform active:scale-95"
               >
-                {loading ? <Loader2 size={16} className="animate-spin" /> : "Save Changes"}
+                {loading ? <Loader2 size={16} className="animate-spin" /> : null}
+                Save Changes
               </Button>
             </div>
           </form>

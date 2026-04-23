@@ -5,9 +5,9 @@ import { useTheme } from "../../../hooks/useTheme";
 import { Button } from "../../ui/Button";
 import { Message } from "../../ui/Message";
 import { Modal } from "../../ui/Modal";
-import type { 
-    ReturnAssetFormValues, 
-    AssignmentResponse 
+import type {
+  ReturnAssetFormValues,
+  AssignmentResponse
 } from "../../../types/assignment.types";
 import { returnAssetSchema } from "../../../types/assignment.types";
 import { returnAssetApi } from "../../../services/assignment.service";
@@ -92,7 +92,7 @@ export default function ReturnAssetModal({ isOpen, asset, assignment, onClose, o
             </div>
 
             <p className="text-xs text-[var(--text-muted)] px-1 leading-relaxed">
-              Confirming return for <span className="font-bold text-[var(--text-main)]">{asset.deviceName}</span> currently assigned to <span className="font-bold text-blue-500">{assignment.assignedTo}</span>.
+              Confirming return for <span className="font-bold text-[var(--text-main)]">{asset.deviceName}</span> currently assigned to <span className="font-bold text-blue-500">{assignment.employee.username}</span>.
             </p>
 
             <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 flex gap-3">

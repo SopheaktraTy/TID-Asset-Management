@@ -189,7 +189,7 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-4">
                           <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-[10px] font-bold ${getAvatarColor(assignment.assignedBy)}`}>
+                            <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-[10px] font-bold ${getAvatarColor(assignment.assignedByUser?.username || "System")}`}>
                               {getInitials(assignment.assignedByUser?.username || "System")}
                             </div>
                             <div className="flex flex-col">
@@ -208,9 +208,9 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
                         <div className="space-y-4">
                           {assignment.returnedDate ? (
                             <>
-                              {assignment.confirmReturnBy && (
+                              {assignment.confirmReturnByUser && (
                                 <div className="flex items-center gap-3">
-                                  <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-[10px] font-bold ${getAvatarColor(assignment.confirmReturnBy)}`}>
+                                  <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-[10px] font-bold ${getAvatarColor(assignment.confirmReturnByUser?.username || "System")}`}>
                                     {getInitials(assignment.confirmReturnByUser?.username || "System")}
                                   </div>
                                   <div className="flex flex-col">

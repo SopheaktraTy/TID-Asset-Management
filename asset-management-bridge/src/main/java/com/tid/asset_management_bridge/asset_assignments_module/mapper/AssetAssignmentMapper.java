@@ -6,7 +6,7 @@ import com.tid.asset_management_bridge.asset_assignments_module.entity.AssetAssi
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = {com.tid.asset_management_bridge.auth_module.mapper.UserMapper.class})
+@Mapper(componentModel = "spring", uses = { com.tid.asset_management_bridge.auth_module.mapper.UserMapper.class })
 public interface AssetAssignmentMapper {
 
     AssetAssignment toEntity(AssignAssetRequest request);

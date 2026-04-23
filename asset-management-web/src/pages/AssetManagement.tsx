@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { HardDrive, ChevronRight as ArrowRight } from "lucide-react";
 import Header from "../components/layout/Header";
@@ -5,11 +6,13 @@ import AssetToolbar from "../components/layout/asset/AssetToolbar";
 import AssetTable, { ASSET_TABLE_COLUMN_OPTIONS } from "../components/layout/asset/AssetTable";
 import AddAssetModal from "../components/layout/asset/AddAssetModal";
 import EditAssetModal from "../components/layout/asset/EditAssetModal";
+import DeleteAssetModal from "../components/layout/asset/DeleteAssetModal";
 import Pagination from "../components/ui/Pagination";
 import { useAssetManagement } from "../hooks/useAssetManagement";
 
 export default function AssetManagementPage() {
   const navigate = useNavigate();
+  const [deleteAsset, setDeleteAsset] = useState<any>(null);
   const {
     assets,
     setAssets,
@@ -81,6 +84,8 @@ export default function AssetManagementPage() {
             hiddenCols={hiddenCols}
             onSort={handleSort}
             onRowClick={(asset) => navigate(`/asset-detail/${asset.id}`)}
+            onEdit={setEditAsset}
+            onDelete={setDeleteAsset}
             menuClassName="bg-[var(--bg)]"
           />
 
@@ -113,6 +118,16 @@ export default function AssetManagementPage() {
         onUpdated={(updated) => {
           setAssets((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
           setEditAsset(null);
+        }}
+      />
+
+      <DeleteAssetModal
+        isOpen={!!deleteAsset}
+        asset={deleteAsset}
+        onClose={() => setDeleteAsset(null)}
+        onDeleted={(assetId) => {
+          setAssets((prev) => prev.filter((a) => a.id !== assetId));
+          setDeleteAsset(null);
         }}
       />
     </div>

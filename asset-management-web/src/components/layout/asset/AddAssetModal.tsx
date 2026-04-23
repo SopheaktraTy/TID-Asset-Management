@@ -1,4 +1,4 @@
-import { Loader2, Tag, Cpu, ClipboardList, MonitorSmartphone, ImagePlus, X, UploadCloud } from "lucide-react";
+import { Loader2, Tag, Cpu, ClipboardList, MonitorSmartphone, ImagePlus, UploadCloud, Trash2 } from "lucide-react";
 import { Controller } from "react-hook-form";
 
 import { Button } from "../../ui/Button";
@@ -26,6 +26,7 @@ import { createAssetSchema } from "../../../types/asset.types";
 import { createAssetApi } from "../../../services/asset.service";
 import { useTheme } from "../../../hooks/useTheme";
 import { useImageUpload } from "../../../hooks/useImageUpload";
+import { getSafeImageUrl } from "../../../utils/image";
 
 
 // Baker Tilly logo assets
@@ -139,7 +140,7 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: AddAssetMo
 
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
           {/* ── Asset Identity ── */}
-          <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
+          <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
             <div className="px-1 mb-3 flex items-center gap-2">
               <Tag size={16} className="text-[var(--color-growth-green)]" />
               <h3 className="text-sm font-bold text-[var(--text-main)]">Asset Identity</h3>
@@ -198,7 +199,7 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: AddAssetMo
           {deviceType && (
             <>
               {/* ── Hardware Specifications ── */}
-              <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
+              <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
                 <div className="px-1 mb-3 flex items-center gap-2">
                   <Cpu size={16} className="text-[var(--color-growth-green)]" />
                   <h3 className="text-sm font-bold text-[var(--text-main)]">Hardware Specifications</h3>
@@ -316,7 +317,7 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: AddAssetMo
 
               {/* ── Software & Network ── */}
               {(deviceType === "LAPTOP" || deviceType === "DESKTOP") && (
-                <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
+                <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
                   <div className="px-1 mb-3 flex items-center gap-2">
                     <MonitorSmartphone size={16} className="text-[var(--color-growth-green)]" />
                     <h3 className="text-sm font-bold text-[var(--text-main)]">Software & Network</h3>
@@ -375,150 +376,150 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: AddAssetMo
               )}
 
 
-          {/* ── Status & Condition ── */}
-          <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
-            <div className="px-1 mb-3 flex items-center gap-2">
-              <ClipboardList size={16} className="text-[var(--color-growth-green)]" />
-              <h3 className="text-sm font-bold text-[var(--text-main)]">Status & Condition</h3>
-            </div>
-            <div className="px-[10px] space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Status</label>
-                  <Controller
-                    name="status"
-                    control={control}
-                    render={({ field }) => (
-                      <DropdownReverseList
-                        options={STATUS_OPTIONS}
-                        value={field.value ?? "AVAILABLE"}
-                        onChange={field.onChange}
-                        className="w-full"
-                        panelClassName="bg-[var(--bg)]"
-                      />
-                    )}
-                  />
-                  {errors.status && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.status.message}</p>}
+              {/* ── Status & Condition ── */}
+              <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
+                <div className="px-1 mb-3 flex items-center gap-2">
+                  <ClipboardList size={16} className="text-[var(--color-growth-green)]" />
+                  <h3 className="text-sm font-bold text-[var(--text-main)]">Status & Condition</h3>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Condition</label>
-                  <Controller
-                    name="condition"
-                    control={control}
-                    render={({ field }) => (
-                      <SuggestionInput
-                        {...field}
-                        suggestions={CONDITION_SUGGESTIONS}
-                        placeholder="e.g. Excellent / Good"
-                        className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                <div className="px-[10px] space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Status</label>
+                      <Controller
+                        name="status"
+                        control={control}
+                        render={({ field }) => (
+                          <DropdownReverseList
+                            options={STATUS_OPTIONS}
+                            value={field.value ?? "AVAILABLE"}
+                            onChange={field.onChange}
+                            className="w-full"
+                            panelClassName="bg-[var(--bg)]"
+                          />
+                        )}
                       />
-                    )}
-                  />
+                      {errors.status && <p className="mt-1 text-[10px] text-red-500 ml-1">{errors.status.message}</p>}
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Condition</label>
+                      <Controller
+                        name="condition"
+                        control={control}
+                        render={({ field }) => (
+                          <SuggestionInput
+                            {...field}
+                            suggestions={CONDITION_SUGGESTIONS}
+                            placeholder="e.g. Excellent / Good"
+                            className="bg-[var(--bg)] border-[var(--border-color)]/50"
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Issue Description (If any)</label>
+                    <textarea
+                      {...register("issueDescription")}
+                      className="w-full px-3 py-2 bg-[var(--bg)] border border-[var(--border-color)]/50 rounded-lg focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-2 focus:ring-[var(--color-growth-green)]/20 text-[11px] text-[var(--text-main)] placeholder:text-[var(--text-muted)] placeholder:text-[11px] transition-all duration-200 min-h-[80px] resize-none"
+                      placeholder="Describe physical or technical issues here..."
+                    />
+                  </div>
                 </div>
               </div>
-              <div>
-                <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Issue Description (If any)</label>
-                <textarea
-                  {...register("issueDescription")}
-                  className="w-full px-3 py-2 bg-[var(--bg)] border border-[var(--border-color)]/50 rounded-lg focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-2 focus:ring-[var(--color-growth-green)]/20 text-[11px] text-[var(--text-main)] placeholder:text-[var(--text-muted)] placeholder:text-[11px] transition-all duration-200 min-h-[80px] resize-none"
-                  placeholder="Describe physical or technical issues here..."
-                />
-              </div>
-            </div>
-          </div>
 
-          {/* ── Asset Image ── */}
-          <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
-            <div className="px-1 mb-3 flex items-center gap-2">
-              <ImagePlus size={16} className="text-[var(--color-growth-green)]" />
-              <h3 className="text-sm font-bold text-[var(--text-main)]">Asset Image</h3>
-            </div>
+              {/* ── Asset Image ── */}
+              <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
+                <div className="px-1 mb-3 flex items-center gap-2">
+                  <ImagePlus size={16} className="text-[var(--color-growth-green)]" />
+                  <h3 className="text-sm font-bold text-[var(--text-main)]">Asset Image</h3>
+                </div>
 
-            <div className="px-2">
-              {imagePreview ? (
-                /* ── Preview card ── */
-                <div className="relative group rounded-xl overflow-hidden border border-[var(--border-color)]/40 bg-[var(--surface-hover)]/20">
-                  <img
-                    src={imagePreview}
-                    alt="Asset preview"
-                    className="w-full h-48 object-contain bg-[var(--surface-hover)]/10"
-                  />
-                  {/* Overlay on hover */}
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                    <button
-                      type="button"
+                <div className="px-2">
+                  {imagePreview ? (
+                    /* ── Preview card ── */
+                    <div className="relative group rounded-xl overflow-hidden border border-[var(--border-color)]/40 bg-[var(--surface-hover)]/20">
+                      <img
+                        src={getSafeImageUrl(imagePreview)}
+                        alt="Asset preview"
+                        className="w-full h-48 object-contain bg-[var(--surface-hover)]/10"
+                      />
+                      {/* Overlay on hover */}
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="flex items-center gap-1.5 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold rounded-full hover:bg-white/20 transition-all"
+                        >
+                          <UploadCloud size={14} />
+                          Replace
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          className="flex items-center gap-1.5 px-4 py-2 bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-300 text-xs font-semibold rounded-full hover:bg-red-500/30 transition-all"
+                        >
+                          <Trash2 size={14} />
+                          Remove
+                        </button>
+                      </div>
+                      {/* File name badge */}
+                      <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/60 to-transparent">
+                        <p className="text-white text-[10px] font-medium truncate">
+                          {selectedFile instanceof File ? selectedFile.name : "Optimized Selection"}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    /* ── Drop zone ── */
+                    <div
+                      {...dragProps}
                       onClick={() => fileInputRef.current?.click()}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold rounded-full hover:bg-white/20 transition-all"
-                    >
-                      <UploadCloud size={14} />
-                      Replace
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleRemoveImage}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-300 text-xs font-semibold rounded-full hover:bg-red-500/30 transition-all"
-                    >
-                      <X size={14} />
-                      Remove
-                    </button>
-                  </div>
-                  {/* File name badge */}
-                  <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/60 to-transparent">
-                    <p className="text-white text-[10px] font-medium truncate">
-                      {selectedFile instanceof File ? selectedFile.name : "Optimized Selection"}
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                /* ── Drop zone ── */
-                <div
-                  {...dragProps}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`
+                      className={`
                     relative flex flex-col items-center justify-center gap-3 rounded-xl
                     border-2 border-dashed cursor-pointer transition-all duration-200
                     py-10 px-6 select-none
                     ${isDragging
-                      ? "border-[var(--color-growth-green)] bg-[var(--color-growth-green)]/5 scale-[1.01]"
-                      : "border-[var(--border-color)]/50 bg-[var(--surface-hover)]/10 hover:border-[var(--color-growth-green)]/60 hover:bg-[var(--color-growth-green)]/5"
-                    }
+                          ? "border-[var(--color-growth-green)] bg-[var(--color-growth-green)]/5 scale-[1.01]"
+                          : "border-[var(--border-color)]/50 bg-[var(--surface-hover)]/10 hover:border-[var(--color-growth-green)]/60 hover:bg-[var(--color-growth-green)]/5"
+                        }
                   `}
-                >
-                  {/* Animated icon */}
-                  <div className={`
+                    >
+                      {/* Animated icon */}
+                      <div className={`
                     w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-200
                     ${isDragging
-                      ? "bg-[var(--color-growth-green)]/20 text-[var(--color-growth-green)] scale-110"
-                      : "bg-[var(--surface-hover)] text-[var(--text-muted)]"
-                    }
+                          ? "bg-[var(--color-growth-green)]/20 text-[var(--color-growth-green)] scale-110"
+                          : "bg-[var(--surface-hover)] text-[var(--text-muted)]"
+                        }
                   `}>
-                    <UploadCloud size={26} strokeWidth={1.5} className={isDragging ? "animate-bounce" : ""} />
-                  </div>
+                        <UploadCloud size={26} strokeWidth={1.5} className={isDragging ? "animate-bounce" : ""} />
+                      </div>
 
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-[var(--text-main)]">
-                      Drop your image here, or{" "}
-                      <span className="text-[var(--color-growth-green)] underline underline-offset-2 cursor-pointer">
-                        browse
-                      </span>
-                    </p>
-                    <p className="text-[11px] text-[var(--text-muted)] mt-1">
-                      Supports: JPG, JPEG2000, PNG · Max 5 MB · One image only
-                    </p>
-                  </div>
+                      <div className="text-center">
+                        <p className="text-sm font-semibold text-[var(--text-main)]">
+                          Drop your image here, or{" "}
+                          <span className="text-[var(--color-growth-green)] underline underline-offset-2 cursor-pointer">
+                            browse
+                          </span>
+                        </p>
+                        <p className="text-[11px] text-[var(--text-muted)] mt-1">
+                          Supports: JPG, JPEG2000, PNG · Max 5 MB · One image only
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Hidden file input */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/jp2"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                  />
                 </div>
-              )}
-
-              {/* Hidden file input */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/jpg,image/png,image/jp2"
-                  className="hidden"
-                  onChange={handleImageUpload}
-                />
-            </div>
-          </div>
+              </div>
 
             </>
           )}
@@ -540,9 +541,10 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: AddAssetMo
               type="submit"
               variant="primary"
               disabled={loading}
-              className="w-auto min-w-[160px] h-10 gap-2 px-8 py-2 text-sm font-bold bg-[var(--color-growth-green)] text-[var(--btn-primary-text)] border-0 transition-all rounded-full shadow-[0_2px_8px_var(--btn-primary-shadow)] hover:shadow-[0_4px_14px_var(--btn-primary-shadow)] hover:brightness-110 transform active:scale-95 flex items-center justify-center"
+              className="w-auto min-w-[160px] h-10 gap-2 px-8 py-2 text-sm font-bold bg-[var(--color-growth-green)] text-black border-0 transition-all rounded-full shadow-[0_2px_8px_var(--btn-primary-shadow)] hover:shadow-[0_4px_14px_var(--btn-primary-shadow)] hover:brightness-110 transform active:scale-95 flex items-center justify-center"
             >
-              {loading ? <Loader2 size={16} className="animate-spin" /> : "Create Asset"}
+              {loading ? <Loader2 size={16} className="animate-spin" /> : null}
+              Create Asset
             </Button>
           </div>
         </form>

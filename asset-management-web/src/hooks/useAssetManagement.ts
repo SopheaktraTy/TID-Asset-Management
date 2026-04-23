@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useDebounce } from "./useDebounce";
 import { getAssetsApi } from "../services/asset.service";
 import type { AssetDto } from "../types/asset.types";
 import type { AssetStatus, DeviceType } from "../types/asset.types";
@@ -9,6 +10,7 @@ export function useAssetManagement() {
 
   // Filters & pagination
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 400);
   const [statusFilter, setStatusFilter] = useState<AssetStatus | "">("");
   const [deviceTypeFilter, setDeviceTypeFilter] = useState<DeviceType | "">("");
   const [page, setPage] = useState(0);
@@ -35,20 +37,77 @@ export function useAssetManagement() {
     });
   };
 
-  // ── Auto-hide columns based on screen width on mount ──────────────────────
+  // ── Auto-hide columns based on screen width ────────────────────────────────
   useEffect(() => {
-    const width = window.innerWidth;
-    setHiddenCols((prev) => {
-      const next = new Set(prev);
-      if (width < 768) {
-        ["manufacturer", "specs", "createdAt", "updatedAt"].forEach((k) =>
-          next.add(k)
-        );
-      } else if (width < 1024) {
-        ["specs", "createdAt", "updatedAt"].forEach((k) => next.add(k));
-      }
-      return next;
-    });
+    let timeoutId: any;
+
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setHiddenCols((prev) => {
+        const next = new Set(prev);
+        // Columns we manage automatically
+        const autoCols = [
+          "image",
+          "serialNumber",
+          "manufacturer",
+          "deviceType",
+          "specs",
+          "latestUsed",
+          "createdAt",
+          "updatedAt",
+        ];
+        autoCols.forEach((k) => next.delete(k));
+
+        if (width < 640) {
+          // Extra small: hide almost everything
+          [
+            "image",
+            "serialNumber",
+            "manufacturer",
+            "deviceType",
+            "specs",
+            "latestUsed",
+            "createdAt",
+            "updatedAt",
+          ].forEach((k) => next.add(k));
+        } else if (width < 768) {
+          // Mobile: keep basic asset info & status
+          [
+            "serialNumber",
+            "manufacturer",
+            "deviceType",
+            "specs",
+            "latestUsed",
+            "createdAt",
+            "updatedAt",
+          ].forEach((k) => next.add(k));
+        } else if (width < 1024) {
+          // Tablet: hide secondary hardware info
+          ["serialNumber", "specs", "latestUsed", "createdAt", "updatedAt"].forEach((k) =>
+            next.add(k)
+          );
+        } else if (width < 1280) {
+          // Small laptop: hide timestamps & history
+          ["latestUsed", "createdAt", "updatedAt"].forEach((k) => next.add(k));
+        } else if (width < 1536) {
+          // Regular desktop: hide timestamps
+          ["createdAt", "updatedAt"].forEach((k) => next.add(k));
+        }
+        return next;
+      });
+    };
+
+    const debouncedResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(handleResize, 150);
+    };
+
+    handleResize();
+    window.addEventListener("resize", debouncedResize);
+    return () => {
+      window.removeEventListener("resize", debouncedResize);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const fetchAssets = useCallback(async () => {
@@ -57,7 +116,7 @@ export function useAssetManagement() {
       const result = await getAssetsApi({
         page,
         size: pageSize,
-        search: search || undefined,
+        search: debouncedSearch || undefined,
         status: statusFilter || undefined,
         deviceType: deviceTypeFilter || undefined,
         sortBy,
@@ -73,7 +132,7 @@ export function useAssetManagement() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, search, statusFilter, deviceTypeFilter, sortBy, sortDir]);
+  }, [page, pageSize, debouncedSearch, statusFilter, deviceTypeFilter, sortBy, sortDir]);
 
   useEffect(() => {
     fetchAssets();

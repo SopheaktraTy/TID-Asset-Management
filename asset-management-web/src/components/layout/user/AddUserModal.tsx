@@ -5,7 +5,9 @@ import {
   EyeOff,
   User as UserIcon,
   Fingerprint,
+  Pencil,
   ShieldCheck,
+  Trash2,
 } from "lucide-react";
 
 import { Button } from "../../ui/Button";
@@ -16,7 +18,7 @@ import { DropdownList } from "../../ui/DropdownList";
 import { DropdownReverseList } from "../../ui/DropdownReverseList";
 import { ToggleSwitch } from "../../ui/ToggleSwitch";
 import { Controller } from "react-hook-form";
-import { Camera, X } from "lucide-react";
+import { Camera } from "lucide-react";
 
 import { useUserForm } from "../../../hooks/useUserForm";
 import type { CreateUserFormValues, UserDto } from "../../../types/user.types";
@@ -201,19 +203,31 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
                         </div>
                       )}
                     </div>
-                    {tempImage && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (tempImage) {
                           handleRemoveImage();
-                        }}
-                        className="absolute inset-0 bg-red-300/30 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-30 backdrop-blur-[1.5px] scale-95 group-hover:scale-100"
-                        title="Remove image"
-                      >
-                        <X size={15} strokeWidth={3} className="drop-shadow-lg" />
-                      </button>
-                    )}
+                        } else {
+                          fileInputRef.current?.click();
+                        }
+                      }}
+                      className={`absolute bottom-0 right-0 w-7 h-7 border-2 border-[var(--surface)] rounded-full flex items-center justify-center text-white shadow-md z-40 transition-all duration-300 ${tempImage
+                        ? "bg-[var(--color-growth-green)] group-hover:bg-red-500"
+                        : "bg-[var(--color-growth-green)]"
+                        }`}
+                      title={tempImage ? "Remove image" : "Upload image"}
+                    >
+                      {tempImage ? (
+                        <div className="relative w-full h-full flex items-center justify-center">
+                          <Trash2 size={12} className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          <Pencil size={12} className="absolute opacity-100 group-hover:opacity-0 transition-opacity duration-300" />
+                        </div>
+                      ) : (
+                        <Pencil size={12} />
+                      )}
+                    </button>
                     <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
                   </div>
                 </div>

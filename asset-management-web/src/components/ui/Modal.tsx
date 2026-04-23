@@ -27,7 +27,7 @@ export function Modal({ isOpen, onClose, children, maxWidth = "max-w-[500px]" }:
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 transition-opacity duration-300"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
       onMouseDown={(e) => {
         // Only set the flag if mousedown lands directly on the backdrop
         mouseDownOnBackdrop.current = e.target === e.currentTarget;
@@ -41,7 +41,7 @@ export function Modal({ isOpen, onClose, children, maxWidth = "max-w-[500px]" }:
       }}
     >
       <div
-        className={`w-full ${maxWidth} bg-[var(--bg)] rounded-3xl shadow-2xl overflow-hidden border-none transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 pointer-events-auto flex flex-col max-h-[90vh] transform scale-100 translate-z-0`}
+        className={`w-full ${maxWidth} bg-[var(--bg)] rounded-3xl shadow-2xl overflow-hidden border border-[var(--border-color)]/10 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 pointer-events-auto flex flex-col max-h-[90vh] transform scale-100 translate-z-0`}
         onClick={(e) => e.stopPropagation()}
       >
 

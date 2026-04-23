@@ -21,9 +21,6 @@ public class AssetAssignment {
     @JoinColumn(name = "employee_id", nullable = false)
     private com.tid.asset_management_bridge.employee_management_module.entity.Employee employee;
 
-    @Column(name = "assigned_by")
-    private String assignedBy;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_by_user_id")
     private com.tid.asset_management_bridge.auth_module.entity.User assignedByUser;
@@ -36,9 +33,6 @@ public class AssetAssignment {
 
     @Column(name = "return_condition", length = 100)
     private String returnCondition;
-
-    @Column(name = "confirm_return_by", length = 100)
-    private String confirmReturnBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "confirm_return_by_user_id")
@@ -92,13 +86,6 @@ public class AssetAssignment {
         this.employee = employee;
     }
 
-    public String getAssignedBy() {
-        return assignedBy;
-    }
-
-    public void setAssignedBy(String assignedBy) {
-        this.assignedBy = assignedBy;
-    }
 
     public com.tid.asset_management_bridge.auth_module.entity.User getAssignedByUser() {
         return assignedByUser;
@@ -132,13 +119,6 @@ public class AssetAssignment {
         this.returnCondition = returnCondition;
     }
 
-    public String getConfirmReturnBy() {
-        return confirmReturnBy;
-    }
-
-    public void setConfirmReturnBy(String confirmReturnBy) {
-        this.confirmReturnBy = confirmReturnBy;
-    }
 
     public com.tid.asset_management_bridge.auth_module.entity.User getConfirmReturnByUser() {
         return confirmReturnByUser;

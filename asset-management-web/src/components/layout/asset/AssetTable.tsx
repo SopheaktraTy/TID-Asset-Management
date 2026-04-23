@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { HardDrive } from "lucide-react";
 import type { AssetDto, AssetStatus, DeviceType } from "../../../types/asset.types";
 import { Table, type ColumnDef } from "../../ui/Table";
+import { ContextMenu, type ContextMenuOption } from "../../ui/ContextMenu";
 import { formatDate } from "../../../utils/format";
 import { getSafeImageUrl } from "../../../utils/image";
 
@@ -8,6 +10,7 @@ import { getSafeImageUrl } from "../../../utils/image";
 export const ASSET_TABLE_COLUMN_OPTIONS = [
   { key: "image", label: "Image" },
   { key: "asset", label: "Asset" },
+  { key: "serialNumber", label: "Serial Number" },
   { key: "deviceType", label: "Type" },
   { key: "status", label: "Status" },
   { key: "manufacturer", label: "Manufacturer" },
@@ -37,10 +40,10 @@ const DEVICE_TYPE_CONFIG: Record<
   DeviceType,
   { bg: string; text: string; label: string }
 > = {
-  LAPTOP: { bg: "bg-blue-600/20 border border-blue-600/40", text: "text-blue-600 dark:text-blue-400", label: "Laptop" },
-  DESKTOP: { bg: "bg-violet-600/20 border border-violet-600/40", text: "text-violet-600 dark:text-violet-400", label: "Desktop" },
-  PORTABLE_MONITOR: { bg: "bg-cyan-600/20 border border-cyan-600/40", text: "text-cyan-600 dark:text-cyan-400", label: "Portable Monitor" },
-  STAND_MONITOR: { bg: "bg-gray-600/20 border border-gray-600/40", text: "text-gray-700 dark:text-gray-300", label: "Stand Monitor" },
+  LAPTOP: { bg: "bg-[#18181b] border border-white/5", text: "text-white", label: "Laptop" },
+  DESKTOP: { bg: "bg-[#18181b] border border-white/5", text: "text-white", label: "Desktop" },
+  PORTABLE_MONITOR: { bg: "bg-[#18181b] border border-white/5", text: "text-white", label: "Portable Monitor" },
+  STAND_MONITOR: { bg: "bg-[#18181b] border border-white/5", text: "text-white", label: "Stand Monitor" },
 };
 
 // ── Compact hardware spec builder ─────────────────────────────────────────────
@@ -63,6 +66,8 @@ interface AssetTableProps {
   hiddenCols: Set<string>;
   onSort: (field: string, dir?: "asc" | "desc") => void;
   onRowClick: (asset: AssetDto) => void;
+  onEdit?: (asset: AssetDto) => void;
+  onDelete?: (asset: AssetDto) => void;
   menuClassName?: string;
 }
 
@@ -75,8 +80,27 @@ export default function AssetTable({
   hiddenCols,
   onSort,
   onRowClick,
+  onEdit,
+  onDelete,
   menuClassName = "",
 }: AssetTableProps) {
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; asset: AssetDto } | null>(null);
+
+  const handleRowContextMenu = (e: React.MouseEvent, asset: AssetDto) => {
+    setContextMenu({ x: e.clientX, y: e.clientY, asset });
+  };
+
+  const contextMenuOptions: ContextMenuOption[] = contextMenu ? [
+    {
+      label: "Edit Asset",
+      onClick: () => onEdit?.(contextMenu.asset),
+    },
+    {
+      label: "Delete Asset",
+      onClick: () => onDelete?.(contextMenu.asset),
+      variant: "danger",
+    },
+  ] : [];
   const columns: ColumnDef<AssetDto>[] = [
     {
       key: "image",
@@ -117,6 +141,16 @@ export default function AssetTable({
       ),
     },
     {
+      key: "serialNumber",
+      header: "Serial Number",
+      sortable: true,
+      cell: (asset) => (
+        <span className="text-xs font-mono text-[var(--text-main)]">
+          {asset.serialNumber || "–"}
+        </span>
+      ),
+    },
+    {
       key: "deviceType",
       header: "Type",
       sortable: true,
@@ -128,7 +162,7 @@ export default function AssetTable({
         };
         return (
           <span
-            className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight ${cfg.bg} ${cfg.text}`}
+            className={`inline-flex items-center px-3 py-1 rounded-sm text-[9px] font-black uppercase tracking-widest ${cfg.bg} ${cfg.text}`}
           >
             {cfg.label}
           </span>
@@ -220,17 +254,30 @@ export default function AssetTable({
   );
 
   return (
-    <Table
-      data={assets}
-      columns={visibleColumns}
-      loading={loading}
-      pageSize={pageSize}
-      sortBy={sortBy}
-      sortDir={sortDir}
-      onSort={onSort}
-      onRowClick={onRowClick}
-      emptyMessage={EmptyState}
-      menuClassName={menuClassName}
-    />
+    <>
+      <Table
+        data={assets}
+        columns={visibleColumns}
+        loading={loading}
+        pageSize={pageSize}
+        sortBy={sortBy}
+        sortDir={sortDir}
+        onSort={onSort}
+        onRowClick={onRowClick}
+        onRowContextMenu={handleRowContextMenu}
+        highlightedRowId={contextMenu?.asset.id}
+        emptyMessage={EmptyState}
+        menuClassName={menuClassName}
+      />
+
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          options={contextMenuOptions}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
+    </>
   );
 }

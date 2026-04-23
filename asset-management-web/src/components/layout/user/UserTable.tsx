@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Users } from "lucide-react";
 import type { UserDto } from "../../../types/user.types";
 import { Table, type ColumnDef } from "../../ui/Table";
+import { ContextMenu, type ContextMenuOption } from "../../ui/ContextMenu";
 import { 
   toPascalCase, 
   formatDate, 
@@ -28,6 +30,9 @@ interface UserTableProps {
   hiddenCols: Set<string>;
   onSort: (field: string, dir?: "asc" | "desc") => void;
   onRowClick: (user: UserDto) => void;
+  onEdit?: (user: UserDto) => void;
+  onDelete?: (user: UserDto) => void;
+  onResetPassword?: (user: UserDto) => void;
   menuClassName?: string;
 }
 
@@ -40,8 +45,32 @@ export default function UserTable({
   hiddenCols,
   onSort,
   onRowClick,
+  onEdit,
+  onDelete,
+  onResetPassword,
   menuClassName = "",
 }: UserTableProps) {
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; user: UserDto } | null>(null);
+
+  const handleRowContextMenu = (e: React.MouseEvent, user: UserDto) => {
+    setContextMenu({ x: e.clientX, y: e.clientY, user });
+  };
+
+  const contextMenuOptions: ContextMenuOption[] = contextMenu ? [
+    {
+      label: "Edit User",
+      onClick: () => onEdit?.(contextMenu.user),
+    },
+    {
+      label: "Reset Password",
+      onClick: () => onResetPassword?.(contextMenu.user),
+    },
+    {
+      label: "Delete User",
+      onClick: () => onDelete?.(contextMenu.user),
+      variant: "danger",
+    },
+  ] : [];
   const columns: ColumnDef<UserDto>[] = [
     {
       key: "username",
@@ -146,17 +175,30 @@ export default function UserTable({
   );
 
   return (
-    <Table
-      data={users}
-      columns={visibleColumns}
-      loading={loading}
-      pageSize={pageSize}
-      sortBy={sortBy}
-      sortDir={sortDir}
-      onSort={onSort}
-      onRowClick={onRowClick}
-      emptyMessage={EmptyState}
-      menuClassName={menuClassName}
-    />
+    <>
+      <Table
+        data={users}
+        columns={visibleColumns}
+        loading={loading}
+        pageSize={pageSize}
+        sortBy={sortBy}
+        sortDir={sortDir}
+        onSort={onSort}
+        onRowClick={onRowClick}
+        onRowContextMenu={handleRowContextMenu}
+        highlightedRowId={contextMenu?.user.id}
+        emptyMessage={EmptyState}
+        menuClassName={menuClassName}
+      />
+
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          options={contextMenuOptions}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
+    </>
   );
 }

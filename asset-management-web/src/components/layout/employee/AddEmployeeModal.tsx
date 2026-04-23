@@ -4,6 +4,7 @@ import {
   X,
   User as UserIcon,
   Pencil,
+  Trash2,
 } from "lucide-react";
 
 import { Button } from "../../ui/Button";
@@ -153,22 +154,31 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
                       </div>
                     )}
                   </div>
-                  <div className="absolute bottom-1 right-1 w-8 h-8 bg-[var(--color-growth-green)] border-2 border-[var(--surface)] rounded-full flex items-center justify-center text-white shadow-md z-40 pointer-events-none">
-                    <Pencil size={14} />
-                  </div>
-                  {tempImage && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (tempImage) {
                         handleRemoveImage();
-                      }}
-                      className="absolute inset-0 bg-red-300/30 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-30 backdrop-blur-[1.5px] scale-95 group-hover:scale-100"
-                      title="Remove image"
-                    >
-                      <X size={15} strokeWidth={3} className="drop-shadow-lg" />
-                    </button>
-                  )}
+                      } else {
+                        fileInputRef.current?.click();
+                      }
+                    }}
+                    className={`absolute bottom-1 right-1 w-8 h-8 border-2 border-[var(--surface)] rounded-full flex items-center justify-center text-white shadow-md z-40 transition-all duration-300 ${tempImage
+                      ? "bg-[var(--color-growth-green)] group-hover:bg-red-500"
+                      : "bg-[var(--color-growth-green)]"
+                      }`}
+                    title={tempImage ? "Remove image" : "Upload image"}
+                  >
+                    {tempImage ? (
+                      <div className="relative w-full h-full flex items-center justify-center">
+                        <Trash2 size={14} className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <Pencil size={14} className="absolute opacity-100 group-hover:opacity-0 transition-opacity duration-300" />
+                      </div>
+                    ) : (
+                      <Pencil size={14} />
+                    )}
+                  </button>
                   <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
                 </div>
               </div>
@@ -242,7 +252,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
                 type="button"
                 variant="outline"
                 onClick={handleClose}
-                className="flex-1 h-10 rounded-full font-bold  text-xs border-[var(--border-color)]/30"
+                className="flex-1 h-10 bg-transparent border-[var(--border-color)] text-[var(--text-main)] hover:bg-[var(--surface-hover)] rounded-full font-bold text-sm transition-all border-opacity-30"
               >
                 Cancel
               </Button>
@@ -250,9 +260,9 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
                 type="submit"
                 variant="primary"
                 disabled={loading}
-                className="flex-[1.5] h-10 bg-[var(--color-growth-green)] rounded-full font-bold  text-xs gap-2 shadow-lg shadow-[var(--color-growth-green)]/10"
+                className="flex-[1.5] h-10 bg-[var(--color-growth-green)] text-black rounded-full font-bold text-sm gap-2 shadow-lg shadow-[var(--color-growth-green)]/10 transition-all hover:brightness-110 active:scale-95"
               >
-                {loading ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
+                {loading ? <Loader2 size={14} className="animate-spin" /> : null}
                 Add Employee
               </Button>
             </div>
@@ -272,6 +282,4 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
   );
 }
 
-const Plus = ({ size }: { size: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-);
+

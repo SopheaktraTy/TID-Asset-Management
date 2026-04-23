@@ -19,17 +19,18 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
     React.useImperativeHandle(ref, () => inputRef.current!);
 
     React.useEffect(() => {
-      if (value && typeof value === 'string' && value.length > 0) {
+      const val = typeof value === 'string' ? value : '';
+      if (val.length > 0) {
         const filtered = suggestions.filter(s => 
-          s.toLowerCase().includes(value.toLowerCase()) && 
-          s.toLowerCase() !== value.toLowerCase()
+          s.toLowerCase().includes(val.toLowerCase()) && 
+          s.toLowerCase() !== val.toLowerCase()
         );
         setFilteredSuggestions(filtered);
         setIsOpen(filtered.length > 0);
       } else {
-        setIsOpen(false);
-        setFilteredSuggestions([]);
-        setActiveIndex(-1);
+        // When empty, show all suggestions (or top 10)
+        setFilteredSuggestions(suggestions);
+        // Don't auto-open here, let onFocus handle it
       }
     }, [value, suggestions]);
 
@@ -106,6 +107,10 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
           onKeyDown={handleKeyDown}
           onFocus={() => {
             if (filteredSuggestions.length > 0) setIsOpen(true);
+          }}
+          onBlur={() => {
+            // Delay closing to allow onClick on suggestions to fire
+            setTimeout(() => setIsOpen(false), 200);
           }}
           autoComplete="off"
         />

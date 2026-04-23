@@ -32,18 +32,30 @@ export const UserFullDetails: React.FC<UserFullDetailsProps> = ({
             user.username ? user.username.substring(0, 2) : "U"
           )}
         </div>
-        <div className="flex flex-col">
-          <h2 className="text-xl font-bold">{user.username}</h2>
-          <span className="text-[var(--text-muted)] text-sm">{user.email}</span>
-          <div className="mt-1 px-3 py-1 bg-[#12131a] border border-[#292a33] text-xs text-gray-300 rounded-md inline-block w-max">
-            User ID: {user.id}
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-black text-[var(--text-main)] ">
+            {user.username}
+          </h2>
+          <div className="flex items-center gap-2.5">
+            <span className="text-[13px] font-medium text-[var(--text-muted)] opacity-80">{user.email}</span>
+            <span className="text-[var(--text-muted)] opacity-30">•</span>
+            <span
+              className={`text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-[0.1em] shadow-sm ${user.status === 'ACTIVE'
+                ? 'bg-[#10b981]/15 text-[#10b981]'
+                : user.status === 'SUSPENDED'
+                  ? 'bg-red-500/15 text-red-500'
+                  : 'bg-[var(--text-muted)]/15 text-[var(--text-muted)]'
+                }`}
+            >
+              {user.status || 'INACTIVE'}
+            </span>
           </div>
         </div>
       </div>
 
       {/* Tabs Placeholder */}
       <div className="flex items-center gap-6 border-b border-[var(--border-color)]">
-        <button className="flex items-center gap-2 pb-3 border-b-2 border-blue-500 text-blue-500 font-medium text-xs">
+        <button className="flex items-center gap-2 pb-3 border-b-2 border-[var(--color-growth-green)] text-[var(--color-growth-green)] font-medium text-xs transition-all">
           <UserIcon size={16} />
           Profile
         </button>
@@ -82,12 +94,12 @@ export const UserFullDetails: React.FC<UserFullDetailsProps> = ({
             <div className="flex items-center gap-2">
               <div className={`w-1.5 h-1.5 rounded-full ${user.status === 'ACTIVE' ? 'bg-emerald-500' :
                 user.status === 'SUSPENDED' ? 'bg-red-500' :
-                'bg-gray-400 dark:bg-gray-500'
-              }`}></div>
+                  'bg-gray-400 dark:bg-gray-500'
+                }`}></div>
               <span className={`${user.status === 'ACTIVE' ? 'text-emerald-600 dark:text-emerald-400' :
                 user.status === 'SUSPENDED' ? 'text-red-500 dark:text-red-400' :
-                'text-[var(--text-muted)]'
-              } font-medium`}>
+                  'text-[var(--text-muted)]'
+                } font-medium`}>
                 {user.status === 'ACTIVE' ? 'Active' : user.status === 'SUSPENDED' ? 'Suspended' : 'Inactive'}
               </span>
             </div>
@@ -145,11 +157,10 @@ export const UserFullDetails: React.FC<UserFullDetailsProps> = ({
               <p className="text-[var(--text-muted)] text-sm">No specific permissions assigned.</p>
             </div>
           ) : (
-            <div className={`grid grid-cols-1 gap-4 ${
-              Object.keys(user.permissions || {}).length >= 4 ? 'lg:grid-cols-4 md:grid-cols-2' : 
-              Object.keys(user.permissions || {}).length === 3 ? 'lg:grid-cols-3 md:grid-cols-3' : 
-              'md:grid-cols-2'
-            }`}>
+            <div className={`grid grid-cols-1 gap-4 ${Object.keys(user.permissions || {}).length >= 4 ? 'lg:grid-cols-4 md:grid-cols-2' :
+              Object.keys(user.permissions || {}).length === 3 ? 'lg:grid-cols-3 md:grid-cols-3' :
+                'md:grid-cols-2'
+              }`}>
               {Object.entries(user.permissions || {}).map(([module, perms]) => (
                 <div key={module} className="flex flex-col bg-[var(--surface)] dark:bg-[var(--bg)] border border-[var(--border-color)]/60 rounded-lg p-4 transition-all hover:border-[var(--border-color)] hover:shadow-sm">
                   <h4 className="text-[var(--text-main)] font-bold text-xs mb-1 uppercase tracking-wider">{module.replace(/_/g, ' ')}</h4>

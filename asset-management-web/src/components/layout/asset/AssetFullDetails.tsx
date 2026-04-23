@@ -150,7 +150,7 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
             }`}
         >
           <Package size={16} />
-          Details & Specifications
+          Asset Specifications
         </button>
         <button
           onClick={() => setActiveTab("assignment")}
@@ -160,7 +160,7 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
             }`}
         >
           <History size={16} />
-          Assignment & History
+          Usage & Returns
         </button>
       </div>
 

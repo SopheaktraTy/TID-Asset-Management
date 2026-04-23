@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Loader2, Cpu, Tag, ClipboardList, Laptop, Monitor, MonitorSmartphone, MonitorPlay, ImagePlus, X, UploadCloud, HardDrive } from "lucide-react";
+import { Loader2, Cpu, Tag, ClipboardList, Laptop, Monitor, MonitorSmartphone, MonitorPlay, ImagePlus, UploadCloud, HardDrive, Trash2 } from "lucide-react";
 import { Controller } from "react-hook-form";
 
 import { Button } from "../../ui/Button";
@@ -27,6 +27,7 @@ import { editAssetSchema } from "../../../types/asset.types";
 import { updateAssetApi } from "../../../services/asset.service";
 import { useTheme } from "../../../hooks/useTheme";
 import { useImageUpload } from "../../../hooks/useImageUpload";
+import { getSafeImageUrl } from "../../../utils/image";
 
 // Baker Tilly logo assets
 import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Growth Symbol Charcoal.png";
@@ -224,16 +225,16 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
           </div>
         </div>
 
-        {/* Asset Summary Card - Full Height Visual Style */}
+
         {/* Asset Summary Card - Minimalist Style */}
-        <div className="relative flex gap-0 min-h-[120px] rounded-[1rem] bg-[var(--surface-hover)]/40 border border-dashed border-[var(--border-color)] dark:border-[var(--text-muted)]/30 shadow-sm mb-6 transition-all duration-500 overflow-hidden group/summary">
-          <div className="w-40 self-stretch bg-[var(--surface-hover)]/20 flex items-center justify-center shrink-0 p-2.5 relative rounded-l-[1.5rem] overflow-hidden">
+        <div className="relative flex gap-0 min-h-[120px] rounded-2xl bg-[var(--surface-hover)]/10 border border-dashed border-[var(--border-color)]/50 shadow-sm mb-6 transition-all duration-500 overflow-hidden group/summary">
+          <div className="w-40 self-stretch bg-[var(--surface-hover)]/5 flex items-center justify-center shrink-0 p-3 relative rounded-l-2xl overflow-hidden">
             <div className={`w-full h-full rounded-xl overflow-hidden shadow-sm relative transition-all duration-700 ring-1
                 ${(STATUS_STYLES[asset.status] || STATUS_STYLES.OTHER).ring} 
                 ${(STATUS_STYLES[asset.status] || STATUS_STYLES.OTHER).shadow}`}
             >
               {imagePreview ? (
-                <img src={imagePreview} alt={asset.deviceName} className="w-full h-full object-cover" />
+                <img src={getSafeImageUrl(imagePreview)} alt={asset.deviceName} className="w-full h-full object-cover" />
               ) : (
                 <div className="flex items-center justify-center w-full h-full bg-[var(--surface)] text-[var(--color-growth-green)]">
                   <div className="scale-125 opacity-80">
@@ -306,7 +307,7 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
 
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
           {/* ── Asset Identity ── */}
-          <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
+          <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
             <div className="px-1 mb-3 flex items-center gap-2">
               <Tag size={16} className="text-[var(--color-growth-green)]" />
               <h3 className="text-sm font-bold text-[var(--text-main)]">Asset Identity</h3>
@@ -365,7 +366,7 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
           {deviceType && (
             <>
               {/* ── Hardware Specifications ── */}
-              <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
+              <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
                 <div className="px-1 mb-3 flex items-center gap-2">
                   <Cpu size={16} className="text-[var(--color-growth-green)]" />
                   <h3 className="text-sm font-bold text-[var(--text-main)]">Hardware Specifications</h3>
@@ -483,7 +484,7 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
 
               {/* ── Software & Network ── */}
               {(deviceType === "LAPTOP" || deviceType === "DESKTOP") && (
-                <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
+                <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
                   <div className="px-1 mb-3 flex items-center gap-2">
                     <MonitorSmartphone size={16} className="text-[var(--color-growth-green)]" />
                     <h3 className="text-sm font-bold text-[var(--text-main)]">Software & Network</h3>
@@ -543,7 +544,7 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
 
 
               {/* ── Status & Condition ── */}
-              <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
+              <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
                 <div className="px-1 mb-3 flex items-center gap-2">
                   <ClipboardList size={16} className="text-[var(--color-growth-green)]" />
                   <h3 className="text-sm font-bold text-[var(--text-main)]">Status & Condition</h3>
@@ -595,7 +596,7 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
               </div>
 
               {/* ── Asset Image ── */}
-              <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--surface-hover)]/10">
+              <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5">
                 <div className="px-1 mb-3 flex items-center gap-2">
                   <ImagePlus size={16} className="text-[var(--color-growth-green)]" />
                   <h3 className="text-sm font-bold text-[var(--text-main)]">Asset Image</h3>
@@ -606,7 +607,7 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
                     /* ── Preview card ── */
                     <div className="relative group rounded-xl overflow-hidden border border-[var(--border-color)]/40 bg-[var(--surface-hover)]/20">
                       <img
-                        src={imagePreview}
+                        src={getSafeImageUrl(imagePreview)}
                         alt="Asset preview"
                         className="w-full h-72 object-contain bg-[var(--surface-hover)]/10"
                         onError={() => {
@@ -629,7 +630,7 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
                           onClick={handleRemoveImage}
                           className="flex items-center gap-1.5 px-4 py-2 bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-300 text-xs font-semibold rounded-full hover:bg-red-500/30 transition-all"
                         >
-                          <X size={14} />
+                          <Trash2 size={14} />
                           Remove
                         </button>
                       </div>

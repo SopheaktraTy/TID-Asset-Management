@@ -1,15 +1,21 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Users, ChevronRight as ArrowRight } from "lucide-react";
 import Header from "../components/layout/Header";
 import AddUserModal from "../components/layout/user/AddUserModal";
 import EditUserModal from "../components/layout/user/EditUserModal";
+import DeleteUserModal from "../components/layout/user/DeleteUserModal";
+import ResetPasswordModal from "../components/layout/user/ResetPasswordModal";
 import UserToolbar from "../components/layout/user/UserToolbar";
 import UserTable, { USER_TABLE_COLUMN_OPTIONS } from "../components/layout/user/UserTable";
+import type { UserDto } from "../types/user.types";
 import Pagination from "../components/ui/Pagination";
 import { useUserManagement } from "../hooks/useUserManagement";
 
 export default function UserManagementPage() {
   const navigate = useNavigate();
+  const [deleteUser, setDeleteUser] = useState<UserDto | null>(null);
+  const [resetUser, setResetUser] = useState<UserDto | null>(null);
   const {
     users,
     setUsers,
@@ -81,6 +87,9 @@ export default function UserManagementPage() {
             hiddenCols={hiddenCols}
             onSort={handleSort}
             onRowClick={(user) => navigate(`/user-detail/${user.id}`)}
+            onEdit={setEditUser}
+            onDelete={setDeleteUser}
+            onResetPassword={setResetUser}
             menuClassName="bg-[var(--bg)]"
           />
 
@@ -114,6 +123,23 @@ export default function UserManagementPage() {
           setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
           setEditUser(null);
         }}
+      />
+
+      <DeleteUserModal
+        isOpen={!!deleteUser}
+        user={deleteUser}
+        onClose={() => setDeleteUser(null)}
+        onDeleted={(userId) => {
+          setUsers((prev) => prev.filter((u) => u.id !== userId));
+          setDeleteUser(null);
+        }}
+      />
+
+      <ResetPasswordModal
+        isOpen={!!resetUser}
+        user={resetUser}
+        onClose={() => setResetUser(null)}
+        onSuccess={() => setResetUser(null)}
       />
     </div>
   );

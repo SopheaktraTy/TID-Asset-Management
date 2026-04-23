@@ -1,6 +1,8 @@
-import { Edit2, Trash2, Users } from "lucide-react";
+import { useState } from "react";
+import { MoreVertical, Users } from "lucide-react";
 import type { EmployeeDto } from "../../../types/employee.types";
 import { Table, type ColumnDef } from "../../ui/Table";
+import { ContextMenu, type ContextMenuOption } from "../../ui/ContextMenu";
 import {
   toPascalCase,
   formatDate,
@@ -43,6 +45,23 @@ export default function EmployeeTable({
   onRowClick,
   menuClassName = "",
 }: EmployeeTableProps) {
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; employee: EmployeeDto } | null>(null);
+
+  const handleRowContextMenu = (e: React.MouseEvent, employee: EmployeeDto) => {
+    setContextMenu({ x: e.clientX, y: e.clientY, employee });
+  };
+
+  const contextMenuOptions: ContextMenuOption[] = contextMenu ? [
+    {
+      label: "Edit Employee",
+      onClick: () => onEdit(contextMenu.employee),
+    },
+    {
+      label: "Delete Employee",
+      onClick: () => onDelete(contextMenu.employee),
+      variant: "danger",
+    },
+  ] : [];
   const columns: ColumnDef<EmployeeDto>[] = [
     {
       key: "username",
@@ -68,9 +87,7 @@ export default function EmployeeTable({
             )}
           </div>
           <div className="min-w-0 flex flex-col leading-tight">
-            <p className="text-sm font-bold text-[var(--text-main)] truncate">{emp?.username || "Unknown"}</p>
-            <p className="text-xs text-[var(--text-muted)] truncate mt-0.5 tracking-tight opacity-70">Employee ID: #{emp?.id}</p>
-          </div>
+            <p className="text-sm font-bold text-[var(--text-main)] truncate">{emp?.username || "Unknown"}</p>          </div>
         </div>
       ),
     },
@@ -100,20 +117,20 @@ export default function EmployeeTable({
       key: "actions",
       header: "Actions",
       cell: (emp) => (
-        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
           <button
-            onClick={() => onEdit(emp)}
-            className="p-1.5 rounded-lg hover:bg-[var(--surface-hover)] text-blue-500 transition-colors"
-            title="Edit Employee"
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              setContextMenu({
+                x: rect.left,
+                y: rect.bottom + 5,
+                employee: emp
+              });
+            }}
+            className="p-1.5 rounded-lg hover:bg-[var(--surface-hover)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all duration-200"
+            title="More Actions"
           >
-            <Edit2 size={14} />
-          </button>
-          <button
-            onClick={() => onDelete(emp)}
-            className="p-1.5 rounded-lg hover:bg-red-500/10 text-red-500 transition-colors"
-            title="Delete Employee"
-          >
-            <Trash2 size={14} />
+            <MoreVertical size={16} />
           </button>
         </div>
       ),
@@ -132,17 +149,30 @@ export default function EmployeeTable({
   );
 
   return (
-    <Table
-      data={employees}
-      columns={visibleColumns}
-      loading={loading}
-      pageSize={pageSize}
-      sortBy={sortBy}
-      sortDir={sortDir}
-      onSort={onSort}
-      onRowClick={onRowClick}
-      emptyMessage={EmptyState}
-      menuClassName={menuClassName}
-    />
+    <>
+      <Table
+        data={employees}
+        columns={visibleColumns}
+        loading={loading}
+        pageSize={pageSize}
+        sortBy={sortBy}
+        sortDir={sortDir}
+        onSort={onSort}
+        onRowClick={onRowClick}
+        onRowContextMenu={handleRowContextMenu}
+        highlightedRowId={contextMenu?.employee.id}
+        emptyMessage={EmptyState}
+        menuClassName={menuClassName}
+      />
+
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          options={contextMenuOptions}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
+    </>
   );
 }

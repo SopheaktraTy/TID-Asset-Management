@@ -34,18 +34,30 @@ export function useUserManagement() {
     });
   };
 
-  // ── Auto-hide columns based on screen width on mount ────────────────────────
+  // ── Auto-hide columns based on screen width ────────────────────────────────
   useEffect(() => {
-    const width = window.innerWidth;
-    setHiddenCols((prev) => {
-      const next = new Set(prev);
-      if (width < 768) {
-        ["department", "created_at", "updated_at"].forEach(k => next.add(k));
-      } else if (width < 1024) {
-        ["created_at", "updated_at"].forEach(k => next.add(k));
-      }
-      return next;
-    });
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setHiddenCols((prev) => {
+        const next = new Set(prev);
+        // Reset auto-managed columns to ensure clean state on resize
+        const autoCols = ["department", "created_at", "updated_at"];
+        autoCols.forEach((k) => next.delete(k));
+
+        if (width < 768) {
+          ["department", "created_at", "updated_at"].forEach((k) =>
+            next.add(k)
+          );
+        } else if (width < 1024) {
+          ["created_at", "updated_at"].forEach((k) => next.add(k));
+        }
+        return next;
+      });
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const fetchUsers = useCallback(async () => {

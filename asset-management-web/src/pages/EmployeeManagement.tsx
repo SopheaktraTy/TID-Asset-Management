@@ -6,6 +6,7 @@ import Pagination from "../components/ui/Pagination";
 import { useEmployeeManagement } from "../hooks/useEmployeeManagement";
 import AddEmployeeModal from "../components/layout/employee/AddEmployeeModal";
 import EditEmployeeModal from "../components/layout/employee/EditEmployeeModal";
+import DeleteEmployeeModal from "../components/layout/employee/DeleteEmployeeModal";
 
 export default function EmployeeManagementPage() {
   const {
@@ -30,7 +31,8 @@ export default function EmployeeManagementPage() {
     setAddOpen,
     editEmployee,
     setEditEmployee,
-    handleDelete,
+    deleteEmployee,
+    setDeleteEmployee,
   } = useEmployeeManagement();
 
   return (
@@ -72,11 +74,7 @@ export default function EmployeeManagementPage() {
             onSort={handleSort}
             hiddenCols={hiddenCols}
             onEdit={(emp) => setEditEmployee(emp)}
-            onDelete={(emp) => {
-              if (window.confirm("Are you sure you want to delete this employee?")) {
-                handleDelete(emp.id);
-              }
-            }}
+            onDelete={(emp) => setDeleteEmployee(emp)}
             menuClassName="bg-[var(--bg)]"
           />
 
@@ -109,6 +107,16 @@ export default function EmployeeManagementPage() {
         onUpdated={(updated) => {
           setEmployees((prev: any[]) => prev.map((e) => (e.id === updated.id ? updated : e)));
           setEditEmployee(null);
+        }}
+      />
+
+      <DeleteEmployeeModal
+        isOpen={!!deleteEmployee}
+        employee={deleteEmployee}
+        onClose={() => setDeleteEmployee(null)}
+        onDeleted={(id) => {
+          setEmployees((prev: any[]) => prev.filter((e) => e.id !== id));
+          setDeleteEmployee(null);
         }}
       />
     </div>

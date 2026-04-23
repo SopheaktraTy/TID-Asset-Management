@@ -12,12 +12,10 @@ public class AssignmentResponse {
     private String assetTag;
     private String deviceName;
     private EmployeeResponse employee;
-    private String assignedBy;
     private UserResponse assignedByUser;
     private LocalDate assignedDate;
     private LocalDate returnedDate;
     private String returnCondition;
-    private String confirmReturnBy;
     private UserResponse confirmReturnByUser;
 
     public Long getId() {
@@ -60,13 +58,6 @@ public class AssignmentResponse {
         this.employee = employee;
     }
 
-    public String getAssignedBy() {
-        return assignedBy;
-    }
-
-    public void setAssignedBy(String assignedBy) {
-        this.assignedBy = assignedBy;
-    }
 
     public LocalDate getAssignedDate() {
         return assignedDate;
@@ -92,13 +83,6 @@ public class AssignmentResponse {
         this.returnCondition = returnCondition;
     }
 
-    public String getConfirmReturnBy() {
-        return confirmReturnBy;
-    }
-
-    public void setConfirmReturnBy(String confirmReturnBy) {
-        this.confirmReturnBy = confirmReturnBy;
-    }
 
     public UserResponse getAssignedByUser() {
         return assignedByUser;

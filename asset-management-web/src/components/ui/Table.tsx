@@ -30,6 +30,9 @@ interface TableProps<T> {
   sortDir?: "asc" | "desc";
   onSort?: (field: string, dir?: "asc" | "desc") => void;
   onRowClick?: (item: T) => void;
+  onRowContextMenu?: (e: React.MouseEvent, item: T) => void;
+  highlightedRowId?: string | number | null;
+  rowIdKey?: keyof T;
   emptyMessage?: React.ReactNode;
   menuClassName?: string;
 }
@@ -44,6 +47,9 @@ export function Table<T>({
   sortDir,
   onSort,
   onRowClick,
+  onRowContextMenu,
+  highlightedRowId,
+  rowIdKey = "id" as keyof T,
   emptyMessage = "No data found",
   menuClassName = "",
 }: TableProps<T>) {
@@ -305,10 +311,16 @@ export function Table<T>({
               <tr
                 key={`row-${rowIndex}`}
                 onClick={() => onRowClick && onRowClick(item)}
+                onContextMenu={(e) => {
+                  if (onRowContextMenu) {
+                    e.preventDefault();
+                    onRowContextMenu(e, item);
+                  }
+                }}
                 className={`group transition-colors ${onRowClick
                   ? "hover:bg-[var(--surface-hover)] cursor-pointer"
                   : ""
-                  }`}
+                  } ${highlightedRowId && item[rowIdKey] === highlightedRowId ? "bg-[var(--surface-hover)]" : ""}`}
               >
                 {visibleColumns.map((col) => (
                   <td

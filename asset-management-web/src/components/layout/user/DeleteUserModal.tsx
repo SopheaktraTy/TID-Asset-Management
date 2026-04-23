@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, Trash2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, User as UserIcon } from "lucide-react";
 import { Modal } from "../../ui/Modal";
 import { Button } from "../../ui/Button";
 import type { UserDto } from "../../../types/user.types";
@@ -8,10 +8,8 @@ import { getSafeImageUrl } from "../../../utils/image";
 import { useTheme } from "../../../hooks/useTheme";
 
 // Baker Tilly logo assets
-import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_Charcoal.png";
-import logoWhite from "../../../assets/Logo_Bakertilly/Baker Tilly Logo_White.png";
-
-
+import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Growth Symbol Charcoal.png";
+import logoWhite from "../../../assets/Logo_Bakertilly/Baker Tilly Growth Symbol White.png";
 
 interface DeleteUserModalProps {
   isOpen: boolean;
@@ -43,49 +41,41 @@ export default function DeleteUserModal({ isOpen, user, onClose, onDeleted }: De
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} maxWidth="max-w-[420px]">
-      <div className="flex flex-col gap-6 text-center py-4">
+      <div className="flex flex-col gap-3 text-center py-4">
         {/* Header - Logo & Title */}
-        <div className="w-full flex flex-col items-center mb-2 pt-2">
+        <div className="w-full flex items-center justify-center mb-2 pt-2">
           <img
             src={theme === "dark" ? logoWhite : logoCharcoal}
             alt="Logo"
-            className="h-10 w-auto object-contain mb-6"
+            className="h-14 w-auto object-contain"
           />
-          <div className="text-center">
-            <h3 className="text-xl font-black tracking-tighter text-[var(--text-main)] leading-none text-center">Delete User</h3>
-            <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mt-2 text-center opacity-70">
-              data integrity protocol
+          <div className="flex flex-col text-left">
+            <h3 className="text-xl font-bold tracking-tight text-[var(--text-main)] leading-none">Delete User</h3>
+            <p className="text-[13px] text-[var(--text-muted)] opacity-80 lowercase font-medium">
+              permanent data removal
             </p>
           </div>
         </div>
 
-        {/* Status Icon Header */}
-        <div className="flex flex-col items-center gap-4">
-
-          <div className="space-y-1">
-            <div className="mt-2 bg-[var(--surface-hover)]/30 border border-dashed border-red-500/30 rounded-2xl p-4 flex items-start gap-3 text-left">
-              <AlertCircle size={18} className="text-red-500 shrink-0 mt-0.5" />
-              <p className="text-[11px] text-[var(--text-muted)] leading-relaxed italic">
-                This action cannot be undone. Are you sure you want to permanently remove this user? All associated data, including history and permissions, will be erased from our servers immediately.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* User Summary Card (Matched with EditUserModal) */}
-        <div className="flex items-center gap-4 px-4 py-4 border border-dashed border-[var(--border-color)] dark:border-[var(--text-muted)]/30 rounded-xl bg-[var(--surface-hover)]/30 text-left">
-          <div className="shrink-0">
-            <div className="w-12 h-12 rounded-full border border-[var(--border-color)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-main)] font-bold text-base overflow-hidden">
+        {/* User Summary Card */}
+        <div className="flex flex-col items-center gap-3 px-6 py-6 border border-dashed border-[var(--border-color)] dark:border-[var(--text-muted)]/20 rounded-2xl bg-[var(--surface-hover)]/50 dark:bg-white/[0.05] text-center mx-auto w-fit min-w-[240px]">
+          <div className="shrink-0 mb-1">
+            <div className="w-16 h-16 rounded-full border-2 border-[var(--border-color)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-main)] font-bold overflow-hidden shadow-md">
               {user.image ? (
                 <img src={getSafeImageUrl(user.image)} alt={user.username} className="w-full h-full object-cover" />
               ) : (
-                user.username?.slice(0, 2).toUpperCase()
+                <UserIcon size={28} className="text-[var(--text-muted)]" />
               )}
             </div>
           </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-sm font-bold text-[var(--text-main)] truncate">{user.username}</span>
-            <span className="text-xs text-[var(--text-muted)] truncate">{user.email}</span>
+          <div className="flex flex-col items-center min-w-0 leading-tight">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-base font-black text-[var(--text-main)] truncate">{user.username}</span>
+              <span className="px-2 py-0.5 rounded-full border border-[var(--border-color)]/30 bg-[var(--surface)] text-[9px] text-[var(--text-main)] font-black uppercase tracking-[0.1em] opacity-70">
+                {user.role?.replace('_', ' ')}
+              </span>
+            </div>
+            <span className="text-xs text-[var(--text-muted)] truncate opacity-70 font-medium italic">{user.email}</span>
           </div>
         </div>
 
@@ -95,12 +85,24 @@ export default function DeleteUserModal({ isOpen, user, onClose, onDeleted }: De
           </div>
         )}
 
+        {/* Status Icon Header */}
+        <div className="flex flex-col items-center gap-4">
+          <div className="space-y-1">
+            <div className="mt-2 bg-[var(--surface-hover)]/50 dark:bg-white/[0.05] border border-dashed border-red-500/20 rounded-2xl p-4 flex items-start gap-3 text-left">
+              <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5 opacity-80" />
+              <p className="text-[11px] text-[var(--text-muted)] leading-relaxed italic">
+                This action cannot be undone. Are you sure you want to permanently remove this user? All associated history, permissions, and records will be erased immediately.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="flex items-center justify-end gap-3 pt-4 border-none mt-2">
           <Button
             variant="outline"
             onClick={onClose}
             disabled={loading}
-            className="flex-1 max-w-[120px] h-10 border-[var(--border-color)]/30 text-[var(--text-main)] hover:bg-[var(--surface-hover)] rounded-full text-sm font-bold"
+            className="w-auto min-w-[100px] h-11 bg-transparent border border-[var(--border-color)]/30 text-[var(--text-main)] hover:bg-[var(--surface-hover)] rounded-full px-6 text-sm font-bold transition-all"
           >
             Cancel
           </Button>
@@ -108,14 +110,9 @@ export default function DeleteUserModal({ isOpen, user, onClose, onDeleted }: De
             variant="primary"
             onClick={handleDelete}
             disabled={loading}
-            className="flex-1 min-w-[160px] h-10 bg-red-500 hover:bg-red-600 text-white border-0 shadow-lg shadow-red-500/20 rounded-full transform active:scale-95 transition-all flex items-center justify-center gap-2 text-sm font-bold"
+            className="flex-1 min-w-[200px] h-11 bg-red-500 hover:bg-red-600 text-white border-0 shadow-lg shadow-red-500/20 rounded-full transform active:scale-95 transition-all flex items-center justify-center gap-2 text-sm font-bold"
           >
-            {loading ? <Loader2 size={18} className="animate-spin" /> : (
-              <>
-                <Trash2 size={16} />
-                Delete User
-              </>
-            )}
+            {loading ? <Loader2 size={18} className="animate-spin" /> : "Delete User"}
           </Button>
         </div>
       </div>

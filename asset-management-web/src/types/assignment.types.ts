@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { UserDto } from "./user.types";
 
 export const DepartmentEnumValues = [
     "OFFICE_ADMIN",
@@ -48,23 +49,15 @@ export interface AssignmentResponse {
     assetTag: string;
     deviceName: string;
     employee: EmployeeDto;
-    assignedBy: string;
-    assignedByUser: any;
+    assignedByUser: UserDto | null;
     assignedDate: string; // ISO Date string
     returnedDate?: string | null;
     returnCondition?: string | null;
-    confirmReturnBy?: string | null;
-    confirmReturnByUser?: any;
+    confirmReturnByUser?: UserDto | null;
 }
 
 export const assignAssetSchema = z.object({
-    assignedTo: z.string().min(1, "Assigned To is required"),
-    department: z.enum(DepartmentEnumValues, {
-        message: "Department is required",
-    }),
-    jobTitle: z.enum(JobTitleEnumValues, {
-        message: "Job Title is required",
-    }),
+    employeeName: z.string().min(1, "Employee name is required"),
 });
 
 export type AssignAssetFormValues = z.infer<typeof assignAssetSchema>;

@@ -1,12 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, ClipboardList } from "lucide-react";
-import { Controller } from "react-hook-form";
 
 import { Button } from "../../ui/Button";
-import { Input } from "../../ui/BackgroundColorPlaceholder";
+import { SuggestionInput } from "../../ui/SuggestionInput";
 import { Message } from "../../ui/Message";
 import { Modal } from "../../ui/Modal";
-import { DropdownReverseList } from "../../ui/DropdownReverseList";
 import { useUserForm } from "../../../hooks/useUserForm";
 import { useTheme } from "../../../hooks/useTheme";
 import type {
@@ -15,10 +13,9 @@ import type {
 } from "../../../types/assignment.types";
 import {
   assignAssetSchema,
-  DepartmentEnumValues,
-  JobTitleEnumValues
 } from "../../../types/assignment.types";
 import { assignAssetApi } from "../../../services/assignment.service";
+import { getEmployeesApi } from "../../../services/employee.service";
 import type { AssetDto } from "../../../types/asset.types";
 
 // Baker Tilly logo assets
@@ -32,22 +29,14 @@ interface AssignAssetModalProps {
   onSuccess: (assignment: AssignmentResponse) => void;
 }
 
-const DEPARTMENT_OPTIONS = DepartmentEnumValues.map(v => ({
-  label: v.replace(/_/g, " "),
-  value: v
-}));
-
-const JOB_TITLE_OPTIONS = JobTitleEnumValues.map(v => ({
-  label: v.replace(/_/g, " "),
-  value: v
-}));
-
 export default function AssignAssetModal({ isOpen, asset, onClose, onSuccess }: AssignAssetModalProps) {
   const { theme } = useTheme();
+  const [employeeNames, setEmployeeNames] = useState<string[]>([]);
+
   const {
     register,
     reset,
-    control,
+    setValue,
     formState: { errors },
     loading,
     errorMsg,
@@ -56,9 +45,7 @@ export default function AssignAssetModal({ isOpen, asset, onClose, onSuccess }: 
   } = useUserForm<AssignAssetFormValues>({
     schema: assignAssetSchema,
     defaultValues: {
-      assignedTo: "",
-      department: "OFFICE_ADMIN",
-      jobTitle: "ASSOCIATE",
+      employeeName: "",
     },
     onSubmit: async (data) => {
       if (!asset) throw new Error("No asset selected");
@@ -73,12 +60,18 @@ export default function AssignAssetModal({ isOpen, asset, onClose, onSuccess }: 
   });
 
   useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const result = await getEmployeesApi({ size: 1000 });
+        setEmployeeNames(result.content.map(e => e.username));
+      } catch (err) {
+        console.error("Failed to fetch employees for suggestions", err);
+      }
+    };
+
     if (isOpen) {
-      reset({
-        assignedTo: "",
-        department: "OFFICE_ADMIN",
-        jobTitle: "ASSOCIATE",
-      });
+      reset({ employeeName: "" });
+      fetchEmployees();
     }
   }, [isOpen, reset]);
 
@@ -117,64 +110,20 @@ export default function AssignAssetModal({ isOpen, asset, onClose, onSuccess }: 
               Assigning <span className="font-bold text-[var(--text-main)]">{asset.deviceName}</span> ({asset.assetTag}) to a team member.
             </p>
 
-            {/* Assigned To */}
+            {/* Employee Name Suggestions */}
             <div className="space-y-2">
               <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">
                 Employee Name *
               </label>
-              <Input
-                placeholder="Enter full name"
+              <SuggestionInput
+                placeholder="Type or select employee"
                 className="bg-[var(--bg)] border-[var(--border-color)]/50"
-                {...register("assignedTo")}
+                suggestions={employeeNames}
+                onSuggestionSelect={(val) => setValue("employeeName", val, { shouldValidate: true })}
+                {...register("employeeName")}
               />
-              {errors.assignedTo && (
-                <p className="text-[10px] text-red-500 ml-1 font-bold">{errors.assignedTo.message}</p>
-              )}
-            </div>
-
-            {/* Department */}
-            <div className="space-y-2">
-              <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">
-                Department *
-              </label>
-              <Controller
-                name="department"
-                control={control}
-                render={({ field }) => (
-                  <DropdownReverseList
-                    options={DEPARTMENT_OPTIONS}
-                    value={field.value}
-                    onChange={field.onChange}
-                    className="w-full"
-                    panelClassName="bg-[var(--bg)]"
-                  />
-                )}
-              />
-              {errors.department && (
-                <p className="text-[10px] text-red-500 ml-1 font-bold">{errors.department.message}</p>
-              )}
-            </div>
-
-            {/* Job Title */}
-            <div className="space-y-2">
-              <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">
-                Job Title *
-              </label>
-              <Controller
-                name="jobTitle"
-                control={control}
-                render={({ field }) => (
-                  <DropdownReverseList
-                    options={JOB_TITLE_OPTIONS}
-                    value={field.value}
-                    onChange={field.onChange}
-                    className="w-full"
-                    panelClassName="bg-[var(--bg)]"
-                  />
-                )}
-              />
-              {errors.jobTitle && (
-                <p className="text-[10px] text-red-500 ml-1 font-bold">{errors.jobTitle.message}</p>
+              {errors.employeeName && (
+                <p className="text-[10px] text-red-500 ml-1 font-bold">{errors.employeeName.message}</p>
               )}
             </div>
           </div>

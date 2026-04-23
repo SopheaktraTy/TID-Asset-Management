@@ -22,20 +22,28 @@ export function useEmployeeManagement() {
   const [hiddenCols, setHiddenCols] = useState<Set<string>>(new Set());
 
 
-  // ── Auto-hide columns based on screen width on mount ──────────────────────
+  // ── Auto-hide columns based on screen width ────────────────────────────────
   useEffect(() => {
-    const width = window.innerWidth;
-    setHiddenCols((prev) => {
-      const next = new Set(prev);
-      if (width < 768) {
-        ["department", "jobTitle", "createdAt"].forEach((k) =>
-          next.add(k)
-        );
-      } else if (width < 1024) {
-        ["createdAt"].forEach((k) => next.add(k));
-      }
-      return next;
-    });
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setHiddenCols((prev) => {
+        const next = new Set(prev);
+        // Reset auto-managed columns to ensure clean state on resize
+        const autoCols = ["department", "jobTitle", "createdAt"];
+        autoCols.forEach((k) => next.delete(k));
+
+        if (width < 768) {
+          ["department", "jobTitle", "createdAt"].forEach((k) => next.add(k));
+        } else if (width < 1024) {
+          ["createdAt"].forEach((k) => next.add(k));
+        }
+        return next;
+      });
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Modals

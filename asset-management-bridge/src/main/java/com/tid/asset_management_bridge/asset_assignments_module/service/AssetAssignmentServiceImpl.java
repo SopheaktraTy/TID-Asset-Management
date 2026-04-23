@@ -82,7 +82,6 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
         AssetAssignment assignment = assignmentMapper.toEntity(request);
         assignment.setAsset(asset);
         assignment.setEmployee(employee);
-        assignment.setAssignedBy(org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName());
         
         Long userId = getAuthenticatedUserId();
         if (userId != null) {
@@ -106,7 +105,6 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
 
         assignment.setReturnedDate(LocalDate.now());
         assignment.setReturnCondition(request.getReturnCondition());
-        assignment.setConfirmReturnBy(org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName());
         
         Long userId = getAuthenticatedUserId();
         if (userId != null) {
@@ -171,9 +169,6 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
             Employee employee = employeeRepository.findByUsername(request.getEmployeeName())
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
             assignment.setEmployee(employee);
-        }
-        if (request.getAssignedBy() != null) {
-            assignment.setAssignedBy(request.getAssignedBy());
         }
         if (request.getReturnedDate() != null) {
             assignment.setReturnedDate(request.getReturnedDate());
