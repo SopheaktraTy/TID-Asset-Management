@@ -58,7 +58,7 @@ public class UpdateAssetRequest {
     @Size(max = 100)
     private String condition;
 
-    private String issueDescription;
+    private String remark;
 
     private LocalDateTime lastSecurityCheck;
 
@@ -200,12 +200,12 @@ public class UpdateAssetRequest {
         this.condition = condition;
     }
 
-    public String getIssueDescription() {
-        return issueDescription;
+    public String getRemark() {
+        return remark;
     }
 
-    public void setIssueDescription(String issueDescription) {
-        this.issueDescription = issueDescription;
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 
     public LocalDateTime getLastSecurityCheck() {

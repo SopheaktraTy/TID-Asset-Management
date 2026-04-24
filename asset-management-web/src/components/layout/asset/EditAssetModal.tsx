@@ -130,7 +130,7 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
       osVersion: "",
       domainJoined: false,
       condition: "",
-      issueDescription: "",
+      remark: "",
     },
     onSubmit: (data) => updateAssetApi(asset!.id, data, selectedFile as File, imageRemoved),
     onSuccess: onUpdated,
@@ -180,7 +180,7 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
         osVersion: asset.osVersion ?? "",
         domainJoined: !!asset.domainJoined,
         condition: asset.condition ?? "",
-        issueDescription: asset.issueDescription ?? "",
+        remark: asset.remark ?? "",
       });
       resetImage(asset.image);
     }
@@ -585,11 +585,11 @@ export default function EditAssetModal({ isOpen, asset, onClose, onUpdated }: Ed
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Issue Description (If any)</label>
+                    <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Remark (If any)</label>
                     <textarea
-                      {...register("issueDescription")}
+                      {...register("remark")}
                       className="w-full px-3 py-2 bg-[var(--bg)] border border-[var(--border-color)]/50 rounded-lg focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-2 focus:ring-[var(--color-growth-green)]/20 text-[11px] text-[var(--text-main)] placeholder:text-[var(--text-muted)] placeholder:text-[11px] transition-all duration-200 min-h-[80px] resize-none"
-                      placeholder="Describe physical or technical issues here..."
+                      placeholder="Describe any remarks or issues here..."
                     />
                   </div>
                 </div>

@@ -12,6 +12,7 @@ public interface AssetIssueRepository extends JpaRepository<AssetIssue, Long> {
     List<AssetIssue> findByAssetIdOrderByReportedAtDesc(Long assetId);
     void deleteByAssetId(Long assetId);
     boolean existsByAssetIdAndIssueStatusIn(Long assetId, List<IssueStatusEnum> statuses);
+    java.util.Optional<AssetIssue> findFirstByAssetIdAndIssueStatusInOrderByReportedAtDesc(Long assetId, List<IssueStatusEnum> statuses);
     long countByIssueStatus(IssueStatusEnum issueStatus);
 }
 

@@ -68,8 +68,8 @@ public class Asset {
     @Column(name = "condition", length = 100)
     private String condition;
 
-    @Column(name = "issue_description", columnDefinition = "TEXT")
-    private String issueDescription;
+    @Column(name = "remark", columnDefinition = "TEXT")
+    private String remark;
 
     @Column(name = "image", columnDefinition = "TEXT")
     private String image;
@@ -248,12 +248,12 @@ public class Asset {
         this.condition = condition;
     }
 
-    public String getIssueDescription() {
-        return issueDescription;
+    public String getRemark() {
+        return remark;
     }
 
-    public void setIssueDescription(String issueDescription) {
-        this.issueDescription = issueDescription;
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 
     public String getImage() {

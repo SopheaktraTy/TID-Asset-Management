@@ -46,6 +46,7 @@ export default function AssignAssetModal({ isOpen, asset, onClose, onSuccess }: 
     schema: assignAssetSchema,
     defaultValues: {
       employeeName: "",
+      remark: "",
     },
     onSubmit: async (data) => {
       if (!asset) throw new Error("No asset selected");
@@ -70,7 +71,7 @@ export default function AssignAssetModal({ isOpen, asset, onClose, onSuccess }: 
     };
 
     if (isOpen) {
-      reset({ employeeName: "" });
+      reset({ employeeName: "", remark: "" });
       fetchEmployees();
     }
   }, [isOpen, reset]);
@@ -125,6 +126,18 @@ export default function AssignAssetModal({ isOpen, asset, onClose, onSuccess }: 
               {errors.employeeName && (
                 <p className="text-[10px] text-red-500 ml-1 font-bold">{errors.employeeName.message}</p>
               )}
+            </div>
+
+            {/* Remark */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">
+                Remark
+              </label>
+              <textarea
+                {...register("remark")}
+                className="w-full px-4 py-3 bg-[var(--bg)] border border-[var(--border-color)]/50 rounded-xl focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-2 focus:ring-[var(--color-growth-green)]/20 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] transition-all duration-200 min-h-[80px] resize-none"
+                placeholder="Add any initial remarks..."
+              />
             </div>
           </div>
 

@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS assets (
     os_version VARCHAR(100),
     domain_joined BOOLEAN DEFAULT FALSE,
     condition VARCHAR(100),
-    issue_description TEXT,
+    remark TEXT,
     image TEXT,
     last_security_check TIMESTAMP,
     latest_used VARCHAR(255),

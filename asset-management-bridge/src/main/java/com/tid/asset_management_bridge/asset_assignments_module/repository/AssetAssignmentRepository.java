@@ -14,6 +14,7 @@ public interface AssetAssignmentRepository extends JpaRepository<AssetAssignment
 
     // Check if an asset already has an active (un-returned) assignment
     boolean existsByAssetIdAndReturnedDateIsNull(Long assetId);
+    java.util.Optional<AssetAssignment> findFirstByAssetIdAndReturnedDateIsNull(Long assetId);
 
     // Same check, but excluding a specific assignment record (used during updates)
     boolean existsByAssetIdAndReturnedDateIsNullAndIdNot(Long assetId, Long excludeId);

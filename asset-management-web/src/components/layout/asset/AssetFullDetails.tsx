@@ -10,6 +10,8 @@ import ReturnAssetModal from "./ReturnAssetModal";
 import EditAssetModal from "./EditAssetModal";
 import AssetDetailsTab from "./tabs/AssetDetailsTab";
 import AssetAssignmentTab from "./tabs/AssetAssignmentTab";
+import EditAssignmentModal from "./EditAssignmentModal";
+import DeleteAssignmentModal from "./DeleteAssignmentModal";
 
 interface AssetFullDetailsProps {
   asset: AssetDto;
@@ -34,6 +36,8 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
   // Modal states
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
+  const [isEditAssignmentModalOpen, setIsEditAssignmentModalOpen] = useState(false);
+  const [isDeleteAssignmentModalOpen, setIsDeleteAssignmentModalOpen] = useState(false);
   const [isStatusEditModalOpen, setIsStatusEditModalOpen] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<AssignmentResponse | null>(null);
 
@@ -69,6 +73,14 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
       const updatedAsset = { ...asset, status: "AVAILABLE" as const };
       onAssetUpdate(updatedAsset);
     }
+  };
+
+  const handleAssignmentUpdateSuccess = (_updatedAssignment: AssignmentResponse) => {
+    fetchAssignments();
+  };
+
+  const handleAssignmentDeleteSuccess = (_assignmentId: number) => {
+    fetchAssignments();
   };
 
   const getStatusStyle = (status: string) => {
@@ -182,6 +194,8 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
           setIsAssignModalOpen={setIsAssignModalOpen}
           setIsStatusEditModalOpen={setIsStatusEditModalOpen}
           setIsReturnModalOpen={setIsReturnModalOpen}
+          setIsEditAssignmentModalOpen={setIsEditAssignmentModalOpen}
+          setIsDeleteAssignmentModalOpen={setIsDeleteAssignmentModalOpen}
           setSelectedAssignment={setSelectedAssignment}
         />
       )}
@@ -200,6 +214,20 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
         assignment={selectedAssignment}
         onClose={() => setIsReturnModalOpen(false)}
         onSuccess={handleReturnSuccess}
+      />
+
+      <EditAssignmentModal
+        isOpen={isEditAssignmentModalOpen}
+        assignment={selectedAssignment}
+        onClose={() => setIsEditAssignmentModalOpen(false)}
+        onSuccess={handleAssignmentUpdateSuccess}
+      />
+
+      <DeleteAssignmentModal
+        isOpen={isDeleteAssignmentModalOpen}
+        assignment={selectedAssignment}
+        onClose={() => setIsDeleteAssignmentModalOpen(false)}
+        onDeleted={handleAssignmentDeleteSuccess}
       />
 
       <EditAssetModal

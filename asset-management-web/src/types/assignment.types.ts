@@ -54,16 +54,19 @@ export interface AssignmentResponse {
     returnedDate?: string | null;
     returnCondition?: string | null;
     confirmReturnByUser?: UserDto | null;
+    remark?: string | null;
 }
 
 export const assignAssetSchema = z.object({
     employeeName: z.string().min(1, "Employee name is required"),
+    remark: z.string().optional().or(z.literal("")),
 });
 
 export type AssignAssetFormValues = z.infer<typeof assignAssetSchema>;
 
 export const returnAssetSchema = z.object({
     returnCondition: z.string().min(1, "Return condition is required"),
+    remark: z.string().optional().or(z.literal("")),
 });
 
 export type ReturnAssetFormValues = z.infer<typeof returnAssetSchema>;
@@ -72,6 +75,7 @@ export const updateAssignmentSchema = assignAssetSchema.extend({
     assignedDate: z.string().min(1, "Assigned Date is required"),
     returnedDate: z.string().optional().nullable(),
     returnCondition: z.string().optional().nullable(),
+    remark: z.string().optional().nullable(),
 });
 
 export type UpdateAssignmentFormValues = z.infer<typeof updateAssignmentSchema>;

@@ -39,6 +39,7 @@ export default function ReturnAssetModal({ isOpen, asset, assignment, onClose, o
     schema: returnAssetSchema,
     defaultValues: {
       returnCondition: "",
+      remark: "",
     },
     onSubmit: async (data) => {
       if (!assignment) throw new Error("No active assignment found");
@@ -56,6 +57,7 @@ export default function ReturnAssetModal({ isOpen, asset, assignment, onClose, o
     if (isOpen) {
       reset({
         returnCondition: asset?.condition || "",
+        remark: "",
       });
     }
   }, [isOpen, asset, reset]);
@@ -119,6 +121,18 @@ export default function ReturnAssetModal({ isOpen, asset, assignment, onClose, o
               {errors.returnCondition && (
                 <p className="text-[10px] text-red-500 ml-1 font-bold">{errors.returnCondition.message}</p>
               )}
+            </div>
+ 
+            {/* Remark */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-xs font-bold text-[var(--text-main)] ml-1">
+                Remark
+              </label>
+              <textarea
+                {...register("remark")}
+                className="w-full px-4 py-3 bg-[var(--bg)] border border-[var(--border-color)]/50 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] transition-all duration-200 min-h-[80px] resize-none"
+                placeholder="Add any additional remarks..."
+              />
             </div>
           </div>
 

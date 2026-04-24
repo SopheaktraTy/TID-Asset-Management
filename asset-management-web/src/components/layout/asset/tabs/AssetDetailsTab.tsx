@@ -191,28 +191,33 @@ const AssetDetailsTab: React.FC<AssetDetailsTabProps> = ({
           </div>
         )}
 
-        {/* Simple history rows */}
-        {(asset.latestUsed || asset.previousUsed) && (
-          <div className="bg-[var(--bg)] border border-[var(--border-color)] rounded-xl p-6 text-xs transition-colors duration-300">
-            <h3 className="text-sm font-bold mb-5 text-[var(--text-main)] flex items-center gap-2">
-              <Clock size={16} className="text-[var(--color-growth-green)]" />
-              Usage Summary
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
-              <InfoRow label="Latest Used By" value={asset.latestUsed} />
-              <InfoRow label="Previously Used By" value={asset.previousUsed} />
-            </div>
-          </div>
-        )}
+        {/* Usage Summary & Remark Row */}
+        {(asset.latestUsed || asset.previousUsed || asset.remark) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Usage Summary */}
+            {(asset.latestUsed || asset.previousUsed) && (
+              <div className={`bg-[var(--bg)] border border-[var(--border-color)] rounded-xl p-6 text-xs transition-colors duration-300 ${!asset.remark ? "md:col-span-2" : ""}`}>
+                <h3 className="text-sm font-bold mb-5 text-[var(--text-main)] flex items-center gap-2">
+                  <Clock size={16} className="text-[var(--color-growth-green)]" />
+                  Usage Summary
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
+                  <InfoRow label="Latest Used By" value={asset.latestUsed} />
+                  <InfoRow label="Previously Used By" value={asset.previousUsed} />
+                </div>
+              </div>
+            )}
 
-        {/* Issue Notes */}
-        {asset.issueDescription && (
-          <div className="bg-orange-500/5 border border-orange-500/20 rounded-xl p-6 text-xs transition-colors duration-300">
-            <h3 className="text-sm font-bold mb-3 text-orange-400 flex items-center gap-2">
-              <Terminal size={16} className="text-[var(--color-growth-green)]" />
-              Issue Description
-            </h3>
-            <p className="text-[var(--text-main)] leading-relaxed whitespace-pre-wrap">{asset.issueDescription}</p>
+            {/* Remark Notes */}
+            {asset.remark && (
+              <div className={`bg-[var(--bg)] border border-[var(--border-color)] rounded-xl p-6 text-xs transition-colors duration-300 ${(!asset.latestUsed && !asset.previousUsed) ? "md:col-span-2" : ""}`}>
+                <h3 className="text-sm font-bold mb-5 text-[var(--text-main)] flex items-center gap-2">
+                  <Terminal size={16} className="text-[var(--color-growth-green)]" />
+                  Remark
+                </h3>
+                <p className="text-[var(--text-main)] leading-relaxed whitespace-pre-wrap">{asset.remark}</p>
+              </div>
+            )}
           </div>
         )}
       </div>

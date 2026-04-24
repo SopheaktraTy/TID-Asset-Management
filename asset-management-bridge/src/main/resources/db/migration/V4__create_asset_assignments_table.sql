@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS asset_assignments (
     returned_date DATE,
     return_condition VARCHAR(100),
     confirm_return_by_user_id BIGINT REFERENCES users(id),
+    remark TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

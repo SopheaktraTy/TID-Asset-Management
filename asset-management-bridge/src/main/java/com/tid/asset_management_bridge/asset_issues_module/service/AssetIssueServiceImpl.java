@@ -26,13 +26,16 @@ public class AssetIssueServiceImpl implements AssetIssueService {
     private final AssetIssueRepository issueRepository;
     private final AssetRepository assetRepository;
     private final AssetIssueMapper issueMapper;
+    private final com.tid.asset_management_bridge.asset_assignments_module.repository.AssetAssignmentRepository assignmentRepository;
 
     public AssetIssueServiceImpl(AssetIssueRepository issueRepository,
             AssetRepository assetRepository,
-            AssetIssueMapper issueMapper) {
+            AssetIssueMapper issueMapper,
+            com.tid.asset_management_bridge.asset_assignments_module.repository.AssetAssignmentRepository assignmentRepository) {
         this.issueRepository = issueRepository;
         this.assetRepository = assetRepository;
         this.issueMapper = issueMapper;
+        this.assignmentRepository = assignmentRepository;
     }
 
     @Override
@@ -53,6 +56,19 @@ public class AssetIssueServiceImpl implements AssetIssueService {
 
         AssetIssue issue = issueMapper.toEntity(request);
         issue.setAsset(asset);
+        
+        // Sync remark to Asset and Active Assignment
+        if (request.getRemark() != null && !request.getRemark().isBlank()) {
+            asset.setRemark(request.getRemark());
+            assetRepository.save(asset);
+            
+            // Link: also update active assignment remark
+            assignmentRepository.findFirstByAssetIdAndReturnedDateIsNull(asset.getId())
+                .ifPresent(assignment -> {
+                    assignment.setRemark(request.getRemark());
+                    assignmentRepository.save(assignment);
+                });
+        }
 
         AssetIssue saved = issueRepository.save(issue);
         return issueMapper.toResponse(saved);
@@ -96,8 +112,19 @@ public class AssetIssueServiceImpl implements AssetIssueService {
                 assetRepository.save(asset);
             }
         }
-        if (request.getNote() != null) {
-            issue.setNote(request.getNote());
+        if (request.getRemark() != null && !request.getRemark().isBlank()) {
+            issue.setRemark(request.getRemark());
+            // Sync remark to Asset
+            Asset asset = issue.getAsset();
+            asset.setRemark(request.getRemark());
+            assetRepository.save(asset);
+
+            // Link: also update active assignment remark
+            assignmentRepository.findFirstByAssetIdAndReturnedDateIsNull(asset.getId())
+                .ifPresent(assignment -> {
+                    assignment.setRemark(request.getRemark());
+                    assignmentRepository.save(assignment);
+                });
         }
 
         AssetIssue updated = issueRepository.save(issue);

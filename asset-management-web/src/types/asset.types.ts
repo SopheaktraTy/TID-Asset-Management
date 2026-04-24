@@ -39,7 +39,7 @@ export interface AssetDto {
   osVersion?: string | null;
   domainJoined?: boolean | null;
   condition?: string | null;
-  issueDescription?: string | null;
+  remark?: string | null;
   image?: string | null;
   lastSecurityCheck?: string | null;
   latestUsed?: string | null;
@@ -92,7 +92,7 @@ export const createAssetSchema = z.object({
   osVersion: z.string().max(100).optional().or(z.literal("")),
   domainJoined: z.boolean().optional().nullable(),
   condition: z.string().max(100).optional().or(z.literal("")),
-  issueDescription: z.string().optional().or(z.literal("")),
+  remark: z.string().optional().or(z.literal("")),
   image: z.string().optional().or(z.literal("")),
   lastSecurityCheck: z.string().optional().nullable(),
 });

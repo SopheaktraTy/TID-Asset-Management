@@ -17,6 +17,7 @@ public class AssignmentResponse {
     private LocalDate returnedDate;
     private String returnCondition;
     private UserResponse confirmReturnByUser;
+    private String remark;
 
     public Long getId() {
         return id;
@@ -98,6 +99,14 @@ public class AssignmentResponse {
 
     public void setConfirmReturnByUser(UserResponse confirmReturnByUser) {
         this.confirmReturnByUser = confirmReturnByUser;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 
 }

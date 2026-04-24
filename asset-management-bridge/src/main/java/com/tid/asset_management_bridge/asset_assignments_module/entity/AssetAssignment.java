@@ -38,6 +38,9 @@ public class AssetAssignment {
     @JoinColumn(name = "confirm_return_by_user_id")
     private com.tid.asset_management_bridge.auth_module.entity.User confirmReturnByUser;
 
+    @Column(name = "remark", columnDefinition = "TEXT")
+    private String remark;
+
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -126,6 +129,14 @@ public class AssetAssignment {
 
     public void setConfirmReturnByUser(com.tid.asset_management_bridge.auth_module.entity.User confirmReturnByUser) {
         this.confirmReturnByUser = confirmReturnByUser;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 
 

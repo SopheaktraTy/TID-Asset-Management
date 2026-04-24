@@ -9,7 +9,7 @@ public class UpdateIssueRequest {
 
     private IssueStatusEnum issueStatus;
 
-    private String note;
+    private String remark;
 
     public IssueTitleEnum getIssueTitle() {
         return issueTitle;
@@ -27,11 +27,11 @@ public class UpdateIssueRequest {
         this.issueStatus = issueStatus;
     }
 
-    public String getNote() {
-        return note;
+    public String getRemark() {
+        return remark;
     }
 
-    public void setNote(String note) {
-        this.note = note;
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }

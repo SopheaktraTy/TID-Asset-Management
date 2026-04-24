@@ -30,17 +30,20 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
     private final AssetAssignmentMapper assignmentMapper;
     private final com.tid.asset_management_bridge.auth_module.repository.UserRepository userRepository;
     private final EmployeeRepository employeeRepository;
+    private final com.tid.asset_management_bridge.asset_issues_module.repository.AssetIssueRepository issueRepository;
 
     public AssetAssignmentServiceImpl(AssetAssignmentRepository assignmentRepository,
             AssetRepository assetRepository,
             AssetAssignmentMapper assignmentMapper,
             com.tid.asset_management_bridge.auth_module.repository.UserRepository userRepository,
-            EmployeeRepository employeeRepository) {
+            EmployeeRepository employeeRepository,
+            com.tid.asset_management_bridge.asset_issues_module.repository.AssetIssueRepository issueRepository) {
         this.assignmentRepository = assignmentRepository;
         this.assetRepository = assetRepository;
         this.assignmentMapper = assignmentMapper;
         this.userRepository = userRepository;
         this.employeeRepository = employeeRepository;
+        this.issueRepository = issueRepository;
     }
 
     @Override
@@ -82,6 +85,22 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
         AssetAssignment assignment = assignmentMapper.toEntity(request);
         assignment.setAsset(asset);
         assignment.setEmployee(employee);
+        
+        // Sync remark to Asset and Active Issue
+        if (request.getRemark() != null && !request.getRemark().isBlank()) {
+            asset.setRemark(request.getRemark());
+            assetRepository.save(asset);
+            assignment.setRemark(request.getRemark());
+
+            // Link: also update active issue remark
+            issueRepository.findFirstByAssetIdAndIssueStatusInOrderByReportedAtDesc(asset.getId(),
+                List.of(com.tid.asset_management_bridge.asset_issues_module.entity.IssueStatusEnum.OPEN, 
+                        com.tid.asset_management_bridge.asset_issues_module.entity.IssueStatusEnum.IN_PROGRESS))
+                .ifPresent(issue -> {
+                    issue.setRemark(request.getRemark());
+                    issueRepository.save(issue);
+                });
+        }
         
         Long userId = getAuthenticatedUserId();
         if (userId != null) {
@@ -126,6 +145,21 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
             asset.setPreviousUsed(currentLatestUsed);
         }
         asset.setLatestUsed(null);
+
+        // Sync remark to Asset and Active Issue
+        if (request.getRemark() != null && !request.getRemark().isBlank()) {
+            asset.setRemark(request.getRemark());
+            assignment.setRemark(request.getRemark());
+
+            // Link: also update active issue remark
+            issueRepository.findFirstByAssetIdAndIssueStatusInOrderByReportedAtDesc(asset.getId(),
+                List.of(com.tid.asset_management_bridge.asset_issues_module.entity.IssueStatusEnum.OPEN, 
+                        com.tid.asset_management_bridge.asset_issues_module.entity.IssueStatusEnum.IN_PROGRESS))
+                .ifPresent(issue -> {
+                    issue.setRemark(request.getRemark());
+                    issueRepository.save(issue);
+                });
+        }
 
         assetRepository.save(asset);
         AssetAssignment updated = assignmentRepository.save(assignment);
@@ -180,6 +214,23 @@ public class AssetAssignmentServiceImpl implements AssetAssignmentService {
             assignment.setAssignedDate(request.getAssignedDate());
         }
 
+
+        if (request.getRemark() != null && !request.getRemark().isBlank()) {
+            assignment.setRemark(request.getRemark());
+            // Sync remark to Asset
+            Asset asset = assignment.getAsset();
+            asset.setRemark(request.getRemark());
+            assetRepository.save(asset);
+
+            // Link: also update active issue remark
+            issueRepository.findFirstByAssetIdAndIssueStatusInOrderByReportedAtDesc(asset.getId(),
+                List.of(com.tid.asset_management_bridge.asset_issues_module.entity.IssueStatusEnum.OPEN, 
+                        com.tid.asset_management_bridge.asset_issues_module.entity.IssueStatusEnum.IN_PROGRESS))
+                .ifPresent(issue -> {
+                    issue.setRemark(request.getRemark());
+                    issueRepository.save(issue);
+                });
+        }
 
         AssetAssignment updated = assignmentRepository.save(assignment);
         return assignmentMapper.toResponse(updated);

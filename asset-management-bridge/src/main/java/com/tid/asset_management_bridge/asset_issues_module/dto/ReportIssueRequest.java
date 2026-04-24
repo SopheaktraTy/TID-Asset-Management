@@ -8,7 +8,7 @@ public class ReportIssueRequest {
     @NotNull(message = "Issue title is required")
     private IssueTitleEnum issueTitle;
 
-    private String note;
+    private String remark;
 
     public IssueTitleEnum getIssueTitle() {
         return issueTitle;
@@ -18,11 +18,11 @@ public class ReportIssueRequest {
         this.issueTitle = issueTitle;
     }
 
-    public String getNote() {
-        return note;
+    public String getRemark() {
+        return remark;
     }
 
-    public void setNote(String note) {
-        this.note = note;
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }

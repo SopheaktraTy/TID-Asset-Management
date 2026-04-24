@@ -9,6 +9,7 @@ public class UpdateAssetAssignmentRequest {
     private LocalDate assignedDate;
     private LocalDate returnedDate;
     private String returnCondition;
+    private String remark;
 
     public String getEmployeeName() {
         return employeeName;
@@ -48,5 +49,13 @@ public class UpdateAssetAssignmentRequest {
 
     public void setReturnCondition(String returnCondition) {
         this.returnCondition = returnCondition;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }

@@ -28,13 +28,19 @@ public class AssetServiceImpl implements AssetService {
     private final AssetRepository assetRepository;
     private final AssetMapper assetMapper;
     private final FileStorageService fileStorageService;
+    private final com.tid.asset_management_bridge.asset_issues_module.repository.AssetIssueRepository issueRepository;
+    private final com.tid.asset_management_bridge.asset_assignments_module.repository.AssetAssignmentRepository assignmentRepository;
 
     public AssetServiceImpl(AssetRepository assetRepository,
             AssetMapper assetMapper,
-            FileStorageService fileStorageService) {
+            FileStorageService fileStorageService,
+            com.tid.asset_management_bridge.asset_issues_module.repository.AssetIssueRepository issueRepository,
+            com.tid.asset_management_bridge.asset_assignments_module.repository.AssetAssignmentRepository assignmentRepository) {
         this.assetRepository = assetRepository;
         this.assetMapper = assetMapper;
         this.fileStorageService = fileStorageService;
+        this.issueRepository = issueRepository;
+        this.assignmentRepository = assignmentRepository;
     }
 
     @SuppressWarnings("null")
@@ -158,6 +164,27 @@ public class AssetServiceImpl implements AssetService {
         // ─────────────────────────────────────────────────────────────────────────
 
         assetMapper.partialUpdate(request, asset);
+
+        // Sync remark to Active Issue and Active Assignment
+        if (request.getRemark() != null && !request.getRemark().isBlank()) {
+            final String newRemark = request.getRemark();
+            
+            // Link: update active issue
+            issueRepository.findFirstByAssetIdAndIssueStatusInOrderByReportedAtDesc(asset.getId(),
+                List.of(com.tid.asset_management_bridge.asset_issues_module.entity.IssueStatusEnum.OPEN, 
+                        com.tid.asset_management_bridge.asset_issues_module.entity.IssueStatusEnum.IN_PROGRESS))
+                .ifPresent(issue -> {
+                    issue.setRemark(newRemark);
+                    issueRepository.save(issue);
+                });
+
+            // Link: update active assignment
+            assignmentRepository.findFirstByAssetIdAndReturnedDateIsNull(asset.getId())
+                .ifPresent(assignment -> {
+                    assignment.setRemark(newRemark);
+                    assignmentRepository.save(assignment);
+                });
+        }
 
         // Ensure image is set to null if request.getImage() == "" and we removed it
         if (removeImage && !(imageFile != null && !imageFile.isEmpty())) {

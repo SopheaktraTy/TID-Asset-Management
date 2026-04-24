@@ -1,5 +1,5 @@
 import React from "react";
-import { UserPlus, History, User, Calendar, AlertTriangle, Wrench, AlertOctagon, AlertCircle, Settings, HelpCircle, ChevronRight, ChevronDown, Info } from "lucide-react";
+import { UserPlus, History, User, Calendar, AlertTriangle, Wrench, AlertOctagon, AlertCircle, Settings, HelpCircle, ChevronRight, ChevronDown, Info, Edit, Trash2 } from "lucide-react";
 import type { AssetDto } from "../../../../types/asset.types";
 import type { AssignmentResponse } from "../../../../types/assignment.types";
 import { formatDate, getInitials, getAvatarColor } from "../../../../utils/format";
@@ -13,6 +13,8 @@ interface AssetAssignmentTabProps {
   setIsAssignModalOpen: (open: boolean) => void;
   setIsStatusEditModalOpen: (open: boolean) => void;
   setIsReturnModalOpen: (open: boolean) => void;
+  setIsEditAssignmentModalOpen: (open: boolean) => void;
+  setIsDeleteAssignmentModalOpen: (open: boolean) => void;
   setSelectedAssignment: (assignment: AssignmentResponse | null) => void;
 }
 
@@ -25,6 +27,8 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
   setIsAssignModalOpen,
   setIsStatusEditModalOpen,
   setIsReturnModalOpen,
+  setIsEditAssignmentModalOpen,
+  setIsDeleteAssignmentModalOpen,
   setSelectedAssignment,
 }) => {
 
@@ -174,14 +178,40 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      {assignment.returnedDate && (
-                        <span className="text-[9px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                          Returned {formatDate(assignment.returnedDate)}
-                        </span>
-                      )}
-                      {expandedAssignment === assignment.id ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                    </div>
+                      <div className="flex items-center gap-2">
+                        {assignment.returnedDate && (
+                          <span className="text-[9px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                            Returned {formatDate(assignment.returnedDate)}
+                          </span>
+                        )}
+                        <div className="flex items-center gap-1.5 ml-2 border-l border-[var(--border-color)] pl-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedAssignment(assignment);
+                              setIsEditAssignmentModalOpen(true);
+                            }}
+                            className="p-1.5 text-[var(--text-muted)] hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-all"
+                            title="Edit Record"
+                          >
+                            <Edit size={14} />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedAssignment(assignment);
+                              setIsDeleteAssignmentModalOpen(true);
+                            }}
+                            className="p-1.5 text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                            title="Delete Record"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                        <div className="ml-1">
+                          {expandedAssignment === assignment.id ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                        </div>
+                      </div>
                   </div>
 
                   {expandedAssignment === assignment.id && (

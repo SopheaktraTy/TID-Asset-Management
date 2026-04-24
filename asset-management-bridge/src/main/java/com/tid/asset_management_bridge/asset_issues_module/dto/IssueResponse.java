@@ -15,7 +15,7 @@ public class IssueResponse {
     private IssueStatusEnum issueStatus;
     private LocalDateTime reportedAt;
     private LocalDateTime resolvedAt;
-    private String note;
+    private String remark;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -83,12 +83,12 @@ public class IssueResponse {
         this.resolvedAt = resolvedAt;
     }
 
-    public String getNote() {
-        return note;
+    public String getRemark() {
+        return remark;
     }
 
-    public void setNote(String note) {
-        this.note = note;
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 
     public LocalDateTime getCreatedAt() {

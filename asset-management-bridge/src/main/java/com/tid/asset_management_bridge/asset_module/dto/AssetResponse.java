@@ -25,7 +25,7 @@ public class AssetResponse {
     private String osVersion;
     private Boolean domainJoined;
     private String condition;
-    private String issueDescription;
+    private String remark;
     private String image;
     private LocalDateTime lastSecurityCheck;
     private String latestUsed;
@@ -176,12 +176,12 @@ public class AssetResponse {
         this.condition = condition;
     }
 
-    public String getIssueDescription() {
-        return issueDescription;
+    public String getRemark() {
+        return remark;
     }
 
-    public void setIssueDescription(String issueDescription) {
-        this.issueDescription = issueDescription;
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 
     public String getImage() {
