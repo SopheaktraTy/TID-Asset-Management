@@ -115,6 +115,58 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
   const headerCfg = getAssignmentHeaderConfig(asset.status);
   const latestAssignment = assignments.length > 0 ? assignments[0] : null;
 
+  const getDeptShortcut = (dept: string | undefined) => {
+    if (!dept) return "N/A";
+    const cleanDept = dept.toUpperCase().replace(/[\s_]+/g, '_');
+    const shortcuts: Record<string, string> = {
+      INFORMATION_TECHNOLOGY: "IT",
+      HUMAN_RESOURCES: "HR",
+      SOFTWARE_DEVELOPMENT: "Dev",
+      ADMINISTRATION: "Admin",
+      FINANCE: "Fin",
+      MARKETING: "Mkt",
+      OPERATIONS: "Ops",
+      SALES: "Sales",
+      MANAGEMENT: "Mgmt",
+      PRODUCTION: "Prod",
+      LOGISTICS: "Log",
+      MAINTENANCE: "Maint",
+      ACCOUNTING: "Acc",
+      CUSTOMER_SERVICE: "CS",
+      QUALITY_ASSURANCE: "QA",
+      RESEARCH_AND_DEVELOPMENT: "R&D",
+      ENGINEERING: "Eng",
+      PURCHASING: "Pur",
+      INVENTORY: "Inv",
+      WAREHOUSE: "Whse",
+      DESIGN: "Des",
+      SECURITY: "Sec",
+    };
+    
+    if (shortcuts[cleanDept]) return shortcuts[cleanDept];
+    
+    // Auto-abbreviate multi-word departments if not in the map
+    const words = dept.split(/[_\s]/).filter(w => w.length > 0);
+    if (words.length > 1) {
+      return words.map(w => w[0]).join('').toUpperCase();
+    }
+    
+    return toPascalCase(dept);
+  };
+
+  const getStatusColor = (status: string) => {
+    const colors: Record<string, string> = {
+      AVAILABLE: "bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)]",
+      IN_USE: "bg-blue-500/10 text-blue-500",
+      DAMAGED: "bg-red-500/10 text-red-500",
+      UNDER_REPAIR: "bg-amber-500/10 text-amber-500",
+      LOST: "bg-red-600/10 text-red-600",
+      MALFUNCTION: "bg-orange-500/10 text-orange-500",
+      MAINTENANCE: "bg-purple-500/10 text-purple-500",
+    };
+    return colors[status] || "bg-[var(--text-muted)]/10 text-[var(--text-muted)]";
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6 items-start">
       {/* Sidebar Container */}
@@ -141,13 +193,13 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
         {/* Assignment Summary Card */}
         <div className="bg-[var(--bg)] border border-[var(--border-color)] rounded-xl overflow-hidden transition-all duration-300 shadow-sm flex flex-col">
           <div className="px-6 pt-6">
-            <h3 className="text-xs font-bold text-[var(--text-main)] flex items-center gap-2 tracking-tight">
+            <h3 className="text-sm font-bold text-[var(--text-main)] flex items-center gap-2 tracking-tight">
               <Activity size={14} className="text-[var(--color-growth-green)]" />
               Asset Insights
             </h3>
           </div>
 
-          <div className="p-6 space-y-5">
+          <div className="pt-6  pb-10 px-10 space-y-5">
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1">
@@ -156,7 +208,7 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] text-[var(--text-muted)] font-bold">Current Status</span>
-                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md w-fit ${asset.status === 'IN_USE' ? 'bg-blue-500/10 text-blue-500' : 'bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)]'}`}>
+                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md w-fit ${getStatusColor(asset.status)}`}>
                   {toPascalCase(asset.status)}
                 </span>
               </div>
@@ -169,16 +221,26 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
                     {latestAssignment.returnedDate ? "Last possessed by" : "Currently held by"}
                   </span>
                   <div className="flex items-center gap-4 p-4 bg-[var(--bg)] border border-dashed border-[var(--border-color)]/60 rounded-xl shadow-sm">
-                    <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold shadow-sm ${getAvatarColor(latestAssignment.employee?.username || 'Unknown')}`}>
+                    <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-sa= font-bold shadow-sm ${getAvatarColor(latestAssignment.employee?.username || 'Unknown')}`}>
                       {getInitials(latestAssignment.employee?.username || 'Unknown')}
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="text-sm font-bold text-[var(--text-main)] truncate">
+                      <span className="text-xs font-bold text-[var(--text-main)] truncate">
                         {latestAssignment.employee?.username || 'Unknown'}
                       </span>
-                      <span className="text-[10px] text-[var(--text-muted)] truncate">
-                        {latestAssignment.employee?.jobTitle || 'Team Member'}
-                      </span>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="text-[10px] text-[var(--text-muted)] truncate">
+                          {latestAssignment.employee?.jobTitle || 'Team Member'}
+                        </span>
+                        {latestAssignment.employee?.department && (
+                          <>
+                            <span className="w-1 h-1 rounded-full bg-[var(--border-color)] shrink-0" />
+                            <span className="text-[10px] text-[var(--text-muted)] font-bold truncate">
+                              {getDeptShortcut(latestAssignment.employee.department)}
+                            </span>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
