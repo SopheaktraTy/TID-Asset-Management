@@ -21,8 +21,10 @@ const InfoRow = ({
   value: React.ReactNode;
   mono?: boolean;
 }) => (
-  <div className="grid grid-cols-[150px_1fr] items-start py-2 border-b border-[var(--border-color)]/40 last:border-0">
-    <span className="text-[var(--text-muted)] text-[11px] font-medium pt-0.5">{label}</span>
+  <div className="grid grid-cols-1 sm:grid-cols-[140px_1fr] items-start py-2 border-b border-[var(--border-color)]/40 last:border-0 gap-y-1 sm:gap-y-0">
+    <span className="text-[var(--text-muted)] text-[10px] sm:text-[11px] font-bold sm:font-medium sm:pt-0.5 uppercase sm:normal-case tracking-wider sm:tracking-normal">
+      {label}
+    </span>
     <span className={`text-[var(--text-main)] text-[11px] font-semibold ${mono ? "font-mono" : ""}`}>
       {value ?? "N/A"}
     </span>
@@ -193,15 +195,15 @@ const AssetDetailsTab: React.FC<AssetDetailsTabProps> = ({
 
         {/* Usage Summary & Remark Row */}
         {(asset.latestUsed || asset.previousUsed || asset.remark) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Usage Summary */}
             {(asset.latestUsed || asset.previousUsed) && (
-              <div className={`bg-[var(--bg)] border border-[var(--border-color)] rounded-xl p-6 text-xs transition-colors duration-300 ${!asset.remark ? "md:col-span-2" : ""}`}>
+              <div className={`bg-[var(--bg)] border border-[var(--border-color)] rounded-xl p-6 text-xs transition-colors duration-300 ${!asset.remark ? "lg:col-span-2" : ""}`}>
                 <h3 className="text-sm font-bold mb-5 text-[var(--text-main)] flex items-center gap-2">
                   <Clock size={16} className="text-[var(--color-growth-green)]" />
                   Usage Summary
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
+                <div className={`grid grid-cols-1 ${!asset.remark ? "md:grid-cols-2" : "2xl:grid-cols-2"} gap-x-10`}>
                   <InfoRow label="Latest Used By" value={asset.latestUsed} />
                   <InfoRow label="Previously Used By" value={asset.previousUsed} />
                 </div>
@@ -210,7 +212,7 @@ const AssetDetailsTab: React.FC<AssetDetailsTabProps> = ({
 
             {/* Remark Notes */}
             {asset.remark && (
-              <div className={`bg-[var(--bg)] border border-[var(--border-color)] rounded-xl p-6 text-xs transition-colors duration-300 ${(!asset.latestUsed && !asset.previousUsed) ? "md:col-span-2" : ""}`}>
+              <div className={`bg-[var(--bg)] border border-[var(--border-color)] rounded-xl p-6 text-xs transition-colors duration-300 ${(!asset.latestUsed && !asset.previousUsed) ? "lg:col-span-2" : ""}`}>
                 <h3 className="text-sm font-bold mb-5 text-[var(--text-main)] flex items-center gap-2">
                   <Terminal size={16} className="text-[var(--color-growth-green)]" />
                   Remark
