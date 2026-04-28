@@ -1,5 +1,4 @@
 import { ChevronRight as ArrowRight, Users2 } from "lucide-react";
-import Header from "../components/layout/Header";
 import EmployeeTable, { EMPLOYEE_TABLE_COLUMN_OPTIONS } from "../components/layout/employee/EmployeeTable";
 import EmployeeToolbar from "../components/layout/employee/EmployeeToolbar";
 import Pagination from "../components/ui/Pagination";
@@ -36,9 +35,7 @@ export default function EmployeeManagementPage() {
   } = useEmployeeManagement();
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
-      <Header />
-
+    <div className="bg-[var(--bg)] min-h-screen">
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* ── Page Title ── */}
         <div className="flex items-center justify-between mb-6">

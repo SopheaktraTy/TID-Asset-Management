@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import Header from "../components/layout/Header";
 import EditUserModal from "../components/layout/user/EditUserModal";
 import DeleteUserModal from "../components/layout/user/DeleteUserModal";
 import ResetPasswordModal from "../components/layout/user/ResetPasswordModal";
@@ -40,8 +39,7 @@ export default function UserDetailsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text-main)]">
-      <Header />
+    <div className="bg-[var(--bg)] text-[var(--text-main)] min-h-screen">
       <main className="max-w-7xl mx-auto px-6 py-8">
 
         {/* Top Header & Breadcrumbs */}

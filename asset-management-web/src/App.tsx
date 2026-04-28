@@ -12,6 +12,7 @@ import AssetDetailsPage from "./pages/AssetDetails";
 import EmployeeManagement from "./pages/EmployeeManagement";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/layout/ProtectedRoute";
+import AppLayout from "./components/layout/AppLayout";
 import LoadingScreen from "./components/ui/LoadingScreen";
 
 /**
@@ -35,13 +36,15 @@ function AppRoutes() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
-      {/* Protected routes — role-gated */}
+      {/* Protected routes — role-gated, wrapped in shared AppLayout (Sidebar) */}
       <Route element={<ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN"]} />}>
-        <Route path="/users-management" element={<UserManagement />} />
-        <Route path="/user-detail/:id" element={<UserDetailsPage />} />
-        <Route path="/assets-management" element={<AssetManagement />} />
-        <Route path="/asset-detail/:id" element={<AssetDetailsPage />} />
-        <Route path="/employee-management" element={<EmployeeManagement />} />
+        <Route element={<AppLayout />}>
+          <Route path="/users-management" element={<UserManagement />} />
+          <Route path="/user-detail/:id" element={<UserDetailsPage />} />
+          <Route path="/assets-management" element={<AssetManagement />} />
+          <Route path="/asset-detail/:id" element={<AssetDetailsPage />} />
+          <Route path="/employee-management" element={<EmployeeManagement />} />
+        </Route>
       </Route>
 
       {/* Default route */}

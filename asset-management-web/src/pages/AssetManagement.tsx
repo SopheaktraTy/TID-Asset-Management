@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { HardDrive, ChevronRight as ArrowRight } from "lucide-react";
-import Header from "../components/layout/Header";
 import AssetToolbar from "../components/layout/asset/AssetToolbar";
 import AssetTable, { ASSET_TABLE_COLUMN_OPTIONS } from "../components/layout/asset/AssetTable";
 import AddAssetModal from "../components/layout/asset/AddAssetModal";
@@ -42,9 +41,7 @@ export default function AssetManagementPage() {
   } = useAssetManagement();
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
-      <Header />
-
+    <div className="bg-[var(--bg)] min-h-screen">
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* ── Page Title ── */}
         <div className="flex items-center justify-between mb-6">

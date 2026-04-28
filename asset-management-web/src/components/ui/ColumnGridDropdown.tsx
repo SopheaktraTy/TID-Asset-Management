@@ -44,15 +44,19 @@ export function ColumnGridDropdown({
 
         const next = new Set(hiddenColumns);
         const timeKeys = ["created_at", "updated_at", "createdAt", "updatedAt"];
+        const mobileHide = ["department", "manufacturer", "specs", "latestUsed", "serialNumber", "deviceType"];
+        const tabletHide = ["specs", "latestUsed", "manufacturer"];
 
         if (width < 768) {
-          next.add("department");
+          mobileHide.forEach(k => next.add(k));
           timeKeys.forEach(k => next.add(k));
         } else if (width < 1024) {
           timeKeys.forEach(k => next.add(k));
-          next.delete("department");
+          tabletHide.forEach(k => next.add(k));
+          mobileHide.filter(k => !tabletHide.includes(k)).forEach(k => next.delete(k));
         } else {
-          next.delete("department");
+          mobileHide.forEach(k => next.delete(k));
+          tabletHide.forEach(k => next.delete(k));
           timeKeys.forEach(k => next.delete(k));
         }
         onSetHiddenColumns(next);

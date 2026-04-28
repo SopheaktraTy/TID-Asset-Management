@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import Header from "../components/layout/Header";
 import EditAssetModal from "../components/layout/asset/EditAssetModal";
 import DeleteAssetModal from "../components/layout/asset/DeleteAssetModal";
 import { useAssetDetails } from "../hooks/useAssetDetails";
@@ -46,8 +45,7 @@ export default function AssetDetailsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text-main)] transition-colors duration-300">
-      <Header />
+    <div className="bg-[var(--bg)] text-[var(--text-main)] transition-colors duration-300 min-h-screen">
       <main className="max-w-7xl mx-auto px-6 py-8">
 
         {/* Top Header & Breadcrumbs */}

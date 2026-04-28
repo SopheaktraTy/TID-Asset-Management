@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Users, ChevronRight as ArrowRight } from "lucide-react";
-import Header from "../components/layout/Header";
 import AddUserModal from "../components/layout/user/AddUserModal";
 import EditUserModal from "../components/layout/user/EditUserModal";
 import DeleteUserModal from "../components/layout/user/DeleteUserModal";
@@ -45,9 +44,7 @@ export default function UserManagementPage() {
   } = useUserManagement();
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
-      <Header />
-
+    <div className="bg-[var(--bg)] min-h-screen">
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* ── Page Title ── */}
         <div className="flex items-center justify-between mb-6">
