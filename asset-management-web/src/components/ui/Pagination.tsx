@@ -40,9 +40,9 @@ export default function Pagination({
   const end = Math.min((page + 1) * pageSize, totalElements);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-3.5 border-t border-[var(--border-color)] w-full">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 sm:px-5 py-3.5 border-t border-[var(--border-color)] w-full">
       {/* Rows per page */}
-      <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)]">
+      <div className="flex items-center justify-between sm:justify-start w-full sm:w-auto gap-2 text-[11px] text-[var(--text-muted)]">
         <span>Rows per page</span>
         <div className="w-[60px]">
           <DropdownReverseList
@@ -56,8 +56,8 @@ export default function Pagination({
       </div>
 
       {/* Page info + controls */}
-      <div className="flex items-center gap-3 text-[11px]">
-        <span className="text-[var(--text-muted)]">
+      <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3 text-[11px]">
+        <span className="text-[var(--text-muted)] whitespace-nowrap">
           {totalElements === 0 ? "0" : `${start} – ${end}`} of {totalElements}
         </span>
 
@@ -70,22 +70,25 @@ export default function Pagination({
             <ChevronLeft size={12} />
           </button>
 
-          {pageRange().map((p, i) =>
-            p === "..." ? (
-              <span key={`ellipsis-${i}`} className="px-1 text-[var(--text-muted)]">...</span>
-            ) : (
-              <button
-                key={p}
-                onClick={() => onPageChange(p as number)}
-                className={`min-w-[24px] h-6 px-1 rounded text-[11px] font-medium transition-colors ${page === p
-                  ? "bg-[var(--color-growth-green)] text-[var(--btn-primary-text)] shadow-sm"
-                  : "border border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--surface-hover)]"
-                  }`}
-              >
-                {(p as number) + 1}
-              </button>
-            )
-          )}
+          <div className="flex items-center gap-1">
+            {pageRange().map((p, i) =>
+              p === "..." ? (
+                <span key={`ellipsis-${i}`} className="px-1 text-[var(--text-muted)] hidden xs:inline">...</span>
+              ) : (
+                <button
+                  key={p}
+                  onClick={() => onPageChange(p as number)}
+                  className={`min-w-[24px] h-6 px-1 rounded text-[11px] font-medium transition-colors ${page === p
+                      ? "bg-[var(--color-growth-green)] text-[var(--btn-primary-text)] shadow-sm"
+                      : "border border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--surface-hover)]"
+                    } ${p !== page && p !== 0 && p !== totalPages - 1 ? "hidden md:inline-flex" : "inline-flex items-center justify-center"
+                    }`}
+                >
+                  {(p as number) + 1}
+                </button>
+              )
+            )}
+          </div>
 
           <button
             onClick={() => onPageChange(Math.min(totalPages - 1, page + 1))}

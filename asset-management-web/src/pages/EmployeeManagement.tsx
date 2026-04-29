@@ -36,7 +36,7 @@ export default function EmployeeManagementPage() {
 
   return (
     <div className="bg-[var(--bg)] min-h-screen">
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* ── Page Title ── */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex flex-col">

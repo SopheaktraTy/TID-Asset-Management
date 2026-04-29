@@ -25,9 +25,9 @@ export default function EmployeeToolbar({
   return (
     <div className="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-[var(--border-color)]">
       <div className="relative flex-1 min-w-[200px] max-w-xs group">
-        <Search 
-          size={15} 
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none group-focus-within:text-[var(--color-growth-green)] transition-colors" 
+        <Search
+          size={15}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none group-focus-within:text-[var(--color-growth-green)] transition-colors"
         />
         <input
           type="text"
@@ -55,7 +55,7 @@ export default function EmployeeToolbar({
           panelClassName="bg-[var(--bg)]"
         />
       </div>
-        
+
       <Button
         onClick={onAddClick}
         variant="primary"

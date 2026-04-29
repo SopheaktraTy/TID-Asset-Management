@@ -29,7 +29,13 @@ const NAV_SECTIONS = [
 ];
 
 // ── Component ─────────────────────────────────────────────────────────────────
-export default function Sidebar() {
+export default function Sidebar({
+  isMobileOpen,
+  setIsMobileOpen
+}: {
+  isMobileOpen?: boolean;
+  setIsMobileOpen?: (open: boolean) => void
+}) {
   const [collapsed, setCollapsed] = useState(false);
 
   const {
@@ -56,6 +62,7 @@ export default function Sidebar() {
           bg-[var(--bg)] border-r border-[var(--border-color)]
           transition-all duration-300 ease-in-out
           ${collapsed ? "w-[80px]" : "w-[260px]"}
+          ${isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         `}
       >
         {/* ── Toggle Button (Floating on the border) ── */}
@@ -63,7 +70,7 @@ export default function Sidebar() {
           onClick={toggle}
           className={`
             absolute -right-3.5 top-[23px] z-50
-            w-7 h-7 flex items-center justify-center
+            w-7 h-7 hidden lg:flex items-center justify-center
             bg-[var(--bg)] border border-[var(--border-color)]
             rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]
             shadow-sm transition-all duration-300 group
@@ -74,7 +81,7 @@ export default function Sidebar() {
           <PanelLeftClose size={14} className="group-hover:scale-110 transition-transform" />
         </button>
         {/* ── Brand header ─────────────────────────────────────────────────── */}
-        <div className="flex items-center h-[70px] shrink-0 pl-[26px]">
+        <div className="flex items-center  shrink-0 pt-[26px] pb-[15px] pl-[26px]">
           <div className="flex items-center gap-2 overflow-hidden">
             {/* Symbol — always visible */}
             <img
@@ -103,31 +110,37 @@ export default function Sidebar() {
         <nav className="flex-1 overflow-y-auto custom-scrollbar">
           {NAV_SECTIONS.map((section) => (
             <div key={section.label} className="mb-2">
-              {/* Section label with separator */}
-              <div className={`
-                flex items-center gap-3 pl-[28px] pr-4 mb-1.5
-                transition-all duration-300 overflow-hidden whitespace-nowrap
-                ${collapsed ? "w-0 opacity-0 invisible" : "w-full"}
-              `}>
-                <p className="text-[12px] uppercase text-[var(--text-muted)] opacity-50 select-none">
-                  {section.label}
-                </p>
-                <div className="flex-1 border-t border-[var(--border-color)] opacity-50 mt-[1px]" />
-              </div>
+              <div className="h-6 relative flex items-center mb-1">
+                {/* Expanded state: Label + Line */}
+                <div className={`
+                  absolute inset-0 flex items-center gap-3 px-6 transition-all duration-300
+                  ${collapsed ? "opacity-0 invisible -translate-x-2" : "opacity-100 visible translate-x-0"}
+                `}>
+                  <p className="text-[10.5px] uppercase font-bold text-[var(--text-muted)] opacity-50 select-none">
+                    {section.label}
+                  </p>
+                  <div className="flex-1 border-t border-[var(--border-color)] mt-[1px]" />
+                </div>
 
-              {collapsed && (
-                <div className="mx-auto w-6 border-t border-[var(--border-color)] mb-3 opacity-50" />
-              )}
+                {/* Collapsed state: Small centered line */}
+                <div className={`
+                  absolute inset-0 flex items-center justify-center transition-all duration-300
+                  ${collapsed ? "opacity-100 visible scale-x-100" : "opacity-0 invisible scale-x-0"}
+                `}>
+                  <div className="w-6 border-t border-[var(--border-color)]" />
+                </div>
+              </div>
 
               <ul className="space-y-0.5">
                 {section.items.map(({ to, icon: Icon, label }) => (
                   <li key={to}>
                     <NavLink
                       to={to}
+                      onClick={() => setIsMobileOpen?.(false)}
                       title={collapsed ? label : undefined}
                       className={({ isActive }) =>
                         `flex items-center rounded-lg transition-colors group
-                        py-2.5 mx-3 px-4
+                        py-2.5 mx-4 px-3.5
                         ${isActive
                           ? "bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)]"
                           : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]"
@@ -137,7 +150,7 @@ export default function Sidebar() {
                       {({ isActive }) => (
                         <>
                           <Icon
-                            size={24}
+                            size={18}
                             className={`shrink-0 transition-colors ${isActive
                               ? "text-[var(--color-growth-green)]"
                               : "text-[var(--text-muted)] group-hover:text-[var(--text-main)]"

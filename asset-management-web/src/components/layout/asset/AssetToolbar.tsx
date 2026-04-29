@@ -54,9 +54,9 @@ export default function AssetToolbar({
   columnOptions,
 }: AssetToolbarProps) {
   return (
-    <div className="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-[var(--border-color)]">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-4 px-4 sm:px-5 py-4 border-b border-[var(--border-color)]">
       {/* Search */}
-      <div className="relative flex-1 min-w-[180px] max-w-xs">
+      <div className="relative w-full sm:max-w-xs">
         <Search
           size={15}
           className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
@@ -76,45 +76,45 @@ export default function AssetToolbar({
         />
       </div>
 
-      {/* Spacer */}
-      <div className="flex-1" />
+      {/* Action Area */}
+      <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3 flex-1">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
+          {/* Status filter */}
+          <DropdownList
+            options={STATUS_OPTIONS}
+            value={statusFilter}
+            onChange={onStatusChange}
+            panelClassName="bg-[var(--bg)]"
+          />
 
-      <div className="flex items-center gap-1">
-        {/* Status filter */}
-        <DropdownList
-          options={STATUS_OPTIONS}
-          value={statusFilter}
-          onChange={onStatusChange}
-          panelClassName="bg-[var(--bg)]"
-        />
+          {/* Device Type filter */}
+          <DropdownList
+            options={DEVICE_TYPE_OPTIONS}
+            value={deviceTypeFilter}
+            onChange={onDeviceTypeChange}
+            panelClassName="bg-[var(--bg)]"
+          />
 
-        {/* Device Type filter */}
-        <DropdownList
-          options={DEVICE_TYPE_OPTIONS}
-          value={deviceTypeFilter}
-          onChange={onDeviceTypeChange}
-          panelClassName="bg-[var(--bg)]"
-        />
+          {/* Column picker */}
+          <ColumnGridDropdown
+            columns={columnOptions}
+            hiddenColumns={hiddenCols}
+            onToggleColumn={onToggleColumn}
+            onSetHiddenColumns={onSetHiddenCols}
+            panelClassName="bg-[var(--bg)]"
+          />
+        </div>
 
-        {/* Column picker */}
-        <ColumnGridDropdown
-          columns={columnOptions}
-          hiddenColumns={hiddenCols}
-          onToggleColumn={onToggleColumn}
-          onSetHiddenColumns={onSetHiddenCols}
-          panelClassName="bg-[var(--bg)]"
-        />
+        {/* Add asset */}
+        <Button
+          variant="primary"
+          onClick={onAddClick}
+          className="!w-full sm:!w-auto gap-1.5 px-4 py-2 text-xs"
+        >
+          <Plus size={15} />
+          Add Asset
+        </Button>
       </div>
-
-      {/* Add asset */}
-      <Button
-        variant="primary"
-        onClick={onAddClick}
-        className="!w-auto gap-1.5 px-4 py-2 text-xs"
-      >
-        <Plus size={15} />
-        Add Asset
-      </Button>
     </div>
   );
 }

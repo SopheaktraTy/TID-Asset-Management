@@ -40,7 +40,7 @@ export default function UserDetailsPage() {
 
   return (
     <div className="bg-[var(--bg)] text-[var(--text-main)] min-h-screen">
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
 
         {/* Top Header & Breadcrumbs */}
         <div className="flex items-start justify-between mb-8">

@@ -1,20 +1,23 @@
 import { useHeader } from "../../hooks/useHeader";
 import { useOnClickOutside } from "../../hooks/useOnClickOutside";
 import { useRef } from "react";
-import { NavLink } from "react-router-dom";
 import {
   Bell,
   User,
   Moon,
-  HardDrive,
-  Users,
-  Contact,
+  Menu,
 } from "lucide-react";
 import { useTheme } from "../../hooks/useTheme";
 import { ProfileWithViewAndEditModal } from "./user/ProfileWithViewAndEditModal";
 import { getSafeImageUrl } from "../../utils/image";
 
-export default function Header() {
+export default function Header({
+  collapsed,
+  isMobile
+}: {
+  collapsed: boolean;
+  isMobile: boolean;
+}) {
   const {
     user,
     dropdownOpen,
@@ -30,61 +33,27 @@ export default function Header() {
 
   useOnClickOutside(dropdownRef, () => setDropdownOpen(false));
 
+  const toggleMobileMenu = () => {
+    window.dispatchEvent(new CustomEvent("toggle-mobile-menu"));
+  };
+
   return (
     <>
-      <header className="h-16 flex items-center justify-between px-6 bg-[var(--bg)] shadow-sm transition-colors border-b border-[var(--border-color)] sticky top-0 z-40">
-
-        {/* ── Left: Brand ── */}
-        <div className="flex items-center gap-2 min-w-[160px]">
-          <div className="w-7 h-7 rounded-lg bg-[var(--color-growth-green)]/15 flex items-center justify-center">
-            <HardDrive size={14} className="text-[var(--color-growth-green)]" />
-          </div>
-          <span className="text-sm font-black text-[var(--text-main)] tracking-tight hidden sm:block">
-            TID Assets
-          </span>
-        </div>
-
-        {/* ── Center: Nav Links ── */}
-        <nav className="flex items-center gap-1">
-          <NavLink
-            to="/assets-management"
-            className={({ isActive }) =>
-              `flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${isActive
-                ? "bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)]"
-                : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]"
-              }`
-            }
+      <header
+        className="h-20 flex items-center justify-between px-4 lg:px-6 bg-[var(--bg)] shadow-sm transition-all duration-300 fixed top-0 right-0 z-40"
+        style={{ left: isMobile ? "0" : (collapsed ? "80px" : "260px") }}
+      >
+        {/* ── Left: Mobile Menu Toggle ── */}
+        {isMobile && (
+          <button
+            onClick={toggleMobileMenu}
+            className="p-2 mr-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors"
           >
-            <HardDrive size={14} />
-            <span>Assets</span>
-          </NavLink>
+            <Menu size={24} />
+          </button>
+        )}
 
-          <NavLink
-            to="/users-management"
-            className={({ isActive }) =>
-              `flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${isActive
-                ? "bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)]"
-                : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]"
-              }`
-            }
-          >
-            <Users size={14} />
-            <span>Users</span>
-          </NavLink>
-
-          <NavLink
-            to="/employee-management"
-            className={({ isActive }) =>
-              `flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${isActive
-                ? "bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)]"
-                : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]"
-              }`
-            }
-          >
-            <Contact size={14} />
-            <span>Employees</span>
-          </NavLink>
-        </nav>
+        <div className="flex-1" />
 
         {/* ── Right: Notification + Avatar ── */}
         <div className="flex items-center space-x-4 min-w-[160px] justify-end">
