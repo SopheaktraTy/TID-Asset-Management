@@ -107,7 +107,7 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
   return (
     <div className="space-y-8">
       {/* ── Asset Header ── */}
-      <div className="flex items-center gap-6">
+      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
         <div
           className={`rounded-2xl bg-[#1a1b23] flex items-center justify-center overflow-hidden shrink-0 shadow-lg border border-[var(--border-color)] ${asset.image ? "w-48 h-32" : "w-24 h-24"
             }`}
@@ -124,13 +124,13 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
           )}
         </div>
 
-        <div className="flex flex-col flex-1 min-w-0">
-          <div className="flex justify-between items-center gap-8">
-            <div className="flex flex-col flex-1 min-w-0 gap-0.5">
-              <span className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.3em] truncate opacity-80">
+        <div className="flex flex-col flex-1 min-w-0 w-full">
+          <div className="flex justify-between items-center gap-8 w-full">
+            <div className="flex flex-col flex-1 min-w-0 gap-0.5 items-center sm:items-start text-center sm:text-left w-full">
+              <span className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.3em] truncate opacity-80 w-full">
                 {asset.assetTag}
               </span>
-              <h2 className="text-2xl font-black text-[var(--text-main)] truncate leading-tight tracking-tight uppercase">
+              <h2 className="text-2xl font-black text-[var(--text-main)] truncate leading-tight tracking-tight uppercase w-full">
                 {asset.deviceName}
               </h2>
               <div className="flex items-center gap-2.5">

@@ -23,8 +23,8 @@ export default function EmployeeToolbar({
   columnOptions,
 }: EmployeeToolbarProps) {
   return (
-    <div className="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-[var(--border-color)]">
-      <div className="relative flex-1 min-w-[200px] max-w-xs group">
+    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 px-4 sm:px-5 py-4 border-b border-[var(--border-color)]">
+      <div className="relative w-full lg:max-w-xs group">
         <Search
           size={15}
           className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none group-focus-within:text-[var(--color-growth-green)] transition-colors"
@@ -44,26 +44,26 @@ export default function EmployeeToolbar({
         />
       </div>
 
-      <div className="flex-1" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between lg:justify-end gap-3 w-full lg:w-auto">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide flex-1 sm:flex-none">
+          <ColumnGridDropdown
+            columns={columnOptions}
+            hiddenColumns={hiddenCols}
+            onToggleColumn={onToggleColumn}
+            onSetHiddenColumns={onSetHiddenCols}
+            panelClassName="bg-[var(--bg)]"
+          />
+        </div>
 
-      <div className="flex items-center gap-1">
-        <ColumnGridDropdown
-          columns={columnOptions}
-          hiddenColumns={hiddenCols}
-          onToggleColumn={onToggleColumn}
-          onSetHiddenColumns={onSetHiddenCols}
-          panelClassName="bg-[var(--bg)]"
-        />
+        <Button
+          onClick={onAddClick}
+          variant="primary"
+          className="w-full sm:w-auto h-auto gap-1.5 px-4 py-2 text-xs font-bold flex justify-center"
+        >
+          <Plus size={15} />
+          Add Employee
+        </Button>
       </div>
-
-      <Button
-        onClick={onAddClick}
-        variant="primary"
-        className="!w-auto h-auto gap-1.5 px-4 py-2 text-xs font-bold"
-      >
-        <Plus size={15} />
-        Add Employee
-      </Button>
     </div>
   );
 }

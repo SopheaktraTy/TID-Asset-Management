@@ -57,7 +57,7 @@ export default function Pagination({
 
       {/* Page info + controls */}
       <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3 text-[11px]">
-        <span className="text-[var(--text-muted)] whitespace-nowrap">
+        <span className="text-[var(--text-muted)] whitespace-nowrap text-center sm:text-left">
           {totalElements === 0 ? "0" : `${start} – ${end}`} of {totalElements}
         </span>
 

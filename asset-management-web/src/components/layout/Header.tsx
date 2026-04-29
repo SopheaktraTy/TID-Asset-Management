@@ -1,6 +1,6 @@
 import { useHeader } from "../../hooks/useHeader";
 import { useOnClickOutside } from "../../hooks/useOnClickOutside";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   Bell,
   User,
@@ -13,10 +13,12 @@ import { getSafeImageUrl } from "../../utils/image";
 
 export default function Header({
   collapsed,
-  isMobile
+  isMobile,
+  onToggleMobileMenu
 }: {
   collapsed: boolean;
   isMobile: boolean;
+  onToggleMobileMenu?: () => void;
 }) {
   const {
     user,
@@ -30,23 +32,31 @@ export default function Header({
 
   const { theme, toggleTheme } = useTheme();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useOnClickOutside(dropdownRef, () => setDropdownOpen(false));
 
-  const toggleMobileMenu = () => {
-    window.dispatchEvent(new CustomEvent("toggle-mobile-menu"));
-  };
 
   return (
     <>
       <header
-        className="h-20 flex items-center justify-between px-4 lg:px-6 bg-[var(--bg)] shadow-sm transition-all duration-300 fixed top-0 right-0 z-40"
+        className={`h-20 flex items-center justify-between px-4 lg:px-6 bg-[var(--bg)] transition-all duration-300 fixed top-0 right-0 z-40 border-b ${
+          scrolled ? "border-[var(--border-color)] shadow-sm" : "border-transparent"
+        }`}
         style={{ left: isMobile ? "0" : (collapsed ? "80px" : "260px") }}
       >
         {/* ── Left: Mobile Menu Toggle ── */}
         {isMobile && (
           <button
-            onClick={toggleMobileMenu}
+            onClick={onToggleMobileMenu}
             className="p-2 mr-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)] transition-colors"
           >
             <Menu size={24} />
@@ -71,11 +81,11 @@ export default function Header({
                 <img
                   src={getSafeImageUrl(user.image)}
                   alt="User avatar"
-                  className="w-8 h-8 rounded-full object-cover"
+                  className="w-10 h-10 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-[var(--surface-hover)] flex items-center justify-center">
-                  <User size={16} className="text-[var(--text-muted)]" />
+                <div className="w-10 h-10 rounded-full bg-[var(--surface-hover)] flex items-center justify-center">
+                  <User size={20} className="text-[var(--text-muted)]" />
                 </div>
               )}
             </button>

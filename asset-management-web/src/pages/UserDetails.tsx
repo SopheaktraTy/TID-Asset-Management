@@ -39,11 +39,11 @@ export default function UserDetailsPage() {
   );
 
   return (
-    <div className="bg-[var(--bg)] text-[var(--text-main)] min-h-screen">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+    <div className="bg-[var(--bg)] text-[var(--text-main)] min-h-screen flex flex-col">
+      <main className="w-full flex-1 px-8 sm:px-12 lg:px-20 xl:px-32 py-2 sm:py-4 lg:py-6">
 
         {/* Top Header & Breadcrumbs */}
-        <div className="flex items-start justify-between mb-8">
+        <div className="flex items-start justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-[var(--text-main)] mb-2">User</h1>
             <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">

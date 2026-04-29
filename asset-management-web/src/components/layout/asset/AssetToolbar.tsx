@@ -54,9 +54,9 @@ export default function AssetToolbar({
   columnOptions,
 }: AssetToolbarProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-4 px-4 sm:px-5 py-4 border-b border-[var(--border-color)]">
+    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 px-4 sm:px-5 py-4 border-b border-[var(--border-color)]">
       {/* Search */}
-      <div className="relative w-full sm:max-w-xs">
+      <div className="relative w-full lg:max-w-xs">
         <Search
           size={15}
           className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
@@ -77,8 +77,8 @@ export default function AssetToolbar({
       </div>
 
       {/* Action Area */}
-      <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3 flex-1">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between lg:justify-end gap-3 w-full lg:w-auto">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide flex-1 sm:flex-none">
           {/* Status filter */}
           <DropdownList
             options={STATUS_OPTIONS}
@@ -105,13 +105,13 @@ export default function AssetToolbar({
           />
         </div>
 
-        {/* Add asset */}
+        {/* Add Button */}
         <Button
-          variant="primary"
           onClick={onAddClick}
-          className="!w-full sm:!w-auto gap-1.5 px-4 py-2 text-xs"
+          className="w-full sm:w-auto gap-1.5 px-4 py-2 text-xs flex justify-center"
+          variant="primary"
         >
-          <Plus size={15} />
+          <Plus size={14} />
           Add Asset
         </Button>
       </div>

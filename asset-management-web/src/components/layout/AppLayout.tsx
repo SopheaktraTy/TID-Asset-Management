@@ -22,31 +22,34 @@ export default function AppLayout() {
     };
 
     window.addEventListener("resize", handleResize);
+    
     const sidebarHandler = (e: CustomEvent<{ collapsed: boolean }>) => {
       setCollapsed(e.detail.collapsed);
     };
 
     window.addEventListener("sidebar-toggle" as any, sidebarHandler);
-    window.addEventListener("toggle-mobile-menu" as any, () => setIsMobileMenuOpen(prev => !prev));
 
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("sidebar-toggle" as any, sidebarHandler);
-      window.removeEventListener("toggle-mobile-menu" as any, () => { });
     };
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-[var(--bg)]">
+    <div className="flex min-h-screen bg-[var(--bg)] w-full">
       <Sidebar isMobileOpen={isMobileMenuOpen} setIsMobileOpen={setIsMobileMenuOpen} />
 
-      {/* Main content shifts right by sidebar width on desktop only */}
+      {/* Main content padding tracks sidebar width */}
       <div
-        className="flex-1 min-h-screen transition-all duration-300 ease-in-out flex flex-col w-full"
-        style={{ marginLeft: isMobile ? "0" : (collapsed ? "80px" : "260px") }}
+        className="flex-1 min-h-screen transition-all duration-300 ease-in-out flex flex-col min-w-0"
+        style={{ paddingLeft: isMobile ? "0" : (collapsed ? "80px" : "260px") }}
       >
-        <Header collapsed={collapsed} isMobile={isMobile} />
-        <main className="flex-1 transition-all duration-300 pt-20 overflow-x-hidden">
+        <Header 
+          collapsed={collapsed} 
+          isMobile={isMobile} 
+          onToggleMobileMenu={() => setIsMobileMenuOpen(prev => !prev)}
+        />
+        <main className="flex-1 transition-all duration-300 pt-20 min-w-0">
           <Outlet />
         </main>
       </div>
@@ -54,7 +57,7 @@ export default function AppLayout() {
       {/* Overlay for mobile sidebar */}
       {isMobile && isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-[45] backdrop-blur-sm transition-opacity duration-300"
+          className="fixed inset-0 bg-transparent z-[45] transition-opacity duration-300"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}

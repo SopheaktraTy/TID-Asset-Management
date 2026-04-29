@@ -1,8 +1,10 @@
 import React from "react";
 import { UserPlus, History, User, Calendar, AlertTriangle, Wrench, AlertOctagon, AlertCircle, Settings, HelpCircle, ChevronRight, ChevronDown, Info, Edit, Trash2, Activity } from "lucide-react";
+import Pagination from "../../../ui/Pagination";
 import type { AssetDto } from "../../../../types/asset.types";
 import type { AssignmentResponse } from "../../../../types/assignment.types";
 import { formatDate, getInitials, getAvatarColor, toPascalCase } from "../../../../utils/format";
+import { getSafeImageUrl } from "../../../../utils/image";
 
 interface AssetAssignmentTabProps {
   asset: AssetDto;
@@ -31,6 +33,21 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
   setIsDeleteAssignmentModalOpen,
   setSelectedAssignment,
 }) => {
+  const [page, setPage] = React.useState(0);
+  const [pageSize, setPageSize] = React.useState(5);
+
+  const totalPages = Math.ceil(assignments.length / pageSize);
+  const currentAssignments = assignments.slice(
+    page * pageSize,
+    (page + 1) * pageSize
+  );
+
+  // Reset page when search/filter might change length
+  React.useEffect(() => {
+    if (page >= totalPages && totalPages > 0) {
+      setPage(totalPages - 1);
+    }
+  }, [assignments.length, totalPages, page]);
 
   const getAssignmentHeaderConfig = (status: string) => {
     switch (status) {
@@ -154,23 +171,10 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
     return toPascalCase(dept);
   };
 
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      AVAILABLE: "bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)]",
-      IN_USE: "bg-blue-500/10 text-blue-500",
-      DAMAGED: "bg-red-500/10 text-red-500",
-      UNDER_REPAIR: "bg-amber-500/10 text-amber-500",
-      LOST: "bg-red-600/10 text-red-600",
-      MALFUNCTION: "bg-orange-500/10 text-orange-500",
-      MAINTENANCE: "bg-purple-500/10 text-purple-500",
-    };
-    return colors[status] || "bg-[var(--text-muted)]/10 text-[var(--text-muted)]";
-  };
-
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6 items-start">
+    <div className="grid grid-cols-1 xl:grid-cols-[320px_1fr] gap-6 items-start">
       {/* Sidebar Container */}
-      <div className="flex flex-col gap-6 lg:sticky lg:top-6">
+      <div className="flex flex-col gap-6">
         {/* Dynamic Management Side Card */}
         <div className="bg-[var(--bg)] border border-[var(--border-color)] rounded-xl p-6 flex flex-col gap-6 transition-all duration-300 shadow-sm">
           <div className="flex justify-between items-start mb-2">
@@ -200,20 +204,6 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
           </div>
 
           <div className="pt-6  pb-10 px-10 space-y-5">
-            {/* Quick Stats Grid */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-[var(--text-muted)] font-bold">Total Records</span>
-                <span className="text-xl font-black text-[var(--text-main)]">{assignments.length}</span>
-              </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-[var(--text-muted)] font-bold">Current Status</span>
-                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md w-fit ${getStatusColor(asset.status)}`}>
-                  {toPascalCase(asset.status)}
-                </span>
-              </div>
-            </div>
-
             {latestAssignment ? (
               <div className="space-y-4">
                 <div className="flex flex-col gap-3">
@@ -221,8 +211,12 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
                     {latestAssignment.returnedDate ? "Last possessed by" : "Currently held by"}
                   </span>
                   <div className="flex items-center gap-4 p-4 bg-[var(--bg)] border border-dashed border-[var(--border-color)]/60 rounded-xl shadow-sm">
-                    <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-sa= font-bold shadow-sm ${getAvatarColor(latestAssignment.employee?.username || 'Unknown')}`}>
-                      {getInitials(latestAssignment.employee?.username || 'Unknown')}
+                    <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold shadow-sm overflow-hidden ${!latestAssignment.employee?.image ? getAvatarColor(latestAssignment.employee?.username || 'Unknown') : ''}`}>
+                      {latestAssignment.employee?.image ? (
+                        <img src={getSafeImageUrl(latestAssignment.employee.image)} alt="Avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        getInitials(latestAssignment.employee?.username || 'Unknown')
+                      )}
                     </div>
                     <div className="flex flex-col min-w-0">
                       <span className="text-xs font-bold text-[var(--text-main)] truncate">
@@ -272,7 +266,7 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
                         <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                         <span>Active possession</span>
                       </div>
-                      <span className="text-[10px] font-black text-blue-500 tracking-wider">In Progress</span>
+                      <span className="text-[10px] font-black text-blue-500 tracking-wider">Not yet returned</span>
                     </div>
                   )}
                 </div>
@@ -302,7 +296,7 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
         </div>
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 p-6 bg-gradient-to-b from-transparent to-[var(--surface-hover)]/5">
+        <div className="flex-1 px-6 pt-4 bg-gradient-to-b from-transparent to-[var(--surface-hover)]/5">
           {loadingAssignments ? (
             <div className="flex flex-col items-center justify-center h-full gap-4">
               <div className="relative">
@@ -322,8 +316,9 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
               <p className="text-[var(--text-muted)] text-[11px] max-w-[220px] leading-relaxed">This asset hasn't been assigned or modified yet.</p>
             </div>
           ) : (
-            <div className="relative pl-8 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-[var(--border-color)]/40">
-              {assignments.map((assignment) => (
+            <div className="flex flex-col gap-6">
+              <div className="relative pl-8 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-[var(--border-color)]/40">
+                {currentAssignments.map((assignment) => (
                 <div key={assignment.id} className="relative mb-6 last:mb-0">
                   <div className={`absolute -left-[27px] top-7 w-4 h-4 rounded-full border-2 ${assignment.returnedDate ? "bg-[var(--bg)] border-[var(--border-color)]" : "bg-[var(--color-growth-green)] border-[var(--color-growth-green)]/40 ring-4 ring-[var(--color-growth-green)]/10"}`} />
 
@@ -333,11 +328,15 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
                       onClick={() => setExpandedAssignment(expandedAssignment === assignment.id ? null : assignment.id)}
                     >
                       <div className="flex items-center gap-4">
-                        <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-[10px] font-bold ${getAvatarColor(assignment.employee?.username || 'Unknown')}`}>
-                          {getInitials(assignment.employee?.username || 'Unknown')}
+                        <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-[10px] font-bold ${!assignment.employee?.image ? getAvatarColor(assignment.employee?.username || 'Unknown') : ''}`}>
+                          {assignment.employee?.image ? (
+                            <img src={getSafeImageUrl(assignment.employee.image)} alt="Avatar" className="w-full h-full object-cover" />
+                          ) : (
+                            getInitials(assignment.employee?.username || 'Unknown')
+                          )}
                         </div>
                         <div className="flex flex-col min-w-0">
-                          <div className="flex items-center gap-2 flex-nowrap">
+                          <div className="flex flex-wrap items-center gap-2">
                             <span className="text-xs font-bold text-[var(--text-main)] group-hover/item:text-[var(--color-growth-green)] transition-colors whitespace-nowrap truncate">{assignment.employee?.username || 'Unknown'}</span>
                             <span className="text-[var(--border-color)] text-[10px] shrink-0">|</span>
                             <span className="text-[10px] text-[var(--text-muted)] font-medium whitespace-nowrap shrink-0">
@@ -391,12 +390,16 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
                     </div>
 
                     {expandedAssignment === assignment.id && (
-                      <div className="p-4 border-t border-[var(--border-color)] bg-[var(--bg)] animate-in slide-in-from-top-2 duration-300">
+                      <div className="p-4 relative before:absolute before:content-[''] before:top-0 before:left-4 before:right-4 before:h-px before:bg-[var(--border-color)] bg-[var(--bg)] animate-in slide-in-from-top-2 duration-300">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-4">
                             <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-[10px] font-bold ${getAvatarColor(assignment.assignedByUser?.username || "System")}`}>
-                                {getInitials(assignment.assignedByUser?.username || "System")}
+                              <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-[10px] font-bold ${!assignment.assignedByUser?.image ? getAvatarColor(assignment.assignedByUser?.username || "System") : ''}`}>
+                                {assignment.assignedByUser?.image ? (
+                                  <img src={getSafeImageUrl(assignment.assignedByUser.image)} alt="Avatar" className="w-full h-full object-cover" />
+                                ) : (
+                                  getInitials(assignment.assignedByUser?.username || "System")
+                                )}
                               </div>
                               <div className="flex flex-col">
                                 <span className="text-[8px] text-[var(--text-muted)] font-bold uppercase tracking-tighter">Assigned By</span>
@@ -416,8 +419,12 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
                               <>
                                 {assignment.confirmReturnByUser && (
                                   <div className="flex items-center gap-3">
-                                    <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-[10px] font-bold ${getAvatarColor(assignment.confirmReturnByUser?.username || "System")}`}>
-                                      {getInitials(assignment.confirmReturnByUser?.username || "System")}
+                                    <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-[10px] font-bold ${!assignment.confirmReturnByUser?.image ? getAvatarColor(assignment.confirmReturnByUser?.username || "System") : ''}`}>
+                                      {assignment.confirmReturnByUser?.image ? (
+                                        <img src={getSafeImageUrl(assignment.confirmReturnByUser.image)} alt="Avatar" className="w-full h-full object-cover" />
+                                      ) : (
+                                        getInitials(assignment.confirmReturnByUser?.username || "System")
+                                      )}
                                     </div>
                                     <div className="flex flex-col">
                                       <span className="text-[8px] text-[var(--text-muted)] font-bold uppercase tracking-tighter">Confirmed By</span>
@@ -448,7 +455,22 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
                 </div>
               ))}
             </div>
-          )}
+
+            <div className=" ">
+              <Pagination
+                page={page}
+                pageSize={pageSize}
+                totalElements={assignments.length}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setPage(0);
+                }}
+              />
+            </div>
+          </div>
+        )}
         </div>
       </div>
     </div>

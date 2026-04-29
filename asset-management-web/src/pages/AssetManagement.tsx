@@ -42,7 +42,7 @@ export default function AssetManagementPage() {
 
   return (
     <div className="bg-[var(--bg)] min-h-screen">
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+      <main className="w-full flex-1 px-8 sm:px-12 lg:px-20 xl:px-32 py-2 sm:py-4 lg:py-6">
         {/* ── Page Title ── */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex flex-col">
