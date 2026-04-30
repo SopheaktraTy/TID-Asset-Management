@@ -73,7 +73,7 @@ export default function ResetPasswordModal({
     <Modal isOpen={isOpen} onClose={handleClose} maxWidth="max-w-[400px]">
       <div className="flex flex-col gap-2">
         {/* Header - Logo & Title */}
-        <div className="w-full flex items-center justify-center mb-6 pt-2">
+        <div className="w-full flex items-center justify-center mb-6 pt-1">
           <img
             src={theme === "dark" ? logoWhite : logoCharcoal}
             alt="Logo"
@@ -81,7 +81,7 @@ export default function ResetPasswordModal({
           />
           <div className="flex flex-col text-left">
             <h3 className="text-xl mt-2 font-bold tracking-tight text-[var(--text-main)] leading-none">Reset Password</h3>
-            <p className="text-[13px] text-[var(--text-muted)] opacity-80 lowercase font-medium">
+            <p className="text-[13px] text-[var(--text-muted)] mt-1.5 lowercase font-bold">
               security protocol
             </p>
           </div>

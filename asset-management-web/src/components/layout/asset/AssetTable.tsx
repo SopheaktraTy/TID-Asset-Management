@@ -16,6 +16,7 @@ export const ASSET_TABLE_COLUMN_OPTIONS = [
   { key: "manufacturer", label: "Manufacturer" },
   { key: "specs", label: "Specs" },
   { key: "latestUsed", label: "Last Used" },
+  { key: "previousUsed", label: "Previously Used By" },
   { key: "createdAt", label: "Created At" },
   { key: "updatedAt", label: "Updated At" },
 ];
@@ -218,6 +219,16 @@ export default function AssetTable({
       cell: (asset) => (
         <span className="text-xs text-[var(--text-muted)]">
           {asset.latestUsed || "–"}
+        </span>
+      ),
+    },
+    {
+      key: "previousUsed",
+      header: "Previously Used By",
+      sortable: true,
+      cell: (asset) => (
+        <span className="text-xs text-[var(--text-muted)]">
+          {asset.previousUsed || "–"}
         </span>
       ),
     },

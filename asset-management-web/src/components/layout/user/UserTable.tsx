@@ -146,7 +146,7 @@ export default function UserTable({
       header: "Department",
       sortable: true,
       cell: (user) => (
-        <span className="text-[var(--text-muted)]">{toPascalCase(user?.department)}</span>
+        <span className="text-[var(--text-muted)] text-xs">{toPascalCase(user?.department)}</span>
       ),
     },
     {

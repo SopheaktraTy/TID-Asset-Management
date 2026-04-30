@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Loader2, AlertCircle, History } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { Modal } from "../../ui/Modal";
 import { Button } from "../../ui/Button";
 import type { AssignmentResponse } from "../../../types/assignment.types";
 import { deleteAssignmentApi } from "../../../services/assignment.service";
 import { useTheme } from "../../../hooks/useTheme";
-import { formatDate } from "../../../utils/format";
+import { getAvatarColor, getInitials } from "../../../utils/format";
+import { getSafeImageUrl } from "../../../utils/image";
 
 // Baker Tilly logo assets
 import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Growth Symbol Charcoal.png";
@@ -43,34 +44,40 @@ export default function DeleteAssignmentModal({ isOpen, assignment, onClose, onD
     <Modal isOpen={isOpen} onClose={onClose} maxWidth="max-w-[420px]">
       <div className="flex flex-col gap-3 text-center py-4">
         {/* Header - Logo & Title */}
-        <div className="w-full flex items-center justify-center mb-6 pt-2">
+        <div className="w-full flex items-center justify-center  pt-2">
           <img
             src={theme === "dark" ? logoWhite : logoCharcoal}
             alt="Logo"
             className="h-14 w-auto object-contain"
           />
           <div className="flex flex-col text-left">
-            <h3 className="text-xl font-bold tracking-tight text-[var(--text-main)] leading-none">Delete Record</h3>
-            <p className="text-[13px] text-[var(--text-muted)] opacity-80 lowercase font-medium">
+            <h3 className="text-xl mt-2 font-bold tracking-tight text-[var(--text-main)] leading-none">Delete Record</h3>
+            <p className="text-[13px] text-[var(--text-muted)] mt-1.5 lowercase font-bold">
               assignment history removal
             </p>
           </div>
         </div>
 
         {/* Assignment Summary Card */}
-        <div className="flex flex-col items-center gap-3 px-6 py-6 border border-dashed border-[var(--border-color)] dark:border-[var(--text-muted)]/20 rounded-2xl bg-[var(--surface-hover)]/50 dark:bg-white/[0.05] text-center mx-auto w-fit min-w-[280px]">
-          <div className="shrink-0 mb-1">
-            <div className="w-16 h-16 rounded-2xl border-2 border-[var(--border-color)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-main)] font-bold overflow-hidden shadow-md">
-              <History size={28} className="text-[var(--color-growth-green)]" />
+        <div className="flex items-center gap-3.5 p-3.5 border border-dashed border-[var(--border-color)] dark:border-[var(--text-muted)]/20 rounded-xl bg-[var(--bg)] text-left w-full shadow-sm">
+          <div className="shrink-0">
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-black shadow-sm overflow-hidden ${!assignment.employee?.image ? getAvatarColor(assignment.employee?.username || 'Unknown') : ''}`}>
+              {assignment.employee?.image ? (
+                <img src={getSafeImageUrl(assignment.employee.image)} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                getInitials(assignment.employee?.username || 'Unknown')
+              )}
             </div>
           </div>
-          <div className="flex flex-col items-center min-w-0 leading-tight">
-            <span className="text-base font-black text-[var(--text-main)] truncate">
+          <div className="flex flex-col min-w-0 leading-tight">
+            <span className="text-[13px] font-bold text-[var(--text-main)] truncate tracking-tight">
               {assignment.employee?.username || "Unknown"}
             </span>
-            <span className="text-[10px] text-[var(--text-muted)] truncate opacity-60 mt-1.5 uppercase font-bold tracking-widest font-mono">
-              Assigned: {formatDate(assignment.assignedDate)}
-            </span>
+            {assignment.employee?.department && (
+              <span className="text-[10px] text-[var(--text-muted)] truncate mt-0.5 opacity-70">
+                {assignment.employee.department.replace(/_/g, " ")}
+              </span>
+            )}
           </div>
         </div>
 
@@ -81,15 +88,11 @@ export default function DeleteAssignmentModal({ isOpen, assignment, onClose, onD
         )}
 
         {/* Status Icon Header */}
-        <div className="flex flex-col items-center gap-4">
-          <div className="space-y-1">
-            <div className="mt-2 bg-[var(--surface-hover)]/50 dark:bg-white/[0.05] border border-dashed border-red-500/20 rounded-2xl p-4 flex items-start gap-3 text-left">
-              <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5 opacity-80" />
-              <p className="text-[11px] text-[var(--text-muted)] leading-relaxed italic">
-                Are you sure you want to delete this assignment record? This will permanently remove this entry from the asset's history.
-              </p>
-            </div>
-          </div>
+        <div className="mt-2 flex items-start gap-3 text-left px-2">
+          <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5 opacity-80" />
+          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed italic">
+            Are you sure you want to delete this assignment record? This will permanently remove this entry from the asset's history.
+          </p>
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-4 border-none mt-2">

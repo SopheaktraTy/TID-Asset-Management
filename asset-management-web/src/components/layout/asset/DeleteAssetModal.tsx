@@ -43,34 +43,34 @@ export default function DeleteAssetModal({ isOpen, asset, onClose, onDeleted }: 
     <Modal isOpen={isOpen} onClose={onClose} maxWidth="max-w-[420px]">
       <div className="flex flex-col gap-3 text-center py-4">
         {/* Header - Logo & Title */}
-        <div className="w-full flex items-center justify-center mb-6 pt-2">
+        <div className="w-full flex items-center justify-center pt-2">
           <img
             src={theme === "dark" ? logoWhite : logoCharcoal}
             alt="Logo"
             className="h-14 w-auto object-contain"
           />
           <div className="flex flex-col text-left">
-            <h3 className="text-xl font-bold tracking-tight text-[var(--text-main)] leading-none">Delete Asset</h3>
-            <p className="text-[13px] text-[var(--text-muted)] opacity-80 lowercase font-medium">
+            <h3 className="text-xl mt-2 font-bold tracking-tight text-[var(--text-main)] leading-none">Delete Asset</h3>
+            <p className="text-[13px] text-[var(--text-muted)] mt-1.5 lowercase font-bold">
               permanent asset removal
             </p>
           </div>
         </div>
 
         {/* Asset Summary Card */}
-        <div className="flex flex-col items-center gap-3 px-6 py-6 border border-dashed border-[var(--border-color)] dark:border-[var(--text-muted)]/20 rounded-2xl bg-[var(--surface-hover)]/50 dark:bg-white/[0.05] text-center mx-auto w-fit min-w-[240px]">
-          <div className="shrink-0 mb-1">
-            <div className="w-16 h-16 rounded-2xl border-2 border-[var(--border-color)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-main)] font-bold overflow-hidden shadow-md">
+        <div className="flex items-center gap-3.5 p-3.5 border border-dashed border-[var(--border-color)] dark:border-[var(--text-muted)]/20 rounded-xl bg-[var(--bg)] text-left w-full shadow-sm">
+          <div className="shrink-0">
+            <div className="w-11 h-11 rounded-lg border border-[var(--border-color)]/50 flex items-center justify-center bg-[var(--surface-hover)]/30 text-[var(--text-main)] overflow-hidden shadow-sm">
               {asset.image ? (
                 <img src={getSafeImageUrl(asset.image)} alt={asset.deviceName} className="w-full h-full object-cover" />
               ) : (
-                <HardDrive size={28} className="text-[var(--text-muted)]" />
+                <HardDrive size={20} className="text-[var(--text-muted)] opacity-70" />
               )}
             </div>
           </div>
-          <div className="flex flex-col items-center min-w-0 leading-tight">
-            <span className="text-base font-black text-[var(--text-main)] truncate">{asset.deviceName}</span>
-            <span className="text-[10px] text-[var(--text-muted)] truncate opacity-60 mt-1.5 uppercase font-bold tracking-widest font-mono">
+          <div className="flex flex-col min-w-0 leading-tight">
+            <span className="text-[13px] font-bold text-[var(--text-main)] truncate tracking-tight">{asset.deviceName}</span>
+            <span className="text-[10px] text-[var(--text-muted)] truncate mt-0.5 opacity-70 font-mono font-bold tracking-wider">
               {asset.assetTag}
             </span>
           </div>
@@ -83,15 +83,11 @@ export default function DeleteAssetModal({ isOpen, asset, onClose, onDeleted }: 
         )}
 
         {/* Status Icon Header */}
-        <div className="flex flex-col items-center gap-4">
-          <div className="space-y-1">
-            <div className="mt-2 bg-[var(--surface-hover)]/50 dark:bg-white/[0.05] border border-dashed border-red-500/20 rounded-2xl p-4 flex items-start gap-3 text-left">
-              <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5 opacity-80" />
-              <p className="text-[11px] text-[var(--text-muted)] leading-relaxed italic">
-                This action cannot be undone. Are you sure you want to permanently remove this asset? All associated history, specifications, and records will be erased immediately.
-              </p>
-            </div>
-          </div>
+        <div className="mt-2 flex items-start gap-3 text-left px-2">
+          <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5 opacity-80" />
+          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed italic">
+            This action cannot be undone. Are you sure you want to permanently remove this asset? All associated history, specifications, and records will be erased immediately.
+          </p>
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-4 border-none mt-2">

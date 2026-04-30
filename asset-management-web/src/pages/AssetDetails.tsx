@@ -46,7 +46,7 @@ export default function AssetDetailsPage() {
 
   return (
     <div className="bg-[var(--bg)] text-[var(--text-main)] transition-colors duration-300 min-h-screen flex flex-col">
-      <main className="w-full flex-1 px-8 sm:px-12 lg:px-20 xl:px-32 py-2 sm:py-4 lg:py-6">
+      <main className="w-full flex-1 px-4 sm:px-6 lg:px-8 xl:px-12">
 
         {/* Top Header & Breadcrumbs */}
         <div className="flex items-start justify-between mb-6">

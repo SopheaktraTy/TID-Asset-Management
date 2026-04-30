@@ -29,6 +29,7 @@ public class AssetResponse {
     private String image;
     private LocalDateTime lastSecurityCheck;
     private String latestUsed;
+    private String previousUsed;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -206,6 +207,14 @@ public class AssetResponse {
 
     public void setLatestUsed(String latestUsed) {
         this.latestUsed = latestUsed;
+    }
+
+    public String getPreviousUsed() {
+        return previousUsed;
+    }
+
+    public void setPreviousUsed(String previousUsed) {
+        this.previousUsed = previousUsed;
     }
 
     public LocalDateTime getCreatedAt() {

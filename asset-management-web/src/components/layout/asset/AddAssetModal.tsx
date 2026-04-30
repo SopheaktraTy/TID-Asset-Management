@@ -421,7 +421,7 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: AddAssetMo
                     <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">Remark (If any)</label>
                     <textarea
                       {...register("remark")}
-                      className="w-full px-3 py-2 bg-[var(--bg)] border border-[var(--border-color)]/50 rounded-lg focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-2 focus:ring-[var(--color-growth-green)]/20 text-[11px] text-[var(--text-main)] placeholder:text-[var(--text-muted)] placeholder:text-[11px] transition-all duration-200 min-h-[80px] resize-none"
+                      className="w-full px-4 py-3 bg-[var(--bg)] border border-[var(--border-color)]/50 rounded-xl focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-2 focus:ring-[var(--color-growth-green)]/20 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] transition-all duration-200 min-h-[80px] resize-none"
                       placeholder="Describe any remarks or issues here..."
                     />
                   </div>

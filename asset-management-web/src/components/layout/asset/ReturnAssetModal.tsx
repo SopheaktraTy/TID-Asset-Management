@@ -72,7 +72,7 @@ export default function ReturnAssetModal({ isOpen, asset, assignment, onClose, o
     >
       <div className="flex flex-col gap-2">
         {/* Header - Logo & Title */}
-        <div className="w-full flex items-center justify-center mb-4 pt-1">
+        <div className="w-full flex items-center justify-center mb-2 pt-1">
           <img
             src={theme === "dark" ? logoWhite : logoCharcoal}
             alt="Logo"
@@ -86,11 +86,11 @@ export default function ReturnAssetModal({ isOpen, asset, assignment, onClose, o
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 text-left">
-          <div className="border border-[var(--border-color)] rounded-2xl p-5 bg-[var(--surface-hover)]/10 space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4 text-left">
+          <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5 space-y-5">
             <div className="px-1 flex items-center gap-2">
               <ClipboardCheck size={16} className="text-[var(--color-growth-green)]" />
-              <h3 className="text-sm font-bold text-[var(--text-main)] uppercase tracking-tight">Return Verification</h3>
+              <h3 className="text-sm font-bold text-[var(--text-main)]">Return Verification</h3>
             </div>
 
             <p className="text-xs text-[var(--text-muted)] px-1 leading-relaxed">
@@ -108,9 +108,8 @@ export default function ReturnAssetModal({ isOpen, asset, assignment, onClose, o
             </div>
 
             {/* Return Condition */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-xs font-bold text-[var(--text-main)] ml-1">
-                <ClipboardCheck size={14} className="text-emerald-500" />
+            <div className="space-y-2 px-1">
+              <label className="block text-xs font-bold text-[var(--text-main)] ml-1">
                 Return Condition *
               </label>
               <textarea
@@ -122,10 +121,10 @@ export default function ReturnAssetModal({ isOpen, asset, assignment, onClose, o
                 <p className="text-[10px] text-red-500 ml-1 font-bold">{errors.returnCondition.message}</p>
               )}
             </div>
- 
+
             {/* Remark */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-xs font-bold text-[var(--text-main)] ml-1">
+            <div className="space-y-2 px-1">
+              <label className="block text-xs font-bold text-[var(--text-main)] ml-1">
                 Remark
               </label>
               <textarea

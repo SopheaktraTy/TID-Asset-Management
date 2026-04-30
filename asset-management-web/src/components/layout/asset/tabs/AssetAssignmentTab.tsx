@@ -1,5 +1,5 @@
 import React from "react";
-import { UserPlus, History, User, Calendar, AlertTriangle, Wrench, AlertOctagon, AlertCircle, Settings, HelpCircle, ChevronRight, ChevronDown, Info, Edit, Trash2, Activity } from "lucide-react";
+import { UserPlus, History, User, AlertTriangle, Wrench, AlertOctagon, AlertCircle, Settings, HelpCircle, ChevronRight, ChevronDown, Info, Edit, Trash2, Activity, ArrowDownUp } from "lucide-react";
 import Pagination from "../../../ui/Pagination";
 import type { AssetDto } from "../../../../types/asset.types";
 import type { AssignmentResponse } from "../../../../types/assignment.types";
@@ -35,9 +35,25 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
 }) => {
   const [page, setPage] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(5);
+  const [sortOrder, setSortOrder] = React.useState<"desc" | "asc">("desc");
 
-  const totalPages = Math.ceil(assignments.length / pageSize);
-  const currentAssignments = assignments.slice(
+  const sortedAssignments = React.useMemo(() => {
+    return [...assignments].sort((a, b) => {
+      const dateA = new Date(a.assignedDate).getTime();
+      const dateB = new Date(b.assignedDate).getTime();
+      let diff = dateB - dateA;
+
+      // If dates are identical or invalid, fallback to ID (higher ID = newer)
+      if (Number.isNaN(diff) || diff === 0) {
+        diff = b.id - a.id;
+      }
+
+      return sortOrder === "desc" ? diff : -diff;
+    });
+  }, [assignments, sortOrder]);
+
+  const totalPages = Math.ceil(sortedAssignments.length / pageSize);
+  const currentAssignments = sortedAssignments.slice(
     page * pageSize,
     (page + 1) * pageSize
   );
@@ -130,46 +146,21 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
   };
 
   const headerCfg = getAssignmentHeaderConfig(asset.status);
-  const latestAssignment = assignments.length > 0 ? assignments[0] : null;
 
-  const getDeptShortcut = (dept: string | undefined) => {
-    if (!dept) return "N/A";
-    const cleanDept = dept.toUpperCase().replace(/[\s_]+/g, '_');
-    const shortcuts: Record<string, string> = {
-      INFORMATION_TECHNOLOGY: "IT",
-      HUMAN_RESOURCES: "HR",
-      SOFTWARE_DEVELOPMENT: "Dev",
-      ADMINISTRATION: "Admin",
-      FINANCE: "Fin",
-      MARKETING: "Mkt",
-      OPERATIONS: "Ops",
-      SALES: "Sales",
-      MANAGEMENT: "Mgmt",
-      PRODUCTION: "Prod",
-      LOGISTICS: "Log",
-      MAINTENANCE: "Maint",
-      ACCOUNTING: "Acc",
-      CUSTOMER_SERVICE: "CS",
-      QUALITY_ASSURANCE: "QA",
-      RESEARCH_AND_DEVELOPMENT: "R&D",
-      ENGINEERING: "Eng",
-      PURCHASING: "Pur",
-      INVENTORY: "Inv",
-      WAREHOUSE: "Whse",
-      DESIGN: "Des",
-      SECURITY: "Sec",
-    };
-    
-    if (shortcuts[cleanDept]) return shortcuts[cleanDept];
-    
-    // Auto-abbreviate multi-word departments if not in the map
-    const words = dept.split(/[_\s]/).filter(w => w.length > 0);
-    if (words.length > 1) {
-      return words.map(w => w[0]).join('').toUpperCase();
-    }
-    
-    return toPascalCase(dept);
-  };
+  // Guarantee latestAssignment is always the newest chronological record
+  const latestAssignment = React.useMemo(() => {
+    if (assignments.length === 0) return null;
+    return [...assignments].sort((a, b) => {
+      const dateA = new Date(a.assignedDate).getTime();
+      const dateB = new Date(b.assignedDate).getTime();
+      let diff = dateB - dateA;
+      if (Number.isNaN(diff) || diff === 0) {
+        diff = b.id - a.id;
+      }
+      return diff;
+    })[0];
+  }, [assignments]);
+
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-[320px_1fr] gap-6 items-start">
@@ -203,11 +194,11 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
             </h3>
           </div>
 
-          <div className="pt-6  pb-10 px-10 space-y-5">
+          <div className="pt-6  pb-8 px-8 space-y-5">
             {latestAssignment ? (
               <div className="space-y-4">
                 <div className="flex flex-col gap-3">
-                  <span className="text-[10px] text-[var(--text-muted)] font-bold">
+                  <span className="text-[11px] text-[var(--text-muted)] font-bold">
                     {latestAssignment.returnedDate ? "Last possessed by" : "Currently held by"}
                   </span>
                   <div className="flex items-center gap-4 p-4 bg-[var(--bg)] border border-dashed border-[var(--border-color)]/60 rounded-xl shadow-sm">
@@ -222,19 +213,11 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
                       <span className="text-xs font-bold text-[var(--text-main)] truncate">
                         {latestAssignment.employee?.username || 'Unknown'}
                       </span>
-                      <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="text-[10px] text-[var(--text-muted)] truncate">
-                          {latestAssignment.employee?.jobTitle || 'Team Member'}
+                      {latestAssignment.employee?.department && (
+                        <span className="text-[11px] text-[var(--text-muted)] truncate mt-0.5">
+                          {toPascalCase(latestAssignment.employee.department)}
                         </span>
-                        {latestAssignment.employee?.department && (
-                          <>
-                            <span className="w-1 h-1 rounded-full bg-[var(--border-color)] shrink-0" />
-                            <span className="text-[10px] text-[var(--text-muted)] font-bold truncate">
-                              {getDeptShortcut(latestAssignment.employee.department)}
-                            </span>
-                          </>
-                        )}
-                      </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -284,14 +267,27 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
       <div className="bg-[var(--bg)] border border-[var(--border-color)] rounded-xl overflow-hidden flex flex-col transition-colors duration-300 shadow-sm">
         {/* Header for the Frame */}
         <div className="px-6 py-4 border-b border-[var(--border-color)]/50 bg-[var(--bg)] flex items-center justify-between shrink-0">
-          <h3 className="text-sm font-bold text-[var(--text-main)] flex items-center gap-2">
-            <Activity size={16} className="text-[var(--color-growth-green)]" />
-            Assignment History
-          </h3>
-          {!loadingAssignments && assignments.length > 0 && (
-            <span className="text-[9px] font-black text-[var(--text-main)] bg-[var(--surface-hover)] px-2.5 py-1 rounded-lg border border-[var(--border-color)]/40 uppercase tracking-widest">
-              {assignments.length} {assignments.length === 1 ? 'Record' : 'Records'}
-            </span>
+          <div className="flex items-center gap-3">
+            <h3 className="text-sm font-bold text-[var(--text-main)] flex items-center gap-2">
+              <Activity size={16} className="text-[var(--color-growth-green)]" />
+              Assignment History
+            </h3>
+            {!loadingAssignments && assignments.length > 0 && (
+              <span className="text-[9px] font-black text-[var(--text-main)] bg-[var(--bg)] px-2.5 py-1 rounded-sm border border-[var(--border-color)]/40 uppercase tracking-widest">
+                {assignments.length} {assignments.length === 1 ? 'Record' : 'Records'}
+              </span>
+            )}
+          </div>
+
+          {/* Sort Toggle Button */}
+          {!loadingAssignments && assignments.length > 1 && (
+            <button
+              onClick={() => setSortOrder(prev => prev === "desc" ? "asc" : "desc")}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[var(--border-color)] text-[10px] font-bold text-[var(--text-main)] bg-[var(--surface-hover)]/30 hover:bg-[var(--surface-hover)] transition-all active:scale-95"
+            >
+              <ArrowDownUp size={12} className="text-[var(--text-muted)]" />
+              {sortOrder === "desc" ? "Newest First" : "Oldest First"}
+            </button>
           )}
         </div>
 
@@ -308,7 +304,7 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
               <span className="text-[11px] text-[var(--text-muted)] font-bold uppercase tracking-widest animate-pulse">Syncing History...</span>
             </div>
           ) : assignments.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center">
+            <div className="h-full flex flex-col items-center justify-center text-center pb-8">
               <div className="w-16 h-16 rounded-full bg-[var(--surface-hover)] flex items-center justify-center mb-4 text-[var(--text-muted)]/40 border border-dashed border-[var(--border-color)]">
                 <History size={32} />
               </div>
@@ -319,158 +315,152 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
             <div className="flex flex-col gap-6">
               <div className="relative pl-8 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-[var(--border-color)]/40">
                 {currentAssignments.map((assignment) => (
-                <div key={assignment.id} className="relative mb-6 last:mb-0">
-                  <div className={`absolute -left-[27px] top-7 w-4 h-4 rounded-full border-2 ${assignment.returnedDate ? "bg-[var(--bg)] border-[var(--border-color)]" : "bg-[var(--color-growth-green)] border-[var(--color-growth-green)]/40 ring-4 ring-[var(--color-growth-green)]/10"}`} />
+                  <div key={assignment.id} className="relative mb-6 last:mb-0">
+                    <div className={`absolute -left-[27px] top-7 w-4 h-4 rounded-full border-2 ${assignment.returnedDate ? "bg-[var(--bg)] border-[var(--border-color)]" : "bg-[var(--color-growth-green)] border-[var(--color-growth-green)]/40 ring-4 ring-[var(--color-growth-green)]/10"}`} />
 
-                  <div className="bg-[var(--bg)] border border-[var(--border-color)] rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-[var(--color-growth-green)]/30 group/item">
-                    <div
-                      className="p-4 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                      onClick={() => setExpandedAssignment(expandedAssignment === assignment.id ? null : assignment.id)}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-[10px] font-bold ${!assignment.employee?.image ? getAvatarColor(assignment.employee?.username || 'Unknown') : ''}`}>
-                          {assignment.employee?.image ? (
-                            <img src={getSafeImageUrl(assignment.employee.image)} alt="Avatar" className="w-full h-full object-cover" />
-                          ) : (
-                            getInitials(assignment.employee?.username || 'Unknown')
-                          )}
+                    <div className="bg-[var(--bg)] border border-[var(--border-color)] rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-[var(--color-growth-green)]/30 group/item">
+                      <div
+                        className="p-4 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                        onClick={() => setExpandedAssignment(expandedAssignment === assignment.id ? null : assignment.id)}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-[10px] font-bold ${!assignment.employee?.image ? getAvatarColor(assignment.employee?.username || 'Unknown') : ''}`}>
+                            {assignment.employee?.image ? (
+                              <img src={getSafeImageUrl(assignment.employee.image)} alt="Avatar" className="w-full h-full object-cover" />
+                            ) : (
+                              getInitials(assignment.employee?.username || 'Unknown')
+                            )}
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-xs font-bold text-[var(--text-main)] group-hover/item:text-[var(--color-growth-green)] transition-colors whitespace-nowrap truncate">{assignment.employee?.username || 'Unknown'}</span>
+                              <span className="text-[var(--border-color)] text-[10px] shrink-0">|</span>
+                              <span className="text-[10px] text-[var(--text-muted)] font-medium whitespace-nowrap shrink-0">
+                                {formatDate(assignment.assignedDate)}
+                              </span>
+                              {!assignment.returnedDate && (
+                                <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)] border border-[var(--color-growth-green)]/20 uppercase tracking-tighter shadow-sm shrink-0">Current</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5 text-[11px] mt-0.5 text-[var(--text-muted)] whitespace-nowrap overflow-hidden">
+                              <span className="font-medium text-[var(--text-main)] truncate">{toPascalCase(assignment.employee?.jobTitle) || 'N/A'}</span>
+                              <span className="w-1 h-1 rounded-full bg-[var(--border-color)] shrink-0" />
+                              <span className="truncate">{toPascalCase(assignment.employee?.department) || 'N/A'}</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex flex-col min-w-0">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-xs font-bold text-[var(--text-main)] group-hover/item:text-[var(--color-growth-green)] transition-colors whitespace-nowrap truncate">{assignment.employee?.username || 'Unknown'}</span>
-                            <span className="text-[var(--border-color)] text-[10px] shrink-0">|</span>
-                            <span className="text-[10px] text-[var(--text-muted)] font-medium whitespace-nowrap shrink-0">
-                              {formatDate(assignment.assignedDate)}
+                        <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto border-t sm:border-0 pt-3 sm:pt-0 border-[var(--border-color)]/30">
+                          {assignment.returnedDate && (
+                            <span className="text-[9px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full whitespace-nowrap">
+                              Returned {formatDate(assignment.returnedDate)}
                             </span>
-                            {!assignment.returnedDate && (
-                              <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)] border border-[var(--color-growth-green)]/20 uppercase tracking-tighter shadow-sm shrink-0">Current</span>
-                            )}
+                          )}
+                          <div className="flex items-center gap-1.5 ml-2 border-l border-[var(--border-color)] pl-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedAssignment(assignment);
+                                setIsEditAssignmentModalOpen(true);
+                              }}
+                              className="p-1.5 text-[var(--text-muted)] hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-all"
+                              title="Edit Record"
+                            >
+                              <Edit size={14} />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedAssignment(assignment);
+                                setIsDeleteAssignmentModalOpen(true);
+                              }}
+                              className="p-1.5 text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                              title="Delete Record"
+                            >
+                              <Trash2 size={14} />
+                            </button>
                           </div>
-                          <div className="flex items-center gap-1.5 text-[10px] mt-0.5 text-[var(--text-muted)] whitespace-nowrap overflow-hidden">
-                            <span className="font-medium text-[var(--text-main)] truncate">{assignment.employee?.jobTitle || 'N/A'}</span>
-                            <span className="w-1 h-1 rounded-full bg-[var(--border-color)] shrink-0" />
-                            <span className="truncate">{assignment.employee?.department?.replace(/_/g, " ") || 'N/A'}</span>
+                          <div className="ml-1 text-[var(--text-muted)]">
+                            {expandedAssignment === assignment.id ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto border-t sm:border-0 pt-3 sm:pt-0 border-[var(--border-color)]/30">
-                        {assignment.returnedDate && (
-                          <span className="text-[9px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full whitespace-nowrap">
-                            Returned {formatDate(assignment.returnedDate)}
-                          </span>
-                        )}
-                        <div className="flex items-center gap-1.5 ml-2 border-l border-[var(--border-color)] pl-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedAssignment(assignment);
-                              setIsEditAssignmentModalOpen(true);
-                            }}
-                            className="p-1.5 text-[var(--text-muted)] hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-all"
-                            title="Edit Record"
-                          >
-                            <Edit size={14} />
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedAssignment(assignment);
-                              setIsDeleteAssignmentModalOpen(true);
-                            }}
-                            className="p-1.5 text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
-                            title="Delete Record"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                        <div className="ml-1 text-[var(--text-muted)]">
-                          {expandedAssignment === assignment.id ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                        </div>
-                      </div>
-                    </div>
 
-                    {expandedAssignment === assignment.id && (
-                      <div className="p-4 relative before:absolute before:content-[''] before:top-0 before:left-4 before:right-4 before:h-px before:bg-[var(--border-color)] bg-[var(--bg)] animate-in slide-in-from-top-2 duration-300">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-4">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-[10px] font-bold ${!assignment.assignedByUser?.image ? getAvatarColor(assignment.assignedByUser?.username || "System") : ''}`}>
-                                {assignment.assignedByUser?.image ? (
-                                  <img src={getSafeImageUrl(assignment.assignedByUser.image)} alt="Avatar" className="w-full h-full object-cover" />
-                                ) : (
-                                  getInitials(assignment.assignedByUser?.username || "System")
-                                )}
+                      {expandedAssignment === assignment.id && (
+                        <div className="p-4 px-6 relative before:absolute before:content-[''] before:top-0 before:left-4 before:right-4 before:h-px before:bg-[var(--border-color)] bg-[var(--bg)] animate-in slide-in-from-top-2 duration-300">
+                          <div className="flex flex-col gap-3.5">
+                            {/* ── Assignment Details ── */}
+                            <div className="flex flex-wrap items-center gap-4 px-1">
+                              <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
+                                <UserPlus size={12} />
+                                <span className="text-[11px] font-medium">Assigned by</span>
                               </div>
-                              <div className="flex flex-col">
-                                <span className="text-[8px] text-[var(--text-muted)] font-bold uppercase tracking-tighter">Assigned By</span>
-                                <span className="text-[11px] font-semibold text-[var(--text-main)]">{assignment.assignedByUser?.username || "System"}</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3 pl-[4px]">
-                              <Calendar size={14} className="text-purple-500" />
-                              <div className="flex flex-col pl-[3px]">
-                                <span className="text-[8px] text-[var(--text-muted)] font-bold uppercase tracking-tighter">Assignment Date</span>
-                                <span className="text-[11px] font-semibold text-[var(--text-main)]">{formatDate(assignment.assignedDate)}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="space-y-4">
-                            {assignment.returnedDate && (
-                              <>
-                                {assignment.confirmReturnByUser && (
-                                  <div className="flex items-center gap-3">
-                                    <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-[10px] font-bold ${!assignment.confirmReturnByUser?.image ? getAvatarColor(assignment.confirmReturnByUser?.username || "System") : ''}`}>
-                                      {assignment.confirmReturnByUser?.image ? (
-                                        <img src={getSafeImageUrl(assignment.confirmReturnByUser.image)} alt="Avatar" className="w-full h-full object-cover" />
-                                      ) : (
-                                        getInitials(assignment.confirmReturnByUser?.username || "System")
-                                      )}
-                                    </div>
-                                    <div className="flex flex-col">
-                                      <span className="text-[8px] text-[var(--text-muted)] font-bold uppercase tracking-tighter">Confirmed By</span>
-                                      <span className="text-[11px] font-semibold text-[var(--text-main)]">{assignment.confirmReturnByUser?.username || "System"}</span>
-                                    </div>
-                                  </div>
-                                )}
-                                <div className="flex items-center gap-3 pl-[4px]">
-                                  <Calendar size={14} className="text-rose-500" />
-                                  <div className="flex flex-col pl-[3px]">
-                                    <span className="text-[8px] text-[var(--text-muted)] font-bold uppercase tracking-tighter">Return Date</span>
-                                    <span className="text-[11px] font-semibold text-[var(--text-main)]">{formatDate(assignment.returnedDate)}</span>
-                                  </div>
+                              <div className="flex items-center gap-2">
+                                <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-[10px] font-bold shadow-sm ${!assignment.assignedByUser?.image ? getAvatarColor(assignment.assignedByUser?.username || "System") : ''}`}>
+                                  {assignment.assignedByUser?.image ? (
+                                    <img src={getSafeImageUrl(assignment.assignedByUser.image)} alt="Avatar" className="w-full h-full object-cover" />
+                                  ) : (
+                                    getInitials(assignment.assignedByUser?.username || "System")
+                                  )}
                                 </div>
-                              </>
+                                <span className="text-xs font-bold text-[var(--text-main)]">{assignment.assignedByUser?.username || "System"}</span>
+                                <span className="text-[var(--border-color)] text-[10px]">|</span>
+                                <span className="text-[11px] font-medium text-[var(--text-muted)]">{formatDate(assignment.assignedDate)}</span>
+                              </div>
+                            </div>
+
+                            {/* ── Return Details ── */}
+                            {assignment.returnedDate && (
+                              <div className="flex flex-wrap items-center gap-4 px-1">
+                                <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
+                                  <Activity size={12} />
+                                  <span className="text-[11px] font-medium">Returned by</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-[10px] font-bold shadow-sm ${!assignment.confirmReturnByUser?.image ? getAvatarColor(assignment.confirmReturnByUser?.username || "System") : ''}`}>
+                                    {assignment.confirmReturnByUser?.image ? (
+                                      <img src={getSafeImageUrl(assignment.confirmReturnByUser.image)} alt="Avatar" className="w-full h-full object-cover" />
+                                    ) : (
+                                      getInitials(assignment.confirmReturnByUser?.username || "System")
+                                    )}
+                                  </div>
+                                  <span className="text-xs font-bold text-[var(--text-main)]">{assignment.confirmReturnByUser?.username || "System"}</span>
+                                  <span className="text-[var(--border-color)] text-[10px]">|</span>
+                                  <span className="text-[11px] font-medium text-[var(--text-muted)]">{formatDate(assignment.returnedDate)}</span>
+                                  {assignment.returnCondition && (
+                                    <div className="group relative flex items-center cursor-help ml-1">
+                                      <AlertCircle size={11} className="text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors" />
+                                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-[var(--surface)] border border-[var(--border-color)] text-[10px] font-medium text-[var(--text-main)] rounded-lg shadow-2xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                                        Condition: {assignment.returnCondition}
+                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[var(--border-color)]" />
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
                             )}
                           </div>
                         </div>
-                        {assignment.returnCondition && (
-                          <div className="mt-4 p-3 bg-[var(--bg)] border border-[var(--border-color)] rounded-lg">
-                            <span className="text-[8px] text-[var(--text-muted)] font-bold uppercase tracking-tighter block mb-1">Return Condition</span>
-                            <p className="text-[11px] text-[var(--text-main)]">{assignment.returnCondition}</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            <div className=" ">
-              <Pagination
-                page={page}
-                pageSize={pageSize}
-                totalElements={assignments.length}
-                totalPages={totalPages}
-                onPageChange={setPage}
-                onPageSizeChange={(size) => {
-                  setPageSize(size);
-                  setPage(0);
-                }}
-              />
+              <div className=" ">
+                <Pagination
+                  page={page}
+                  pageSize={pageSize}
+                  totalElements={assignments.length}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                  onPageSizeChange={(size) => {
+                    setPageSize(size);
+                    setPage(0);
+                  }}
+                />
+              </div>
             </div>
-          </div>
-        )}
+          )}
         </div>
       </div>
     </div>

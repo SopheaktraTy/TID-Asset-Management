@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, ClipboardList, Calendar, User, Info } from "lucide-react";
+import { Loader2, ClipboardList, Calendar } from "lucide-react";
 
 import { Button } from "../../ui/Button";
 import { SuggestionInput } from "../../ui/SuggestionInput";
@@ -95,7 +95,7 @@ export default function EditAssignmentModal({ isOpen, assignment, onClose, onSuc
     >
       <div className="flex flex-col gap-2">
         {/* Header - Logo & Title */}
-        <div className="w-full flex items-center justify-center mb-4 pt-1">
+        <div className="w-full flex items-center justify-center mb-2 pt-1">
           <img
             src={theme === "dark" ? logoWhite : logoCharcoal}
             alt="Logo"
@@ -109,17 +109,16 @@ export default function EditAssignmentModal({ isOpen, assignment, onClose, onSuc
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5 text-left">
-          <div className="border border-[var(--border-color)] rounded-2xl p-5 bg-[var(--surface-hover)]/10 space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 text-left">
+          <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5 space-y-5">
             <div className="px-1 flex items-center gap-2">
               <ClipboardList size={16} className="text-[var(--color-growth-green)]" />
-              <h3 className="text-sm font-bold text-[var(--text-main)] uppercase tracking-tight">Assignment Details</h3>
+              <h3 className="text-sm font-bold text-[var(--text-main)]">Assignment Details</h3>
             </div>
 
             {/* Employee Name */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-xs font-bold text-[var(--text-main)] mb-1 ml-1">
-                <User size={12} className="text-[var(--text-muted)]" />
+            <div className="space-y-2 px-1">
+              <label className="block text-xs font-bold text-[var(--text-main)] mb-1 ml-1">
                 Employee Name *
               </label>
               <SuggestionInput
@@ -135,16 +134,19 @@ export default function EditAssignmentModal({ isOpen, assignment, onClose, onSuc
             </div>
 
             {/* Assigned Date */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-xs font-bold text-[var(--text-main)] mb-1 ml-1">
-                <Calendar size={12} className="text-[var(--text-muted)]" />
+            <div className="space-y-2 px-1">
+              <label className="block text-xs font-bold text-[var(--text-main)] mb-1 ml-1">
                 Assigned Date *
               </label>
-              <Input
-                type="date"
-                className="bg-[var(--bg)] border-[var(--border-color)]/50"
-                {...register("assignedDate")}
-              />
+              <div className="relative">
+                <Input
+                  type="date"
+                  className="bg-[var(--bg)] border-[var(--border-color)]/50 pr-10 cursor-pointer"
+                  onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
+                  {...register("assignedDate")}
+                />
+                <Calendar size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+              </div>
               {errors.assignedDate && (
                 <p className="text-[10px] text-red-500 ml-1 font-bold">{errors.assignedDate.message}</p>
               )}
@@ -152,48 +154,46 @@ export default function EditAssignmentModal({ isOpen, assignment, onClose, onSuc
 
             {/* If returned, allow editing return details */}
             {assignment.returnedDate && (
-              <div className="pt-4 border-t border-[var(--border-color)] space-y-4">
-                <div className="px-1 flex items-center gap-2">
-                  <Info size={14} className="text-blue-400" />
-                  <h4 className="text-[11px] font-bold text-[var(--text-main)] uppercase tracking-tighter">Return Details</h4>
-                </div>
+              <div className="space-y-5">
 
                 <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-xs font-bold text-[var(--text-main)] mb-1 ml-1">
-                      <Calendar size={12} className="text-[var(--text-muted)]" />
+                    <label className="block text-xs font-bold text-[var(--text-main)] mb-1 ml-1">
                       Returned Date
                     </label>
-                    <Input
-                      type="date"
-                      className="bg-[var(--bg)] border-[var(--border-color)]/50"
-                      {...register("returnedDate")}
-                    />
+                    <div className="relative">
+                      <Input
+                        type="date"
+                        className="bg-[var(--bg)] border-[var(--border-color)]/50 pr-10 cursor-pointer"
+                        onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
+                        {...register("returnedDate")}
+                      />
+                      <Calendar size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+                    </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-xs font-bold text-[var(--text-main)] mb-1 ml-1">
-                      <ClipboardList size={12} className="text-[var(--text-muted)]" />
+                    <label className="block text-xs font-bold text-[var(--text-main)] mb-1 ml-1">
                       Return Condition
                     </label>
                     <textarea
                       {...register("returnCondition")}
-                      className="w-full px-3 py-2 bg-[var(--bg)] border border-[var(--border-color)]/50 rounded-lg focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-2 focus:ring-[var(--color-growth-green)]/20 text-[11px] text-[var(--text-main)] placeholder:text-[var(--text-muted)] placeholder:text-[11px] transition-all duration-200 min-h-[60px] resize-none"
+                      className="w-full px-4 py-3 bg-[var(--bg)] border border-[var(--border-color)]/50 rounded-xl focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-2 focus:ring-[var(--color-growth-green)]/20 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] transition-all duration-200 min-h-[80px] resize-none"
                       placeholder="e.g. Scratched screen, Battery issues..."
                     />
                   </div>
                 </div>
               </div>
             )}
- 
+
             {/* Shared Remark */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-xs font-bold text-[var(--text-main)] mb-1 ml-1">
+            <div className="space-y-2 px-1">
+              <label className="block text-xs font-bold text-[var(--text-main)] mb-1 ml-1">
                 Remark
               </label>
               <textarea
                 {...register("remark")}
-                className="w-full px-3 py-2 bg-[var(--bg)] border border-[var(--border-color)]/50 rounded-lg focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-2 focus:ring-[var(--color-growth-green)]/20 text-[11px] text-[var(--text-main)] placeholder:text-[var(--text-muted)] placeholder:text-[11px] transition-all duration-200 min-h-[60px] resize-none"
+                className="w-full px-4 py-3 bg-[var(--bg)] border border-[var(--border-color)]/50 rounded-xl focus:outline-none focus:border-[var(--color-growth-green)] focus:ring-2 focus:ring-[var(--color-growth-green)]/20 text-xs text-[var(--text-main)] placeholder:text-[var(--text-muted)] transition-all duration-200 min-h-[80px] resize-none"
                 placeholder="Add any additional remarks..."
               />
             </div>

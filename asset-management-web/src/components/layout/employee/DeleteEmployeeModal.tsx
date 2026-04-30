@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Loader2, AlertCircle, User } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { Modal } from "../../ui/Modal";
 import { Button } from "../../ui/Button";
 import type { EmployeeDto } from "../../../types/employee.types";
 import { deleteEmployeeApi } from "../../../services/employee.service";
 import { getSafeImageUrl } from "../../../utils/image";
 import { useTheme } from "../../../hooks/useTheme";
-import { toPascalCase } from "../../../utils/format";
+import { getAvatarColor, getInitials } from "../../../utils/format";
 
 // Baker Tilly logo assets
 import logoCharcoal from "../../../assets/Logo_Bakertilly/Baker Tilly Growth Symbol Charcoal.png";
@@ -44,7 +44,7 @@ export default function DeleteEmployeeModal({ isOpen, employee, onClose, onDelet
     <Modal isOpen={isOpen} onClose={onClose} maxWidth="max-w-[420px]">
       <div className="flex flex-col gap-3 text-center py-4">
         {/* Header - Logo & Title */}
-        <div className="w-full flex items-center justify-center mb-6 pt-2">
+        <div className="w-full flex items-center justify-center pt-2">
           <img
             src={theme === "dark" ? logoWhite : logoCharcoal}
             alt="Logo"
@@ -61,20 +61,21 @@ export default function DeleteEmployeeModal({ isOpen, employee, onClose, onDelet
 
 
         {/* Employee Summary Card */}
-        <div className="flex flex-col items-center gap-3 px-6 py-6 border border-dashed border-[var(--border-color)] dark:border-[var(--text-muted)]/20 rounded-2xl bg-[var(--surface-hover)]/50 dark:bg-white/[0.05] text-center mx-auto w-fit min-w-[240px]">
+        <div className="flex items-center gap-3.5 p-3.5 border border-dashed border-[var(--border-color)] dark:border-[var(--text-muted)]/20 rounded-xl bg-[var(--bg)] text-left w-full shadow-sm">
           <div className="shrink-0">
-            <div className="w-16 h-16 rounded-full border-2 border-[var(--border-color)] flex items-center justify-center bg-[var(--surface)] text-[var(--text-main)] font-bold overflow-hidden shadow-md">
+            <div className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-black shadow-sm overflow-hidden ${!employee.image ? getAvatarColor(employee.username) : ''}`}>
               {employee.image ? (
                 <img src={getSafeImageUrl(employee.image)} alt={employee.username} className="w-full h-full object-cover" />
               ) : (
-                <User size={28} className="text-[var(--text-muted)]" />
+                getInitials(employee.username)
               )}
             </div>
           </div>
-          <div className="flex flex-col items-center min-w-0 leading-tight">
-            <span className="text-base font-black text-[var(--text-main)] truncate">{employee.username}</span>
-            <span className="text-xs text-[var(--text-muted)] font-bold truncate mt-1.5 opacity-90 tracking-tight">{toPascalCase(employee.jobTitle)}</span>
-            <span className="text-[10px] text-[var(--text-muted)] truncate opacity-60 mt-1 uppercase font-bold tracking-widest">{toPascalCase(employee.department)}</span>
+          <div className="flex flex-col min-w-0 leading-tight">
+            <span className="text-[13px] font-bold text-[var(--text-main)] truncate tracking-tight">{employee.username}</span>
+            <span className="text-[10px] text-[var(--text-muted)] truncate mt-0.5 opacity-70">
+              {employee.department.replace(/_/g, " ")}
+            </span>
           </div>
         </div>
 
@@ -84,15 +85,11 @@ export default function DeleteEmployeeModal({ isOpen, employee, onClose, onDelet
           </div>
         )}
         {/* Status Icon Header */}
-        <div className="flex flex-col items-center gap-4">
-          <div className="space-y-1">
-            <div className="mt-2 bg-[var(--surface-hover)]/50 dark:bg-white/[0.05] border border-dashed border-red-500/20 rounded-2xl p-4 flex items-start gap-3 text-left">
-              <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5 opacity-80" />
-              <p className="text-[11px] text-[var(--text-muted)] leading-relaxed italic">
-                This action cannot be undone. Are you sure you want to permanently remove this employee? All associated data, including asset assignments and records, will be affected.
-              </p>
-            </div>
-          </div>
+        <div className="mt-2 flex items-start gap-3 text-left px-2">
+          <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5 opacity-80" />
+          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed italic">
+            This action cannot be undone. Are you sure you want to permanently remove this employee? All associated data, including asset assignments and records, will be affected.
+          </p>
         </div>
         <div className="flex items-center justify-end gap-3 pt-4 border-none mt-2">
           <Button

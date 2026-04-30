@@ -86,7 +86,7 @@ export default function AssignAssetModal({ isOpen, asset, onClose, onSuccess }: 
     >
       <div className="flex flex-col gap-2">
         {/* Header - Logo & Title */}
-        <div className="w-full flex items-center justify-center mb-4 pt-1">
+        <div className="w-full flex items-center justify-center mb-2 pt-1">
           <img
             src={theme === "dark" ? logoWhite : logoCharcoal}
             alt="Logo"
@@ -100,11 +100,11 @@ export default function AssignAssetModal({ isOpen, asset, onClose, onSuccess }: 
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5 text-left">
-          <div className="border border-[var(--border-color)] rounded-2xl p-5 bg-[var(--surface-hover)]/10 space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4 text-left">
+          <div className="border border-[var(--border-color)]/30 rounded-2xl p-4 bg-[var(--surface-hover)]/5 space-y-5">
             <div className="px-1 flex items-center gap-2">
               <ClipboardList size={16} className="text-[var(--color-growth-green)]" />
-              <h3 className="text-sm font-bold text-[var(--text-main)] uppercase tracking-tight">Asset Assignment</h3>
+              <h3 className="text-sm font-bold text-[var(--text-main)]">Asset Assignment</h3>
             </div>
 
             <p className="text-xs text-[var(--text-muted)] px-1 leading-relaxed">
@@ -112,7 +112,7 @@ export default function AssignAssetModal({ isOpen, asset, onClose, onSuccess }: 
             </p>
 
             {/* Employee Name Suggestions */}
-            <div className="space-y-2">
+            <div className="space-y-2 px-1">
               <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">
                 Employee Name *
               </label>
@@ -129,7 +129,7 @@ export default function AssignAssetModal({ isOpen, asset, onClose, onSuccess }: 
             </div>
 
             {/* Remark */}
-            <div className="space-y-2">
+            <div className="space-y-2 px-1">
               <label className="block text-xs font-bold text-[var(--text-main)] mb-2 ml-1">
                 Remark
               </label>
