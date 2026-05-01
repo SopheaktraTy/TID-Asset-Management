@@ -10,8 +10,14 @@ import ReturnAssetModal from "./ReturnAssetModal";
 import EditAssetModal from "./EditAssetModal";
 import AssetDetailsTab from "./tabs/AssetDetailsTab";
 import AssetAssignmentTab from "./tabs/AssetAssignmentTab";
+import AssetProcurementTab from "./tabs/AssetProcurementTab";
 import EditAssignmentModal from "./EditAssignmentModal";
 import DeleteAssignmentModal from "./DeleteAssignmentModal";
+import ManageProcurementModal from "./ManageProcurementModal";
+import DeleteProcurementModal from "./DeleteProcurementModal";
+import { getAssetProcurementApi, deleteAssetProcurementApi } from "../../../services/procurement.service";
+import type { ProcurementResponse } from "../../../types/procurement.types";
+import { ShoppingBag } from "lucide-react";
 
 interface AssetFullDetailsProps {
   asset: AssetDto;
@@ -28,9 +34,12 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
   onAssetUpdate,
   isDeleting = false,
 }) => {
-  const [activeTab, setActiveTab] = useState<"details" | "assignment">("details");
+  const [activeTab, setActiveTab] = useState<"details" | "assignment" | "procurement">("details");
   const [assignments, setAssignments] = useState<AssignmentResponse[]>([]);
+  const [procurement, setProcurement] = useState<ProcurementResponse | null>(null);
   const [loadingAssignments, setLoadingAssignments] = useState(false);
+  const [loadingProcurement, setLoadingProcurement] = useState(false);
+  const [deletingProcurement, setDeletingProcurement] = useState(false);
   const [expandedAssignment, setExpandedAssignment] = useState<number | null>(null);
 
   // Modal states
@@ -39,6 +48,8 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
   const [isEditAssignmentModalOpen, setIsEditAssignmentModalOpen] = useState(false);
   const [isDeleteAssignmentModalOpen, setIsDeleteAssignmentModalOpen] = useState(false);
   const [isStatusEditModalOpen, setIsStatusEditModalOpen] = useState(false);
+  const [isManageProcurementModalOpen, setIsManageProcurementModalOpen] = useState(false);
+  const [isDeleteProcurementModalOpen, setIsDeleteProcurementModalOpen] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<AssignmentResponse | null>(null);
 
   const fetchAssignments = async () => {
@@ -53,9 +64,24 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
     }
   };
 
+  const fetchProcurement = async () => {
+    try {
+      setLoadingProcurement(true);
+      const data = await getAssetProcurementApi(asset.id);
+      setProcurement(data);
+    } catch (error) {
+      console.error("Failed to fetch procurement:", error);
+      setProcurement(null);
+    } finally {
+      setLoadingProcurement(false);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === "assignment") {
       fetchAssignments();
+    } else if (activeTab === "procurement") {
+      fetchProcurement();
     }
   }, [activeTab, asset.id]);
 
@@ -81,6 +107,23 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
 
   const handleAssignmentDeleteSuccess = (_assignmentId: number) => {
     fetchAssignments();
+  };
+
+  const handleProcurementSuccess = (data: ProcurementResponse) => {
+    setProcurement(data);
+  };
+
+  const handleConfirmDeleteProcurement = async () => {
+    try {
+      setDeletingProcurement(true);
+      await deleteAssetProcurementApi(asset.id);
+      setProcurement(null);
+      setIsDeleteProcurementModalOpen(false);
+    } catch (error) {
+      console.error("Failed to delete procurement:", error);
+    } finally {
+      setDeletingProcurement(false);
+    }
   };
 
   const getStatusStyle = (status: string) => {
@@ -174,6 +217,16 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
           <History size={16} />
           Usage & Returns
         </button>
+        <button
+          onClick={() => setActiveTab("procurement")}
+          className={`flex items-center gap-2 pb-3 border-b-2 transition-all font-medium text-xs ${activeTab === "procurement"
+            ? "border-[var(--color-growth-green)] text-[var(--color-growth-green)]"
+            : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)]"
+            }`}
+        >
+          <ShoppingBag size={16} />
+          Procurement & Warranty
+        </button>
       </div>
 
       {activeTab === "details" ? (
@@ -184,7 +237,7 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
           isDeleting={isDeleting}
           getStatusStyle={getStatusStyle}
         />
-      ) : (
+      ) : activeTab === "assignment" ? (
         <AssetAssignmentTab
           asset={asset}
           assignments={assignments}
@@ -197,6 +250,15 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
           setIsEditAssignmentModalOpen={setIsEditAssignmentModalOpen}
           setIsDeleteAssignmentModalOpen={setIsDeleteAssignmentModalOpen}
           setSelectedAssignment={setSelectedAssignment}
+        />
+      ) : (
+        <AssetProcurementTab
+          asset={asset}
+          procurement={procurement}
+          loading={loadingProcurement}
+          onAdd={() => setIsManageProcurementModalOpen(true)}
+          onEdit={() => setIsManageProcurementModalOpen(true)}
+          onDelete={() => setIsDeleteProcurementModalOpen(true)}
         />
       )}
 
@@ -238,6 +300,24 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
           setIsStatusEditModalOpen(false);
           onAssetUpdate?.(updated);
         }}
+      />
+
+      <ManageProcurementModal
+        isOpen={isManageProcurementModalOpen}
+        onClose={() => setIsManageProcurementModalOpen(false)}
+        onSuccess={handleProcurementSuccess}
+        assetId={asset.id}
+        initialData={procurement}
+      />
+
+      <DeleteProcurementModal
+        isOpen={isDeleteProcurementModalOpen}
+        onClose={() => setIsDeleteProcurementModalOpen(false)}
+        onConfirm={handleConfirmDeleteProcurement}
+        loading={deletingProcurement}
+        assetTag={asset.assetTag}
+        vendor={procurement?.purchaseVendor}
+        cost={procurement?.purchaseCost}
       />
     </div>
   );

@@ -45,9 +45,9 @@ const SpecTile = ({
 }) => {
   const accentMap = {
     emerald: "group-hover:bg-[var(--color-growth-green)]/10 group-hover:text-[var(--color-growth-green)]",
-    blue: "group-hover:bg-[var(--color-aqua)]/10 group-hover:text-[var(--color-aqua)]",
-    purple: "group-hover:bg-[var(--color-growth-green)]/15 group-hover:text-[var(--color-growth-green)]",
-    orange: "group-hover:bg-[var(--color-aqua)]/15 group-hover:text-[var(--color-aqua)]",
+    blue: "group-hover:bg-[var(--color-growth-green)]/10 group-hover:text-[var(--color-growth-green)]",
+    purple: "group-hover:bg-[var(--color-growth-green)]/10 group-hover:text-[var(--color-growth-green)]",
+    orange: "group-hover:bg-[var(--color-growth-green)]/10 group-hover:text-[var(--color-growth-green)]",
   };
   return (
     <div className="flex items-center gap-3 group border border-dashed border-[var(--border-color)] rounded-xl p-3">

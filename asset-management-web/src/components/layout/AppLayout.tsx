@@ -49,7 +49,7 @@ export default function AppLayout() {
           isMobile={isMobile} 
           onToggleMobileMenu={() => setIsMobileMenuOpen(prev => !prev)}
         />
-        <main className="flex-1 transition-all duration-300 pt-20 min-w-0">
+        <main className="flex-1 transition-all duration-300 pt-20 pb-10 px-4 sm:px-6 lg:px-8 xl:px-12 min-w-0">
           <Outlet />
         </main>
       </div>

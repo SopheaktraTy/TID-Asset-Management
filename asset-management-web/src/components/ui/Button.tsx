@@ -28,6 +28,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         "text-[color:var(--text-main)] " +
         "hover:bg-[color:var(--surface-hover)] " +
         "hover:border-[color:var(--text-muted)]",
+
+      // ── Danger: red background, white text ──
+      danger:
+        "bg-red-500 " +
+        "text-white " +
+        "hover:bg-red-600 " +
+        "shadow-[0_2px_8px_rgba(239,68,68,0.2)] " +
+        "hover:shadow-[0_4px_14px_rgba(239,68,68,0.3)]",
     };
 
     return (

@@ -39,8 +39,8 @@ export default function UserDetailsPage() {
   );
 
   return (
-    <div className="bg-[var(--bg)] text-[var(--text-main)] min-h-screen flex flex-col">
-      <main className="w-full flex-1 px-4 sm:px-6 lg:px-8 xl:px-12">
+    <div className="bg-[var(--bg)] text-[var(--text-main)] flex flex-col">
+      <div className="w-full flex-1">
 
         {/* Top Header & Breadcrumbs */}
         <div className="flex items-start justify-between mb-6">
@@ -72,7 +72,7 @@ export default function UserDetailsPage() {
           isDeleting={isDeleting}
         />
 
-      </main>
+      </div>
 
       <EditUserModal
         isOpen={isEditModalOpen}

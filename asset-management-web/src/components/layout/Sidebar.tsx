@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import {
   HardDrive,
   Users,
@@ -44,6 +44,18 @@ export default function Sidebar({
   } = useSidebar();
 
   const { theme } = useTheme();
+  const location = useLocation();
+
+  const isNavLinkActive = (to: string) => {
+    if (to === "/assets-management") {
+      return location.pathname === "/assets-management" || location.pathname.startsWith("/asset-detail");
+    }
+    if (to === "/users-management") {
+      return location.pathname === "/users-management" || location.pathname.startsWith("/user-detail");
+    }
+    // Add other mappings if needed
+    return location.pathname === to;
+  };
 
   // Notify AppLayout of width change
   const toggle = () => {
@@ -138,33 +150,39 @@ export default function Sidebar({
                       to={to}
                       onClick={() => setIsMobileOpen?.(false)}
                       title={collapsed ? label : undefined}
-                      className={({ isActive }) =>
-                        `flex items-center rounded-lg transition-colors group
-                        py-2.5 mx-4 px-3.5
-                        ${isActive
-                          ? "bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)]"
-                          : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]"
-                        }`
-                      }
+                      className={() => {
+                        const active = isNavLinkActive(to);
+                        return `flex items-center rounded-lg transition-colors group py-2.5 mx-4 px-3.5 ${
+                          active
+                            ? "bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)]"
+                            : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]"
+                        }`;
+                      }}
                     >
-                      {({ isActive }) => (
-                        <>
-                          <Icon
-                            size={18}
-                            className={`shrink-0 transition-colors ${isActive
-                              ? "text-[var(--color-growth-green)]"
-                              : "text-[var(--text-muted)] group-hover:text-[var(--text-main)]"
+                      {() => {
+                        const active = isNavLinkActive(to);
+                        return (
+                          <>
+                            <Icon
+                              size={18}
+                              className={`shrink-0 transition-colors ${
+                                active
+                                  ? "text-[var(--color-growth-green)]"
+                                  : "text-[var(--text-muted)] group-hover:text-[var(--text-main)]"
                               }`}
-                          />
-                          <span className={`
-                            text-[13.5px] font-semibold leading-none
-                            transition-all duration-300 overflow-hidden whitespace-nowrap
-                            ${collapsed ? "w-0 opacity-0 invisible ml-0" : "w-32 opacity-100 visible ml-3.5"}
-                          `}>
-                            {label}
-                          </span>
-                        </>
-                      )}
+                            />
+                            <span
+                              className={`text-[13.5px] font-semibold leading-none transition-all duration-300 overflow-hidden whitespace-nowrap ${
+                                collapsed
+                                  ? "w-0 opacity-0 invisible ml-0"
+                                  : "w-32 opacity-100 visible ml-3.5"
+                              }`}
+                            >
+                              {label}
+                            </span>
+                          </>
+                        );
+                      }}
                     </NavLink>
                   </li>
                 ))}

@@ -41,8 +41,8 @@ export default function AssetManagementPage() {
   } = useAssetManagement();
 
   return (
-    <div className="bg-[var(--bg)] min-h-screen">
-      <main className="w-full flex-1 px-4 sm:px-6 lg:px-8 xl:px-12">
+    <div className="bg-[var(--bg)]">
+      <div className="w-full flex-1">
         {/* ── Page Title ── */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex flex-col">
@@ -96,7 +96,7 @@ export default function AssetManagementPage() {
             panelClassName="bg-[var(--bg)]"
           />
         </div>
-      </main>
+      </div>
 
       {/* ── Modals ── */}
       <AddAssetModal

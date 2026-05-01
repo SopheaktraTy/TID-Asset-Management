@@ -20,6 +20,49 @@ interface AssetAssignmentTabProps {
   setSelectedAssignment: (assignment: AssignmentResponse | null) => void;
 }
 
+const UsageAnalysisChart = () => (
+  <div className="bg-[var(--bg)] border border-[var(--border-color)] rounded-xl p-6 shadow-sm flex flex-col gap-4">
+    <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-0.5">
+        <span className="text-[10px] font-black text-[var(--text-main)] uppercase tracking-wider">Historical Activity</span>
+        <span className="text-[9px] text-[var(--text-muted)] font-bold">Usage intensity (15 days)</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-aqua)] animate-pulse shadow-[0_0_8px_var(--color-aqua)]" />
+        <span className="text-[9px] font-black text-[var(--color-aqua)] uppercase tracking-widest">Live Sync</span>
+      </div>
+    </div>
+    <div className="relative h-24 w-full bg-gradient-to-b from-[var(--color-aqua)]/[0.02] to-transparent rounded-lg overflow-hidden border border-[var(--border-color)]/20 p-1 group/chart">
+      <svg className="w-full h-full overflow-visible" viewBox="0 0 100 40" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="assignUsageGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="var(--color-aqua)" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="var(--color-aqua)" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        
+        <path
+          d="M0,30 C5,25 10,10 15,15 C20,20 25,35 30,30 C35,25 40,5 45,10 C50,15 55,25 60,20 C65,15 70,30 75,25 C80,20 85,15 90,12 C95,9 100,10 100,10 L100,40 L0,40 Z"
+          fill="url(#assignUsageGradient)"
+        />
+        
+        <path
+          d="M0,30 C5,25 10,10 15,15 C20,20 25,35 30,30 C35,25 40,5 45,10 C50,15 55,25 60,20 C65,15 70,30 75,25 C80,20 85,15 90,12 C95,9 100,10 100,10"
+          fill="none"
+          stroke="var(--color-aqua)"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+      </svg>
+      
+      <div className="absolute bottom-1 left-3 right-3 flex justify-between text-[7px] font-black text-[var(--text-muted)] opacity-40 uppercase tracking-widest">
+        <span>Sep 08</span>
+        <span>Sep 23</span>
+      </div>
+    </div>
+  </div>
+);
+
 const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
   asset,
   assignments,
@@ -163,108 +206,9 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
 
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-[320px_1fr] gap-6 items-start">
-      {/* Sidebar Container */}
-      <div className="flex flex-col gap-6">
-        {/* Dynamic Management Side Card */}
-        <div className="bg-[var(--bg)] border border-[var(--border-color)] rounded-xl p-6 flex flex-col gap-6 transition-all duration-300 shadow-sm">
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="text-sm font-bold text-[var(--text-main)] flex items-center gap-2">
-              <span className="text-[var(--color-growth-green)]">
-                {React.cloneElement(headerCfg.icon as any, { size: 14 })}
-              </span>
-              Assignment Management
-            </h3>
-          </div>
-          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed -mt-4">
-            {headerCfg.description}
-          </p>
-
-          <div className="space-y-4">
-            {headerCfg.action}
-          </div>
-        </div>
-
-        {/* Assignment Summary Card */}
-        <div className="bg-[var(--bg)] border border-[var(--border-color)] rounded-xl overflow-hidden transition-all duration-300 shadow-sm flex flex-col">
-          <div className="px-6 pt-6">
-            <h3 className="text-sm font-bold text-[var(--text-main)] flex items-center gap-2 tracking-tight">
-              <Activity size={14} className="text-[var(--color-growth-green)]" />
-              Asset Insights
-            </h3>
-          </div>
-
-          <div className="pt-6  pb-8 px-8 space-y-5">
-            {latestAssignment ? (
-              <div className="space-y-4">
-                <div className="flex flex-col gap-3">
-                  <span className="text-[11px] text-[var(--text-muted)] font-bold">
-                    {latestAssignment.returnedDate ? "Last possessed by" : "Currently held by"}
-                  </span>
-                  <div className="flex items-center gap-4 p-4 bg-[var(--bg)] border border-dashed border-[var(--border-color)]/60 rounded-xl shadow-sm">
-                    <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold shadow-sm overflow-hidden ${!latestAssignment.employee?.image ? getAvatarColor(latestAssignment.employee?.username || 'Unknown') : ''}`}>
-                      {latestAssignment.employee?.image ? (
-                        <img src={getSafeImageUrl(latestAssignment.employee.image)} alt="Avatar" className="w-full h-full object-cover" />
-                      ) : (
-                        getInitials(latestAssignment.employee?.username || 'Unknown')
-                      )}
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-xs font-bold text-[var(--text-main)] truncate">
-                        {latestAssignment.employee?.username || 'Unknown'}
-                      </span>
-                      {latestAssignment.employee?.department && (
-                        <span className="text-[11px] text-[var(--text-muted)] truncate mt-0.5">
-                          {toPascalCase(latestAssignment.employee.department)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-3 px-1">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)]">
-                      <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
-                      <span>Assigned date</span>
-                    </div>
-                    <span className="text-[11px] font-bold text-[var(--text-main)]">
-                      {formatDate(latestAssignment.assignedDate)}
-                    </span>
-                  </div>
-
-                  {latestAssignment.returnedDate ? (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)]">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                        <span>Returned date</span>
-                      </div>
-                      <span className="text-[11px] font-bold text-[var(--text-main)]">
-                        {formatDate(latestAssignment.returnedDate)}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)]">
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                        <span>Active possession</span>
-                      </div>
-                      <span className="text-[10px] font-black text-blue-500 tracking-wider">Not yet returned</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="py-8 flex flex-col items-center justify-center text-center bg-[var(--surface-hover)]/10 rounded-xl border border-dashed border-[var(--border-color)]">
-                <span className="text-[10px] text-[var(--text-muted)] font-bold">No assignment history</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
+    <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6 items-start">
       {/* History Timeline Frame */}
-      <div className="bg-[var(--bg)] border border-[var(--border-color)] rounded-xl overflow-hidden flex flex-col transition-colors duration-300 shadow-sm">
+      <div className="bg-[var(--bg)] border border-[var(--border-color)] rounded-xl overflow-hidden flex flex-col transition-colors duration-300 shadow-sm order-2 xl:order-1">
         {/* Header for the Frame */}
         <div className="px-6 py-4 border-b border-[var(--border-color)]/50 bg-[var(--bg)] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
@@ -446,7 +390,7 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
                 ))}
               </div>
 
-              <div className=" ">
+              <div>
                 <Pagination
                   page={page}
                   pageSize={pageSize}
@@ -461,6 +405,108 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
               </div>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Sidebar Container */}
+      <div className="flex flex-col gap-6 order-1 xl:order-2">
+        {/* Dynamic Management Side Card */}
+        <div className="bg-[var(--bg)] border border-[var(--border-color)] rounded-xl p-6 flex flex-col gap-6 transition-all duration-300 shadow-sm">
+          <div className="flex justify-between items-start mb-2">
+            <h3 className="text-sm font-bold text-[var(--text-main)] flex items-center gap-2">
+              <span className="text-[var(--color-growth-green)]">
+                {React.cloneElement(headerCfg.icon as any, { size: 14 })}
+              </span>
+              Assignment Management
+            </h3>
+          </div>
+          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed -mt-4">
+            {headerCfg.description}
+          </p>
+
+          <div className="space-y-4">
+            {headerCfg.action}
+          </div>
+        </div>
+
+        {/* Usage Analysis Chart */}
+        <UsageAnalysisChart />
+
+        {/* Assignment Summary Card */}
+        <div className="bg-[var(--bg)] border border-[var(--border-color)] rounded-xl overflow-hidden transition-all duration-300 shadow-sm flex flex-col">
+          <div className="px-6 pt-6">
+            <h3 className="text-sm font-bold text-[var(--text-main)] flex items-center gap-2 tracking-tight">
+              <Activity size={14} className="text-[var(--color-growth-green)]" />
+              Asset Insights
+            </h3>
+          </div>
+
+          <div className="pt-6 pb-8 px-8 space-y-5">
+            {latestAssignment ? (
+              <div className="space-y-4">
+                <div className="flex flex-col gap-3">
+                  <span className="text-[11px] text-[var(--text-muted)] font-bold">
+                    {latestAssignment.returnedDate ? "Last possessed by" : "Currently held by"}
+                  </span>
+                  <div className="flex items-center gap-4 p-4 bg-[var(--bg)] border border-dashed border-[var(--border-color)]/60 rounded-xl shadow-sm">
+                    <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold shadow-sm overflow-hidden ${!latestAssignment.employee?.image ? getAvatarColor(latestAssignment.employee?.username || 'Unknown') : ''}`}>
+                      {latestAssignment.employee?.image ? (
+                        <img src={getSafeImageUrl(latestAssignment.employee.image)} alt="Avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        getInitials(latestAssignment.employee?.username || 'Unknown')
+                      )}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-bold text-[var(--text-main)] truncate">
+                        {latestAssignment.employee?.username || 'Unknown'}
+                      </span>
+                      {latestAssignment.employee?.department && (
+                        <span className="text-[11px] text-[var(--text-muted)] truncate mt-0.5">
+                          {toPascalCase(latestAssignment.employee.department)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3 px-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)]">
+                      <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                      <span>Assigned date</span>
+                    </div>
+                    <span className="text-[11px] font-bold text-[var(--text-main)]">
+                      {formatDate(latestAssignment.assignedDate)}
+                    </span>
+                  </div>
+
+                  {latestAssignment.returnedDate ? (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)]">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <span>Returned date</span>
+                      </div>
+                      <span className="text-[11px] font-bold text-[var(--text-main)]">
+                        {formatDate(latestAssignment.returnedDate)}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)]">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                        <span>Active possession</span>
+                      </div>
+                      <span className="text-[10px] font-black text-blue-500 tracking-wider">Not yet returned</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="py-8 flex flex-col items-center justify-center text-center bg-[var(--surface-hover)]/10 rounded-xl border border-dashed border-[var(--border-color)]">
+                <span className="text-[10px] text-[var(--text-muted)] font-bold">No assignment history</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
