@@ -1,10 +1,10 @@
 import React from "react";
-import { 
-  ShoppingBag, 
-  Calendar, 
-  CreditCard, 
-  ShieldCheck, 
-  ShieldAlert, 
+import {
+  ShoppingBag,
+  Calendar,
+  CreditCard,
+  ShieldCheck,
+  ShieldAlert,
   Store,
   Plus,
   AlertCircle
@@ -22,16 +22,16 @@ interface AssetProcurementTabProps {
   onDelete: () => void;
 }
 
-const InfoCard = ({ 
-  icon: Icon, 
-  label, 
-  value, 
+const InfoCard = ({
+  icon: Icon,
+  label,
+  value,
   subValue,
-  accent = "blue" 
-}: { 
-  icon: any, 
-  label: string, 
-  value: string, 
+  accent = "blue"
+}: {
+  icon: any,
+  label: string,
+  value: string,
   subValue?: string,
   accent?: "emerald" | "blue" | "purple" | "orange" | "red"
 }) => {
@@ -80,8 +80,8 @@ const AssetProcurementTab: React.FC<AssetProcurementTabProps> = ({
     );
   }
 
-  const isWarrantyActive = procurement?.warrantyExpiryDate 
-    ? new Date(procurement.warrantyExpiryDate) > new Date() 
+  const isWarrantyActive = procurement?.warrantyExpiryDate
+    ? new Date(procurement.warrantyExpiryDate) > new Date()
     : false;
 
   const daysUntilExpiry = procurement?.warrantyExpiryDate
@@ -116,33 +116,33 @@ const AssetProcurementTab: React.FC<AssetProcurementTabProps> = ({
                 <ShoppingBag size={16} className="text-[var(--color-growth-green)]" />
                 Purchase & Warranty Details
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoCard 
-                  icon={Calendar} 
-                  label="Purchase Date" 
-                  value={formatDate(procurement.purchaseDate)} 
+                <InfoCard
+                  icon={Calendar}
+                  label="Purchase Date"
+                  value={formatDate(procurement.purchaseDate)}
                   subValue="Initial deployment"
                   accent="emerald"
                 />
-                <InfoCard 
-                  icon={Store} 
-                  label="Vendor" 
-                  value={procurement.purchaseVendor} 
+                <InfoCard
+                  icon={Store}
+                  label="Vendor"
+                  value={procurement.purchaseVendor}
                   subValue="Authorized supplier"
                   accent="blue"
                 />
-                <InfoCard 
-                  icon={CreditCard} 
-                  label="Purchase Cost" 
-                  value={`$${procurement.purchaseCost.toLocaleString()}`} 
+                <InfoCard
+                  icon={CreditCard}
+                  label="Purchase Cost"
+                  value={`$${procurement.purchaseCost.toLocaleString()}`}
                   subValue="Total valuation"
                   accent="purple"
                 />
-                <InfoCard 
-                  icon={isWarrantyActive ? ShieldCheck : ShieldAlert} 
-                  label="Warranty Expiry" 
-                  value={formatDate(procurement.warrantyExpiryDate)} 
+                <InfoCard
+                  icon={isWarrantyActive ? ShieldCheck : ShieldAlert}
+                  label="Warranty Expiry"
+                  value={formatDate(procurement.warrantyExpiryDate)}
                   subValue={isWarrantyActive ? `${daysUntilExpiry} days remaining` : "Warranty expired"}
                   accent={isWarrantyActive ? "emerald" : "red"}
                 />
@@ -155,7 +155,7 @@ const AssetProcurementTab: React.FC<AssetProcurementTabProps> = ({
                 <div className="space-y-1">
                   <h4 className="text-[11px] font-bold text-[var(--text-main)] uppercase tracking-tight">Financial Note</h4>
                   <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
-                    This procurement record is unique to <strong>{asset.assetTag}</strong>. 
+                    This procurement record is unique to <strong>{asset.assetTag}</strong>.
                     Financial records should be tracked using the vendor information above.
                   </p>
                 </div>

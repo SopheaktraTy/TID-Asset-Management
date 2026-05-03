@@ -3,7 +3,7 @@ import { UserPlus, History, User, AlertTriangle, Wrench, AlertOctagon, AlertCirc
 import Pagination from "../../../ui/Pagination";
 import type { AssetDto } from "../../../../types/asset.types";
 import type { AssignmentResponse } from "../../../../types/assignment.types";
-import { formatDate, getInitials, getAvatarColor, toPascalCase } from "../../../../utils/format";
+import { formatDateTime, getInitials, getAvatarColor, toPascalCase } from "../../../../utils/format";
 import { getSafeImageUrl } from "../../../../utils/image";
 
 interface AssetAssignmentTabProps {
@@ -20,48 +20,7 @@ interface AssetAssignmentTabProps {
   setSelectedAssignment: (assignment: AssignmentResponse | null) => void;
 }
 
-const UsageAnalysisChart = () => (
-  <div className="bg-[var(--bg)] border border-[var(--border-color)] rounded-xl p-6 shadow-sm flex flex-col gap-4">
-    <div className="flex items-center justify-between">
-      <div className="flex flex-col gap-0.5">
-        <span className="text-[10px] font-black text-[var(--text-main)] uppercase tracking-wider">Historical Activity</span>
-        <span className="text-[9px] text-[var(--text-muted)] font-bold">Usage intensity (15 days)</span>
-      </div>
-      <div className="flex items-center gap-2">
-        <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-aqua)] animate-pulse shadow-[0_0_8px_var(--color-aqua)]" />
-        <span className="text-[9px] font-black text-[var(--color-aqua)] uppercase tracking-widest">Live Sync</span>
-      </div>
-    </div>
-    <div className="relative h-24 w-full bg-gradient-to-b from-[var(--color-aqua)]/[0.02] to-transparent rounded-lg overflow-hidden border border-[var(--border-color)]/20 p-1 group/chart">
-      <svg className="w-full h-full overflow-visible" viewBox="0 0 100 40" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="assignUsageGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--color-aqua)" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="var(--color-aqua)" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        
-        <path
-          d="M0,30 C5,25 10,10 15,15 C20,20 25,35 30,30 C35,25 40,5 45,10 C50,15 55,25 60,20 C65,15 70,30 75,25 C80,20 85,15 90,12 C95,9 100,10 100,10 L100,40 L0,40 Z"
-          fill="url(#assignUsageGradient)"
-        />
-        
-        <path
-          d="M0,30 C5,25 10,10 15,15 C20,20 25,35 30,30 C35,25 40,5 45,10 C50,15 55,25 60,20 C65,15 70,30 75,25 C80,20 85,15 90,12 C95,9 100,10 100,10"
-          fill="none"
-          stroke="var(--color-aqua)"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-      </svg>
-      
-      <div className="absolute bottom-1 left-3 right-3 flex justify-between text-[7px] font-black text-[var(--text-muted)] opacity-40 uppercase tracking-widest">
-        <span>Sep 08</span>
-        <span>Sep 23</span>
-      </div>
-    </div>
-  </div>
-);
+
 
 const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
   asset,
@@ -280,7 +239,7 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
                               <span className="text-xs font-bold text-[var(--text-main)] group-hover/item:text-[var(--color-growth-green)] transition-colors whitespace-nowrap truncate">{assignment.employee?.username || 'Unknown'}</span>
                               <span className="text-[var(--border-color)] text-[10px] shrink-0">|</span>
                               <span className="text-[10px] text-[var(--text-muted)] font-medium whitespace-nowrap shrink-0">
-                                {formatDate(assignment.assignedDate)}
+                                {formatDateTime(assignment.assignedDate)}
                               </span>
                               {!assignment.returnedDate && (
                                 <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-[var(--color-growth-green)]/10 text-[var(--color-growth-green)] border border-[var(--color-growth-green)]/20 uppercase tracking-tighter shadow-sm shrink-0">Current</span>
@@ -296,7 +255,7 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
                         <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto border-t sm:border-0 pt-3 sm:pt-0 border-[var(--border-color)]/30">
                           {assignment.returnedDate && (
                             <span className="text-[9px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full whitespace-nowrap">
-                              Returned {formatDate(assignment.returnedDate)}
+                              Returned {formatDateTime(assignment.returnedDate)}
                             </span>
                           )}
                           <div className="flex items-center gap-1.5 ml-2 border-l border-[var(--border-color)] pl-2">
@@ -348,7 +307,7 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
                                 </div>
                                 <span className="text-xs font-bold text-[var(--text-main)]">{assignment.assignedByUser?.username || "System"}</span>
                                 <span className="text-[var(--border-color)] text-[10px]">|</span>
-                                <span className="text-[11px] font-medium text-[var(--text-muted)]">{formatDate(assignment.assignedDate)}</span>
+                                <span className="text-[11px] font-medium text-[var(--text-muted)]">{formatDateTime(assignment.assignedDate)}</span>
                               </div>
                             </div>
 
@@ -369,7 +328,7 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
                                   </div>
                                   <span className="text-xs font-bold text-[var(--text-main)]">{assignment.confirmReturnByUser?.username || "System"}</span>
                                   <span className="text-[var(--border-color)] text-[10px]">|</span>
-                                  <span className="text-[11px] font-medium text-[var(--text-muted)]">{formatDate(assignment.returnedDate)}</span>
+                                  <span className="text-[11px] font-medium text-[var(--text-muted)]">{formatDateTime(assignment.returnedDate)}</span>
                                   {assignment.returnCondition && (
                                     <div className="group relative flex items-center cursor-help ml-1">
                                       <AlertCircle size={11} className="text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors" />
@@ -429,8 +388,7 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
           </div>
         </div>
 
-        {/* Usage Analysis Chart */}
-        <UsageAnalysisChart />
+
 
         {/* Assignment Summary Card */}
         <div className="bg-[var(--bg)] border border-[var(--border-color)] rounded-xl overflow-hidden transition-all duration-300 shadow-sm flex flex-col">
@@ -476,7 +434,7 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
                       <span>Assigned date</span>
                     </div>
                     <span className="text-[11px] font-bold text-[var(--text-main)]">
-                      {formatDate(latestAssignment.assignedDate)}
+                      {formatDateTime(latestAssignment.assignedDate)}
                     </span>
                   </div>
 
@@ -487,7 +445,7 @@ const AssetAssignmentTab: React.FC<AssetAssignmentTabProps> = ({
                         <span>Returned date</span>
                       </div>
                       <span className="text-[11px] font-bold text-[var(--text-main)]">
-                        {formatDate(latestAssignment.returnedDate)}
+                        {formatDateTime(latestAssignment.returnedDate)}
                       </span>
                     </div>
                   ) : (

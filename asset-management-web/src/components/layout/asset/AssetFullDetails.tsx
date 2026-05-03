@@ -16,8 +16,15 @@ import DeleteAssignmentModal from "./DeleteAssignmentModal";
 import ManageProcurementModal from "./ManageProcurementModal";
 import DeleteProcurementModal from "./DeleteProcurementModal";
 import { getAssetProcurementApi, deleteAssetProcurementApi } from "../../../services/procurement.service";
+import { ShoppingBag, Construction } from "lucide-react";
+import { getAssetIssuesApi } from "../../../services/issue.service";
+import type { IssueResponse } from "../../../types/issue.types";
 import type { ProcurementResponse } from "../../../types/procurement.types";
-import { ShoppingBag } from "lucide-react";
+import AssetIssueTab from "./tabs/AssetIssueTab";
+import ReportIssueModal from "./ReportIssueModal";
+import EditIssueModal from "./EditIssueModal";
+import DeleteIssueModal from "./DeleteIssueModal";
+import UpdateIssueStatusModal from "./UpdateIssueStatusModal";
 
 interface AssetFullDetailsProps {
   asset: AssetDto;
@@ -34,13 +41,16 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
   onAssetUpdate,
   isDeleting = false,
 }) => {
-  const [activeTab, setActiveTab] = useState<"details" | "assignment" | "procurement">("details");
+  const [activeTab, setActiveTab] = useState<"details" | "assignment" | "procurement" | "issue">("details");
   const [assignments, setAssignments] = useState<AssignmentResponse[]>([]);
   const [procurement, setProcurement] = useState<ProcurementResponse | null>(null);
+  const [issues, setIssues] = useState<IssueResponse[]>([]);
   const [loadingAssignments, setLoadingAssignments] = useState(false);
   const [loadingProcurement, setLoadingProcurement] = useState(false);
+  const [loadingIssues, setLoadingIssues] = useState(false);
   const [deletingProcurement, setDeletingProcurement] = useState(false);
   const [expandedAssignment, setExpandedAssignment] = useState<number | null>(null);
+  const [expandedIssue, setExpandedIssue] = useState<number | null>(null);
 
   // Modal states
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
@@ -50,7 +60,12 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
   const [isStatusEditModalOpen, setIsStatusEditModalOpen] = useState(false);
   const [isManageProcurementModalOpen, setIsManageProcurementModalOpen] = useState(false);
   const [isDeleteProcurementModalOpen, setIsDeleteProcurementModalOpen] = useState(false);
+  const [isReportIssueModalOpen, setIsReportIssueModalOpen] = useState(false);
+  const [isEditIssueModalOpen, setIsEditIssueModalOpen] = useState(false);
+  const [isDeleteIssueModalOpen, setIsDeleteIssueModalOpen] = useState(false);
+  const [isUpdateStatusModalOpen, setIsUpdateStatusModalOpen] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<AssignmentResponse | null>(null);
+  const [selectedIssue, setSelectedIssue] = useState<IssueResponse | null>(null);
 
   const fetchAssignments = async () => {
     try {
@@ -77,11 +92,25 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
     }
   };
 
+  const fetchIssues = async () => {
+    try {
+      setLoadingIssues(true);
+      const data = await getAssetIssuesApi(asset.id);
+      setIssues(data);
+    } catch (error) {
+      console.error("Failed to fetch issues:", error);
+    } finally {
+      setLoadingIssues(false);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === "assignment") {
       fetchAssignments();
     } else if (activeTab === "procurement") {
       fetchProcurement();
+    } else if (activeTab === "issue") {
+      fetchIssues();
     }
   }, [activeTab, asset.id]);
 
@@ -112,6 +141,16 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
   const handleProcurementSuccess = (data: ProcurementResponse) => {
     setProcurement(data);
   };
+
+  const handleIssueSuccess = (_issue: IssueResponse) => {
+    fetchIssues();
+  };
+
+  const handleIssueDeleteSuccess = (_issueId: number) => {
+    fetchIssues();
+  };
+
+
 
   const handleConfirmDeleteProcurement = async () => {
     try {
@@ -227,6 +266,16 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
           <ShoppingBag size={16} />
           Procurement & Warranty
         </button>
+        <button
+          onClick={() => setActiveTab("issue")}
+          className={`flex items-center gap-2 pb-3 border-b-2 transition-all font-medium text-xs ${activeTab === "issue"
+            ? "border-[var(--color-growth-green)] text-[var(--color-growth-green)]"
+            : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)]"
+            }`}
+        >
+          <Construction size={16} />
+          Issues & Reports
+        </button>
       </div>
 
       {activeTab === "details" ? (
@@ -251,7 +300,7 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
           setIsDeleteAssignmentModalOpen={setIsDeleteAssignmentModalOpen}
           setSelectedAssignment={setSelectedAssignment}
         />
-      ) : (
+      ) : activeTab === "procurement" ? (
         <AssetProcurementTab
           asset={asset}
           procurement={procurement}
@@ -259,6 +308,22 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
           onAdd={() => setIsManageProcurementModalOpen(true)}
           onEdit={() => setIsManageProcurementModalOpen(true)}
           onDelete={() => setIsDeleteProcurementModalOpen(true)}
+        />
+      ) : (
+        <AssetIssueTab
+          asset={asset}
+          issues={issues}
+          loadingIssues={loadingIssues}
+          expandedIssue={expandedIssue}
+          setExpandedIssue={setExpandedIssue}
+          setIsReportModalOpen={setIsReportIssueModalOpen}
+          setIsEditModalOpen={setIsEditIssueModalOpen}
+          setIsDeleteModalOpen={setIsDeleteIssueModalOpen}
+          setSelectedIssue={setSelectedIssue}
+          onUpdateStatus={(issue) => {
+            setSelectedIssue(issue);
+            setIsUpdateStatusModalOpen(true);
+          }}
         />
       )}
 
@@ -318,6 +383,34 @@ export const AssetFullDetails: React.FC<AssetFullDetailsProps> = ({
         assetTag={asset.assetTag}
         vendor={procurement?.purchaseVendor}
         cost={procurement?.purchaseCost}
+      />
+
+      <ReportIssueModal
+        isOpen={isReportIssueModalOpen}
+        asset={asset}
+        onClose={() => setIsReportIssueModalOpen(false)}
+        onSuccess={handleIssueSuccess}
+      />
+
+      <EditIssueModal
+        isOpen={isEditIssueModalOpen}
+        issue={selectedIssue}
+        onClose={() => setIsEditIssueModalOpen(false)}
+        onSuccess={handleIssueSuccess}
+      />
+
+      <DeleteIssueModal
+        isOpen={isDeleteIssueModalOpen}
+        issue={selectedIssue}
+        onClose={() => setIsDeleteIssueModalOpen(false)}
+        onDeleted={handleIssueDeleteSuccess}
+      />
+
+      <UpdateIssueStatusModal
+        isOpen={isUpdateStatusModalOpen}
+        issue={selectedIssue}
+        onClose={() => setIsUpdateStatusModalOpen(false)}
+        onSuccess={handleIssueSuccess}
       />
     </div>
   );
